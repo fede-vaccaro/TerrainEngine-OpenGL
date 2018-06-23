@@ -19,48 +19,23 @@ public:
 	Shader(const char* vertexPath, const char* fragmentPath)
 	{
 		std::cout << "CREATING BASE SHADER" << std::endl;
-		// 1. retrieve the vertex/fragment source code from filePath
-		std::string vertexCode;
-		std::string fragmentCode;
-		std::ifstream vShaderFile;
-		std::ifstream fShaderFile;
-		// ensure ifstream objects can throw exceptions:
-		vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-		fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-		try
-		{
-			// open files
-			vShaderFile.open(vertexPath);
-			fShaderFile.open(fragmentPath);
-			std::stringstream vShaderStream, fShaderStream;
-			// read file's buffer contents into streams
-			vShaderStream << vShaderFile.rdbuf();
-			fShaderStream << fShaderFile.rdbuf();
-			// close file handlers
-			vShaderFile.close();
-			fShaderFile.close();
-			// convert stream into string
-			vertexCode = vShaderStream.str();
-			fragmentCode = fShaderStream.str();
-		}
-		catch (std::ifstream::failure e)
-		{
-			std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-		}
-		const char* vShaderCode = vertexCode.c_str();
-		const char * fShaderCode = fragmentCode.c_str();
+		std::string vShaderCode = loadShaderFromFile(vertexPath);
+		std::string fShaderCode = loadShaderFromFile(fragmentPath);
+
+		const char * vShaderString = vShaderCode.c_str();
+		const char * fShaderString = fShaderCode.c_str();
 		// 2. compile shaders
 		unsigned int vertex, fragment;
 		int success;
 		char infoLog[512];
 		// vertex shader
 		vertex = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(vertex, 1, &vShaderCode, NULL);
+		glShaderSource(vertex, 1, &vShaderString, NULL);
 		glCompileShader(vertex);
 		checkCompileErrors(vertex, "VERTEX");
 		// fragment Shader
 		fragment = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(fragment, 1, &fShaderCode, NULL);
+		glShaderSource(fragment, 1, &fShaderString, NULL);
 		glCompileShader(fragment);
 		checkCompileErrors(fragment, "FRAGMENT");
 		// shader Program
@@ -140,6 +115,30 @@ protected:
 		if (success) {
 			std::cout << type + " SHADER SUCCESSFULLY COMPILED AND/OR LINKED!" << std::endl;
 		}
+	}
+
+	std::string loadShaderFromFile(const char* shaderPath) {
+		std::string shaderCode;
+		std::ifstream shaderFile;
+		shaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+		try
+		{
+			// open files
+			shaderFile.open(shaderPath);
+			std::stringstream shaderStream;
+			// read file's buffer contents into streams
+			shaderStream << shaderFile.rdbuf();
+			// close file handlers
+			shaderFile.close();
+			// convert stream into string
+			shaderCode = shaderStream.str();
+		}
+		catch (std::ifstream::failure e)
+		{
+			std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+		}
+		return shaderCode;
+
 	}
 };
 

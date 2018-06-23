@@ -186,7 +186,7 @@ int main()
 	unsigned int texture = TextureFromFile("D6.png", "resources", false);
 	unsigned int texture1 = TextureFromFile("C6W.png", "resources", false);
 
-	glm::vec3 fogColor(0.2f, 0.3f, 0.3f);
+	glm::vec3 fogColor(0.9f, 0.92f, 0.95f);
 
 	// render loop
 	// -----------
