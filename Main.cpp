@@ -3,6 +3,7 @@
 
 #include <shaderUtils.h>
 #include "TessShader.h"
+#include "texture.h"
 
 #include <camera.h>
 #include <stb_image.h>
@@ -33,6 +34,7 @@ bool firstMouse = true;
 
 float t1 = 0.0, t2 = 0.0, frameTime = 0.0; // time variables
 bool wireframe = false;
+glm::mat4 identityMatrix;
 
 int main()
 {
@@ -74,11 +76,11 @@ int main()
 	}
 
 
-	Shader lightShader("shaders/lightVertexShader.glsl", "shaders/lightFragmentShader.glsl");
+	Shader lightShader("shaders/lightVertexShader.vert", "shaders/lightFragmentShader.frag");
+	Shader skyboxShader("shaders/skyboxVert.vert", "shaders/skyboxFrag.frag");
 	//Shader program2("vertexShader1.glsl", "fragmentShader1.glsl");
 	//Shader modelLoading("model_loading.vs", "model_loading.fs");
-
-	TessellationShader tshader("shaders/tessVertexShader.glsl", "shaders/tessControlShader.glsl", "shaders/tessEvaluationShader.glsl", "shaders/tessFragmentShader.glsl");
+	TessellationShader tshader("shaders/tessVertexShader.vert", "shaders/tessControlShader.tcs", "shaders/tessEvaluationShader.tes", "shaders/tessFragmentShader.frag");
 
 
 	// cube vertices
@@ -125,6 +127,52 @@ int main()
 		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
+	
+	float skyboxVertices[] = {
+		// positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f
+	};
+
 
 	//cube texture coordinates
 	float textureCoordinate[] = {
@@ -136,24 +184,17 @@ int main()
 	
 	// initializing buffer objects
 	unsigned int VAO1, VBO1;// , EBO1;
-
 	glGenVertexArrays(2, &VAO1);
 	glGenBuffers(2, &VBO1);
-	//glGenBuffers(2, &EBO1);
-
 	glBindVertexArray(VAO1);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO1);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
-
 	//send vertices information
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-
-	
 	//send normal information assigning a variable in shader. 
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
 	glEnableVertexAttribArray(1);
-	
 	/* in case of indices drawing
 	glGenBuffers(1, &EBO1);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO1);
@@ -166,12 +207,19 @@ int main()
 	glGenVertexArrays(1, &lightVAO);
 	glBindVertexArray(lightVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO1);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO1);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	// potrebbe mancare il set vertex attrib pointer / enablevertex attrib array
-
 	glBindVertexArray(0);
+
+	// skyboxVAO
+	unsigned int skyboxVAO, skyboxVBO;
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
 	// set light matrices
 	glm::mat4 lightModel, idMat;
@@ -186,20 +234,38 @@ int main()
 	unsigned int texture = TextureFromFile("D6.png", "resources", false);
 	unsigned int texture1 = TextureFromFile("C6W.png", "resources", false);
 
-	glm::vec3 fogColor(0.9f, 0.92f, 0.95f);
+	vector<std::string> faces =
+	{
+		"resources/skybox/right.jpg",
+		"resources/skybox/left.jpg",
+		"resources/skybox/top.jpg",
+		"resources/skybox/bottom.jpg",
+		"resources/skybox/front.jpg",
+		"resources/skybox/back.jpg"
+	};
+	unsigned int cubemapTexture = loadCubemap(faces);
+
+	skyboxShader.use();
+	skyboxShader.setInt("skybox", 0);
+
+	glm::vec3 fogColor(204, 224, 255);
+	fogColor *= 1.0/255.0;
 
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
 	{
 		t1 = glfwGetTime(); 
-		float degreePerSecond = 45.0f * frameTime;
+		float degreePerSecond = 30.0f;
 
-		float x = cos(glm::radians(t1*90.0))*15.0;
-		float z = sin(glm::radians(t1*90.0))*15.0;
-		lightPosition = glm::vec3(x, 10.0, z); //ruotate light
-		
-		lightModel = glm::translate(idMat, lightPosition); //update light model
+
+
+		float x = cos(glm::radians(t1*degreePerSecond))*20.0;
+		float z = sin(glm::radians(t1*degreePerSecond))*20.0;
+		lightPosition = glm::vec3(x, 5.0, z); //ruotate light
+
+		glm::mat4 rot = glm::rotate(identityMatrix, glm::radians( - t1 * degreePerSecond ), glm::vec3(0.0, 1.0, 0.0));
+		lightModel = glm::translate(idMat, lightPosition) * rot; //update light model
 
 		// input
 		processInput(window);
@@ -220,6 +286,7 @@ int main()
 		// Camera (View Matrix) setting
 		glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
 
 		// draw terrain
 		// set matrices
@@ -258,6 +325,22 @@ int main()
 		glBindVertexArray(lightVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 46);
 
+
+		//draw skyBox
+		glDepthFunc(GL_LEQUAL);
+		//glDepthMask(GL_FALSE);
+		skyboxShader.use();
+		glm::mat4 view2 = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
+		glm::mat4 model;
+		model = glm::translate(model, glm::vec3(0.0, -0.1, 0.0));
+		skyboxShader.setMat4("model", model);
+		skyboxShader.setMat4("view", view2);
+		skyboxShader.setMat4("projection", proj);
+		glBindVertexArray(skyboxVAO);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDepthMask(GL_TRUE);
+		glDepthFunc(GL_LESS);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------

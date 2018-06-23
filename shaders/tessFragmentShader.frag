@@ -38,7 +38,7 @@ void main()
     vec3 ambient = ambientStrength * u_LightColor; 
 
 	// calculate diffuse illumination
-	vec3 norm = mix(n, Normal, 0.75); 
+	vec3 norm = mix(n, Normal, 0.5); 
 	norm = normalize(norm);
 	vec3 lightDir = normalize(u_LightPosition - WorldPos);
 	float diffuseFactor = max(0.0, dot(lightDir, norm));
@@ -53,9 +53,10 @@ void main()
 
 	// calculate color by sampling the texture at the given coordinates
 	vec4 texCol = texture(tex, texCoord);
+	//texCol = vec4(0.7);	
 
 	// calculate fog color 
-	vec2 u_FogDist = vec2(10.0, 20.0);
+	vec2 u_FogDist = vec2(15.0, 20.0);
 	float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
 
 	// putting all together
