@@ -4,11 +4,8 @@
 **depandancies needed:**
 * GLFW 
 * Assimp
-* *A OpenGL 4.4 ready graphics card!* 
-**depandancy needed:**
-* GLFW 
-* Assimp
-* *A OpenGL 4.4 ready graphic card!* 
+* A OpenGL 4.4
+* *An OpenGL 4.4 ready graphics card!*
 
 Compile them and put in *Libraries/* directory (I'll upload the compiled libraries soon). *Include/* directory is been already uploaded.
 
