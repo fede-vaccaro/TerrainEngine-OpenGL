@@ -1,6 +1,10 @@
 ## Tessellation Shader in OpenGL 4 and procedural Terrain ##
 *A little OpenGL application which renders a procedural terrain with the use of a Tessellation Shader*
 
+**depandancies needed:**
+* GLFW 
+* Assimp
+* *A OpenGL 4.4 ready graphics card!* 
 **depandancy needed:**
 * GLFW 
 * Assimp
