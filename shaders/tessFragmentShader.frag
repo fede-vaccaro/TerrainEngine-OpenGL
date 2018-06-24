@@ -29,9 +29,10 @@ void main()
 	float dhdu = SCALE/(2/WIDTH) * (texture(height_map, uv+du).r - texture(height_map, uv-du).r);
 	float dhdv = SCALE/(2/HEIGHT) * (texture(height_map, uv+dv).r - texture(height_map, uv-dv).r);
 
-	vec3 X = vec3(1.0, 0.0, 0.0);
-	vec3 Z = vec3(0.0, 0.0, 1.0);
-	vec3 n = normalize(Normal+X*dhdu+Z*dhdv); // add offset to original normal (equivalent to calculate real surface normal)
+	vec3 X = vec3(1.0, dhdu, 1.0);
+	vec3 Z = vec3(0.0, dhdv, 1.0);
+	vec3 n = normalize(cross(Z,X));
+	//vec3 n = normalize(Normal+Z*dhdu+X*dhdv); // add offset to original normal (equivalent to calculate real surface normal)
 
 	// calculate ambient illumination
 	float ambientStrength = 0.15; 
