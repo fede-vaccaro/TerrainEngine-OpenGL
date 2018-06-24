@@ -7,7 +7,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "..\texture.h"
 #include <stb_image.h>
-#include <stb_image_write.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
