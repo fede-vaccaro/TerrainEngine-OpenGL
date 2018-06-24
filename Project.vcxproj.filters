@@ -61,9 +61,6 @@
     <None Include="shaders\tessEvaluationShader.tes">
       <Filter>File di risorse</Filter>
     </None>
-    <None Include="shaders\tessFragmentShader.frag">
-      <Filter>File di risorse</Filter>
-    </None>
     <None Include="shaders\tessVertexShader.vert">
       <Filter>File di risorse</Filter>
     </None>
@@ -71,6 +68,9 @@
       <Filter>File di risorse</Filter>
     </None>
     <None Include="shaders\skyboxVert.vert">
+      <Filter>File di risorse</Filter>
+    </None>
+    <None Include="shaders\tessFragmentShader.frag">
       <Filter>File di risorse</Filter>
     </None>
   </ItemGroup>
