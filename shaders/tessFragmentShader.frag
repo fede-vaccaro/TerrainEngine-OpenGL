@@ -54,7 +54,7 @@ void main()
 
 	// calculate color by sampling the texture at the given coordinates
 	vec4 texCol = texture(tex, texCoord);
-	//texCol = vec4(0.7);	
+	texCol *= vec4(113, 113, 91, 255.0)/255.0;
 
 	// calculate fog color 
 	vec2 u_FogDist = vec2(15.0, 20.0);

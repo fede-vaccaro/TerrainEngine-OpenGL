@@ -9,13 +9,26 @@
 #include <stb_image.h>
 #include <model.h>
 
+#include "perlin/HeightMap.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/random.hpp>
 
+#include <stdlib.h>
 #include <iostream>
 #include <stdlib.h> 
+
+
+// HEIGHT MAP & TERRAIN
+int h = 2048, ww = 1024; // Resolution
+float HeightRange = 60;
+bool generateTerrain = false;
+
+const int MAX_FPS = 60,
+HEIGHT_SCENE = 200,
+WIDTH_SCENE = 200;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -38,6 +51,16 @@ glm::mat4 identityMatrix;
 
 int main()
 {
+
+	if (generateTerrain) {
+		// HEIGHT MAP & TERRAIN
+		int h = 4096, ww = 1024; // Resolution
+		float HeightRange = 60;
+
+		srand(time(NULL));
+		HeightMap* hm = new HeightMap(h, HeightRange, 10, rand() % 10, 0.5);
+		hm->saveMap("resources/heightMap.bmp");
+	}
 	// glfw: initialize and configure
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -81,7 +104,8 @@ int main()
 	//Shader program2("vertexShader1.glsl", "fragmentShader1.glsl");
 	//Shader modelLoading("model_loading.vs", "model_loading.fs");
 	TessellationShader tshader("shaders/tessVertexShader.vert", "shaders/tessControlShader.tcs", "shaders/tessEvaluationShader.tes", "shaders/tessFragmentShader.frag");
-
+	TessellationShader tshader2("shaders/tessVertexShader.vert", "shaders/tessControlShader2.tcs", "shaders/tessEvaluationShader2.tes", "shaders/tessFragmentShader2.frag");
+	TessellationShader lightShader2("shaders/tessVertexShader2.vert", "shaders/tessControlShader2.tcs", "shaders/tessEvaluationShader2.tes", "shaders/lightFragmentShader.frag");
 
 	// cube vertices
 	float vertices1[] = {
@@ -229,10 +253,12 @@ int main()
 	
 	//loading models
 	Model plane_("resources/plane.obj", GL_PATCHES);
+	Model monkey("resources/head.obj", GL_PATCHES);
+	Model sphere("resources/sphere.obj", GL_PATCHES);
 
 	//init textures
-	unsigned int texture = TextureFromFile("D6.png", "resources", false);
-	unsigned int texture1 = TextureFromFile("C6W.png", "resources", false);
+	unsigned int texture = TextureFromFile("heightMap.bmp", "resources", false);
+	unsigned int texture1 = TextureFromFile("terrainTexture.jpg", "resources", false);
 
 	vector<std::string> faces =
 	{
@@ -249,23 +275,20 @@ int main()
 	skyboxShader.setInt("skybox", 0);
 
 	glm::vec3 fogColor(204, 224, 255);
-	fogColor *= 1.0/255.0;
+	fogColor /= 255.0;
+	glm::vec3 lightColor(255, 255, 153);
+	lightColor /= 255.0;
 
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
 	{
 		t1 = glfwGetTime(); 
-		float degreePerSecond = 30.0f;
-
-
-
-		float x = cos(glm::radians(t1*degreePerSecond))*20.0;
-		float z = sin(glm::radians(t1*degreePerSecond))*20.0;
-		lightPosition = glm::vec3(x, 5.0, z); //ruotate light
-
-		glm::mat4 rot = glm::rotate(identityMatrix, glm::radians( - t1 * degreePerSecond ), glm::vec3(0.0, 1.0, 0.0));
-		lightModel = glm::translate(idMat, lightPosition) * rot; //update light model
+		float degreePerSecond = 10.0f;
+		float dist = 50.0;
+		float x = cos(glm::radians(t1*degreePerSecond))*dist;
+		float z = sin(glm::radians(t1*degreePerSecond))*dist;
+		lightPosition = glm::vec3(x, 7.5, z); //ruotate light
 
 		// input
 		processInput(window);
@@ -294,37 +317,57 @@ int main()
 		gWorld = glm::scale(gWorld, glm::vec3(5.0, 0.0, 5.0));
 		gVP = proj * view;
 
-		// set uniform variables
-		tshader.use();
-		tshader.setVec3("gEyeWorldPos", camera.Position);
-		tshader.setMat4("gWorld", gWorld);
-		tshader.setMat4("gVP", gVP);
-		tshader.setFloat("gDispFactor", 4.5f);
-		tshader.setVec3("u_LightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-		tshader.setVec3("u_LightPosition", lightPosition);
-		tshader.setVec3("u_ViewPosition", camera.Position);
-		tshader.setVec3("fogColor", fogColor);
 
-		// set textures
-		glActiveTexture(GL_TEXTURE0); 
-		glBindTexture(GL_TEXTURE_2D, texture);
-		tshader.setInt("heigh_map", 0);
-		glActiveTexture(GL_TEXTURE1); 
-		glBindTexture(GL_TEXTURE_2D, texture1);
-		tshader.setInt("tex", 1);
-		
-		// finally, draw
-		plane_.Draw(tshader);
+		if (true) {
+			// Draw the terrain
+			// set uniform variables
+			tshader.use();
+			tshader.setVec3("gEyeWorldPos", camera.Position); // terrain shader
+			tshader.setMat4("gWorld", gWorld);
+			tshader.setMat4("gVP", gVP);
+			tshader.setFloat("gDispFactor", 4.5f);
+			tshader.setVec3("u_LightColor", lightColor);
+			tshader.setVec3("u_LightPosition", lightPosition);
+			tshader.setVec3("u_ViewPosition", camera.Position);
+			tshader.setVec3("fogColor", fogColor);
+
+			// set textures
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture);
+			tshader.setInt("gDisplacementMap", 0);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, texture1);
+			tshader.setInt("tex", 1);
+
+			// finally, draw
+			plane_.Draw(tshader);
+
+		}
+
+		if (false) {
+			tshader2.use();
+			tshader2.setVec3("gEyeWorldPos", camera.Position); // terrain shader
+			tshader2.setFloat("gTessellationLevel", 4.0f);
+			tshader2.setMat4("gWorld", glm::rotate(identityMatrix, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0)));
+			tshader2.setMat4("gVP", gVP);
+			tshader2.setVec3("u_LightColor", lightColor);
+			tshader2.setVec3("u_LightPosition", lightPosition);
+			tshader2.setVec3("u_ViewPosition", camera.Position);
+			tshader2.setVec3("fogColor", fogColor);
+
+			monkey.Draw(tshader2);
+		}
 
 		//draw light source
-		lightShader.use();
-		unsigned int mvpMatrix = glGetUniformLocation(lightShader.ID, "mvpMatrix"); // getting mvpMatrix location
-		glm::mat4 MVP = proj * view * lightModel;
-		lightShader.setMat4("mvpMatrix", MVP);
-		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(lightVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 46);
-
+		
+		lightShader2.use();
+		glm::mat4 rot = glm::rotate(identityMatrix, glm::radians(-t1 * degreePerSecond), glm::vec3(0.0, 1.0, 0.0));
+		lightModel = glm::translate(idMat, lightPosition) * rot; //update light model
+		lightShader2.setMat4("gWorld", lightModel);
+		lightShader2.setMat4("gVP", gVP);
+		lightShader2.setFloat("gTessellationLevel", 5.0f);
+		lightShader2.setVec3("u_LightColor", lightColor);
+		sphere.Draw(lightShader2);
 
 		//draw skyBox
 		glDepthFunc(GL_LEQUAL);

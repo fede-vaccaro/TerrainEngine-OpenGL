@@ -112,6 +112,7 @@ private:
 			vector.y = mesh->mNormals[i].y;
 			vector.z = mesh->mNormals[i].z;
 			vertex.Normal = vector;
+			
 			// texture coordinates
 			if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
 			{
@@ -124,6 +125,7 @@ private:
 			}
 			else
 				vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+			
 			// tangent
 			vector.x = mesh->mTangents[i].x;
 			vector.y = mesh->mTangents[i].y;
