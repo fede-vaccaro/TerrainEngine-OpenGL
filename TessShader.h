@@ -25,7 +25,7 @@ public:
 		glCompileShader(tEval);
 		checkCompileErrors(tEval, "TESSELLATION_EVALUATION");
 		// Geometry Shader
-		gShader = glCreateShader(GL_GEOMETRY_SHADER);
+		//gShader = glCreateShader(GL_GEOMETRY_SHADER);
 		//glShaderSource(gShader, 1, &gShadCode, NULL);
 		//glCompileShader(gShader);
 		//checkCompileErrors(gShader, "GEOMETRY");

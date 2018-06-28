@@ -98,14 +98,12 @@ int main()
 		return -1;
 	}
 
-
-	Shader lightShader("shaders/lightVertexShader.vert", "shaders/lightFragmentShader.frag");
 	Shader skyboxShader("shaders/skyboxVert.vert", "shaders/skyboxFrag.frag");
 	//Shader program2("vertexShader1.glsl", "fragmentShader1.glsl");
 	//Shader modelLoading("model_loading.vs", "model_loading.fs");
 	TessellationShader tshader("shaders/tessVertexShader.vert", "shaders/tessControlShader.tcs", "shaders/tessEvaluationShader.tes", "shaders/tessFragmentShader.frag");
-	TessellationShader tshader2("shaders/tessVertexShader.vert", "shaders/tessControlShader2.tcs", "shaders/tessEvaluationShader2.tes", "shaders/tessFragmentShader2.frag");
-	TessellationShader lightShader2("shaders/tessVertexShader2.vert", "shaders/tessControlShader2.tcs", "shaders/tessEvaluationShader2.tes", "shaders/lightFragmentShader.frag");
+	TessellationShader tshader2("shaders/tessSmoothingVertexShader.vert", "shaders/tessSmoothingControlShader.tcs", "shaders/tessSmoothingEvaluationShader.tes", "shaders/tessSmoothingFragmentShader2.frag");
+	TessellationShader lightShader2("shaders/tessSmoothingVertexShader.vert", "shaders/tessSmoothingControlShader.tcs", "shaders/tessSmoothingEvaluationShader.tes", "shaders/lightFragmentShader.frag");
 
 	// cube vertices
 	float vertices1[] = {
@@ -358,8 +356,7 @@ int main()
 			monkey.Draw(tshader2);
 		}
 
-		//draw light source
-		
+		// draw light source
 		lightShader2.use();
 		glm::mat4 rot = glm::rotate(identityMatrix, glm::radians(-t1 * degreePerSecond), glm::vec3(0.0, 1.0, 0.0));
 		lightModel = glm::translate(idMat, lightPosition) * rot; //update light model
