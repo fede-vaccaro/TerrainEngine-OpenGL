@@ -11,4 +11,4 @@ Compile them and put in *Libraries/* directory (I'll upload the compiled librari
 
 ![Demonstrative image](/resources/gitpic.jpg)
 
-A special thanks to [Prof. Stefano Berretti](https://www.micc.unifi.it/people/stefano-berretti/),  [Joey DeVries](https://learnopengl.com/), [Etay Meiri](http://ogldev.atspace.co.uk/www/tutorial30/tutorial30.html) and [https://www.youtube.com/watch?v=HusvGeEDU_U&list=PLRIWtICgwaX23jiqVByUs0bqhnalNTNZh](ThinMatrix' YouTube Channel) for their awesome OpenGL tutorials!
+A special thanks to [Prof. Stefano Berretti](https://www.micc.unifi.it/people/stefano-berretti/),  [Joey DeVries](https://learnopengl.com/), [Etay Meiri](http://ogldev.atspace.co.uk/www/tutorial30/tutorial30.html) and [ThinMatrix' YouTube Channel](https://www.youtube.com/watch?v=HusvGeEDU_U&list=PLRIWtICgwaX23jiqVByUs0bqhnalNTNZh) for their awesome OpenGL tutorials!
