@@ -57,7 +57,7 @@ void main()
 	texCol *= vec4(113, 113, 91, 255.0)/255.0;
 
 	// calculate fog color 
-	vec2 u_FogDist = vec2(15.0, 20.0);
+	vec2 u_FogDist = vec2(20.0, 30.0);
 	float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
 
 	// putting all together

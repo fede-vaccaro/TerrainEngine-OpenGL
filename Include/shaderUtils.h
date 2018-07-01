@@ -81,6 +81,12 @@ public:
 		glUniform3fv(location, 1, glm::value_ptr(vector));
 	}
 
+	void setVec4(const std::string &name, glm::vec4 vector) const
+	{
+		unsigned int location = glGetUniformLocation(ID, name.c_str());
+		glUniform4fv(location, 1, glm::value_ptr(vector));
+	}
+
 	void setMat4(const std::string &name, glm::mat4 matrix) const
 	{
 		unsigned int mat = glGetUniformLocation(ID, name.c_str());

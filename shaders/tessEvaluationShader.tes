@@ -7,7 +7,8 @@ uniform sampler2D gDisplacementMap;
 uniform float gDispFactor;      
 
 uniform vec3 gEyeWorldPos;                                                                      
-                                                                                                
+uniform vec4 clipPlane;
+					   
 in vec3 WorldPos_ES_in[];                                                                       
 in vec2 TexCoord_ES_in[];                                                                       
 in vec3 Normal_ES_in[];                                                                         
@@ -34,10 +35,13 @@ void main()
     Normal = interpolate3D(Normal_ES_in[0], Normal_ES_in[1], Normal_ES_in[2]);            
     Normal = normalize(Normal);                                                     
     WorldPos = interpolate3D(WorldPos_ES_in[0], WorldPos_ES_in[1], WorldPos_ES_in[2]);    
-                                                                                                
+    
+
     // Displace the vertex along the normal                                                     
     float Displacement = texture(gDisplacementMap, texCoord.xy).x;                        
-    WorldPos += Normal * Displacement * gDispFactor;  
+    WorldPos += Normal * Displacement * gDispFactor;
+	
+	gl_ClipDistance[0] = dot(clipPlane, vec4(WorldPos, 1.0));
 
 	distFromPos = distance(WorldPos, gEyeWorldPos);
 
