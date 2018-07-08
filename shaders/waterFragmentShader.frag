@@ -43,7 +43,7 @@ void main(){
 	float floorDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
 	float waterDistance = 2.0 * near * far / (far + near - (2.0 * gl_FragCoord.z - 1.0) * (far - near));
 	float waterDepth = floorDistance - waterDistance;
-	clamp(waterDepth/5.0, 0.0, 1.0);
+	clamp(waterDepth/10.0, 0.0, 1.0);
 
 	refractionTexCoords += totalDistortion;
 	refractionTexCoords = clamp(refractionTexCoords, 0.001, 0.999);
@@ -67,7 +67,7 @@ void main(){
 	vec3 diffuse = diffuseFactor * vec3(1.0);
 
 	// calculate specular illumination 
-	float specularFactor = 0.2f;
+	float specularFactor = 0.05f;
 	vec3 viewDir = normalize(cameraPosition - position.xyz);
 	vec3 reflectDir = reflect(-lightDir, norm);  
 	float spec = pow(max(dot(-viewDir, reflectDir), 0.0), 64.0);

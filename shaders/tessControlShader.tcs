@@ -17,15 +17,15 @@ out vec3 Normal_ES_in[];
 
                                                                                                 
 float GetTessLevel(float Distance0, float Distance1)                                            
-{                                                                                               
+{                                                       
+	//return 20.0;
     float AvgDistance = (Distance0 + Distance1) / 2.0;
-    
-    if (AvgDistance <= 5.0) {                                                                   
-        return 60.0;                                                                            
-    }else if(AvgDistance <= 10.0){
+    if (AvgDistance <= 10.0) {                                                                   
+        return 45.0;                                                                            
+    }else if(AvgDistance <= 30.0){
 		return 30.0;
 	}
-    else if (AvgDistance <= 15.0) {                                                              
+    else if (AvgDistance <= 60.0) {                                                              
         return 15.0;                                                                             
     }                                                                                           
     else {                                                                                      
@@ -36,8 +36,8 @@ float GetTessLevel(float Distance0, float Distance1)
     float q = 30.0 - falloffRate;
     float tessLevel = AvgDistance * falloffRate + q;
     tessLevel = max(tessLevel, 3.0);
-    //tessLevel = 1.0;*/
-    //return tessLevel;
+    tessLevel = 1.0;
+    return tessLevel;*/
 }                                                                                               
                                                                                                 
 void main()                                                                                     

@@ -64,5 +64,6 @@ double ValueNoise_2D(double x, double y, int numOctaves, int primeIndex, double 
 		total += InterpolatedNoise((primeIndex + i) % 10,
 			x / frequency, y / frequency) * amplitude;
 	}
+
 	return total / frequency;
 }
