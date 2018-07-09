@@ -13,43 +13,86 @@ uniform vec3 u_ViewPosition;
 uniform vec3 fogColor;
 uniform vec2 offset;
 uniform bool drawFog;
+uniform float gDispFactor;
+uniform float freq;
+uniform bool normals;
 
 uniform sampler2D sand, grass, rock, snow;
-uniform sampler2D height_map;
 
 out vec4 FragColor;
 
-void main()
+float Random2D(in vec2 st)
 {
+	return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
 
-	float HEIGHT = 1024.0f; // height map dimensions
-	float WIDTH = 1024.0f;
-	float SCALE = 0.05f; // step factor
+float InterpolatedNoise(int ind, float x, float y) {
+	int integer_X = int(floor(x));
+	float fractional_X = fract(x);
+	int integer_Y = int(floor(y));
+	float fractional_Y = fract(y);
 
-	vec2 uv =  texCoord.xy;
-	vec2 du = vec2(1.0/WIDTH, 0);
-	vec2 dv= vec2(0, 1.0/HEIGHT);
-	// calculate surface partial derivatives 
-	float dhdu = SCALE/(2/WIDTH) * (texture(height_map, uv+du).r - texture(height_map, uv-du).r)*dispFactor;
-	float dhdv = SCALE/(2/HEIGHT) * (texture(height_map, uv+dv).r - texture(height_map, uv-dv).r)*dispFactor;
+	vec2 randomInput = vec2(integer_X, integer_Y);
+	float v1 = Random2D(randomInput);
+	float v2 = Random2D(randomInput + vec2(1.0, 0.0));
+	float v3 = Random2D(randomInput + vec2(0.0, 1.0));
+	float v4 = Random2D(randomInput + vec2(1.0, 1.0));
+	float i1 = mix(v1, v2, fractional_X);
+	float i2 = mix(v3, v4, fractional_X);
+	return mix(i1, i2, fractional_Y);
+}
+
+float perlin(float x, float y){
+	
+    int numOctaves = 10;
+	float persistence = 0.5;
+	float total = 0,
+		frequency = pow(2, numOctaves),
+		amplitude = 1;
+	for (int i = 0; i < numOctaves; ++i) {
+		frequency /= 2;
+		amplitude *= persistence;
+		
+		total += InterpolatedNoise( int(mod(0 + i,10)), x / frequency, y / frequency) * amplitude;
+	}
+	return total / frequency;
+}
+
+vec3 computeNormals(vec3 WorldPos){
+	float st = 0.1;
+	float dhdu = (perlin((WorldPos.x + st)*freq, WorldPos.z*freq)*gDispFactor - perlin((WorldPos.x - st)*freq, WorldPos.z*freq)*gDispFactor)/(2.0*st);
+	float dhdv = (perlin( WorldPos.x*freq, (WorldPos.z + st)*freq)*gDispFactor - perlin(WorldPos.x*freq, (WorldPos.z - st)*freq)*gDispFactor)/(2.0*st);
 
 	vec3 X = vec3(1.0, dhdu, 1.0);
 	vec3 Z = vec3(0.0, dhdv, 1.0);
+
 	vec3 n = normalize(cross(Z,X));
+	return n;
+}
+
+void main()
+{
+	
+	vec3 n; 
+	if(normals){
+		n = computeNormals(WorldPos);
+	}else{
+		n = vec3(0,1,0);
+	}
 	//vec3 n = normalize(Normal+Z*dhdu+X*dhdv); // add offset to original normal (equivalent to calculate real surface normal)
 	// calculate ambient illumination
 	float ambientStrength = 0.15; 
     vec3 ambient = ambientStrength * u_LightColor; 
 
 	// calculate diffuse illumination
-	vec3 norm = mix(n, Normal, 0.75); 
+	vec3 norm = mix(n, Normal, 0.5); 
 	norm = normalize(norm);
 	vec3 lightDir = normalize(u_LightPosition - WorldPos);
 	float diffuseFactor = max(0.0, dot(lightDir, norm));
 	vec3 diffuse = diffuseFactor * u_LightColor; 
 
 	// calculate specular illumination 
-	float specularFactor = 0.05f;
+	float specularFactor = 0.15f;
 	vec3 viewDir = normalize(u_ViewPosition - WorldPos);
 	vec3 reflectDir = reflect(-lightDir, norm);  
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
@@ -59,7 +102,7 @@ void main()
 
 	vec4 rockColor = vec4(1.0, 0.0, 0.0, 1.0);//vec4(163, 163, 117, 255)/255.0;
 
-	float trans = 1.0;
+	float trans = 0.4;
 
 	vec4 texCol;
 	if(height < dispFactor/2.5 - trans){

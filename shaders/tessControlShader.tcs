@@ -3,7 +3,8 @@
 // define the number of CPs in the output patch                                                 
 layout (vertices = 3) out;                                                                      
                                                                                                 
-uniform vec3 gEyeWorldPos;                                                                      
+uniform vec3 gEyeWorldPos;
+uniform float tessLevel;
                                                                                                 
 // attributes of the input CPs                                                                  
 in vec3 WorldPos_CS_in[];                                                                       
@@ -18,26 +19,21 @@ out vec3 Normal_ES_in[];
                                                                                                 
 float GetTessLevel(float Distance0, float Distance1)                                            
 {                                                       
-	//return 20.0;
+	if(tessLevel > 0.0){
+		return tessLevel;
+	}
     float AvgDistance = (Distance0 + Distance1) / 2.0;
     if (AvgDistance <= 10.0) {                                                                   
-        return 45.0;                                                                            
+        return 120.0;                                                                            
     }else if(AvgDistance <= 30.0){
-		return 30.0;
+		return 60.0;
 	}
     else if (AvgDistance <= 60.0) {                                                              
-        return 15.0;                                                                             
+        return 30.0;                                                                             
     }                                                                                           
     else {                                                                                      
-        return 5.0;                                                                             
+        return 15.0;                                                                             
     }
-    /*
-    float falloffRate = -1.5;
-    float q = 30.0 - falloffRate;
-    float tessLevel = AvgDistance * falloffRate + q;
-    tessLevel = max(tessLevel, 3.0);
-    tessLevel = 1.0;
-    return tessLevel;*/
 }                                                                                               
                                                                                                 
 void main()                                                                                     

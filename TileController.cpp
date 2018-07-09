@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 
-TileController::TileController(float scale, float disp, Camera * camera, TessellationShader * shad, Shader * waterShader, TerrainGenerator * tg) : scale(scale), disp(disp), camera(camera), shad(shad), tg(tg), waterShader(waterShader)
+TileController::TileController(float scale, float disp, Camera * camera, TessellationShader * shad, Shader * waterShader) : scale(scale), disp(disp), camera(camera), shad(shad), waterShader(waterShader)
 {
 	position = new glm::vec2[9];
 
@@ -36,8 +36,7 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 	waterHeight = disp / 2.5;
 
 	for (int i = 0; i < totTiles; i++) {
-		tiles[i] = new Tile(position[i], scale, disp, shad, tg, planeModel, textures);
-		//tiles[i]->setWater(new Water(tiles[i]->position, waterShader, scale, disp / 2.0, dudvMap, normalMap, waterModel));
+		tiles[i] = new Tile(position[i], scale, disp, shad, planeModel, textures);
 	}
 	tiles[C]->setWater(new Water(tiles[C]->position, waterShader, scale*3.0, waterHeight, dudvMap, normalMap, waterModel));
 
@@ -54,8 +53,9 @@ void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec
 	camera->Position.y -= 2 * (camera->Position.y - waterHeight);
 
 	for (int j = 0; j < tiles.size(); j++) {
-		tiles[j]->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 1.0f);
+		tiles[j]->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 1.0f, 15.0f);
 	}
+
 	camera->invertPitch();
 	camera->Position.y += 2 * abs(camera->Position.y - waterHeight);
 	waterPtr->unbindFBO();
@@ -64,7 +64,7 @@ void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec
 	waterPtr->bindRefractionFBO();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	for (int j = 0; j < tiles.size(); j++) {
-		tiles[j]->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, -1.0f);
+		tiles[j]->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, -1.0f, 15.0f);
 	};
 	waterPtr->unbindFBO();
 
@@ -123,17 +123,14 @@ void TileController::changeTiles(tPosition currentTile) {
 
 		Tile * t1 = tiles[NE], *t2 = tiles[N], *t3 = tiles[NW];
 
-		float eps_y = 0.02f*scale*3.0f;
+		float eps_y = 0.0f;//-0.02f*scale*3.0f;
 
 
-		tiles[NE] = new Tile(t1->position + position[N] + glm::vec2(0.0, eps_y), scale, disp, shad, tg, planeModel, textures);
-		//tiles[NE]->setWater(new Water(tiles[NE]->position, waterShader, scale, disp / 2.0, dudvMap, normalMap, waterModel));
+		tiles[NE] = new Tile(t1->position + position[N] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
 
-		tiles[N] = new Tile(t2->position + position[N] + glm::vec2(0.0, eps_y), scale, disp, shad, tg, planeModel, textures);
-		//tiles[N]->setWater(new Water(tiles[N]->position, waterShader, scale, disp / 2.0, dudvMap, normalMap, waterModel));
+		tiles[N] = new Tile(t2->position + position[N] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
 
-		tiles[NW] = new Tile(t3->position + position[N] + glm::vec2(0.0, eps_y), scale, disp, shad, tg, planeModel, textures);
-		//tiles[NW]->setWater(new Water(tiles[NW]->position, waterShader, scale, disp / 2.0, dudvMap, normalMap, waterModel));
+		tiles[NW] = new Tile(t3->position + position[N] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
 
 	}
 	else if (currentTile == S) {
@@ -156,16 +153,13 @@ void TileController::changeTiles(tPosition currentTile) {
 
 		Tile * t1 = tiles[SE], *t2 = tiles[S], *t3 = tiles[SW];
 
-		float eps_y = -0.02f*scale*3.0f;
+		float eps_y = 0.0f;//-0.02f*scale*3.0f;
 
-		tiles[SE] = new Tile(t1->position + position[S] + glm::vec2(0.0, eps_y), scale, disp, shad, tg, planeModel, textures);
-		//tiles[SE]->setWater(new Water(tiles[SE]->position, waterShader, scale, disp / 2.0, dudvMap, normalMap, waterModel));
+		tiles[SE] = new Tile(t1->position + position[S] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
 
-		tiles[S] = new Tile(t2->position + position[S] + glm::vec2(0.0, eps_y), scale, disp, shad, tg, planeModel, textures);
-		//tiles[S]->setWater(new Water(tiles[S]->position, waterShader, scale, disp / 2.0, dudvMap, normalMap, waterModel));
+		tiles[S] = new Tile(t2->position + position[S] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
 
-		tiles[SW] = new Tile(t3->position + position[S] + glm::vec2(0.0, eps_y), scale, disp, shad, tg, planeModel, textures);
-		//tiles[SW]->setWater(new Water(tiles[SW]->position, waterShader, scale, disp / 2.0, dudvMap, normalMap, waterModel));
+		tiles[SW] = new Tile(t3->position + position[S] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
 
 	}
 	else if (currentTile == E) {
@@ -187,16 +181,13 @@ void TileController::changeTiles(tPosition currentTile) {
 
 		Tile * t1 = tiles[NE], *t2 = tiles[E], *t3 = tiles[SE];
 
-		float eps_X = -0.02f*scale*3.0f;
+		float eps_X = 0.0;// 0.02f*scale*3.0f;
 
-		tiles[NE] = new Tile(t1->position + position[E] + glm::vec2(eps_X, 0.0), scale, disp, shad, tg, planeModel, textures);
-		//tiles[NE]->setWater(new Water(tiles[NE]->position, waterShader, scale, disp / 2.0, dudvMap, normalMap, waterModel));
+		tiles[NE] = new Tile(t1->position + position[E] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
 
-		tiles[E] = new Tile(t2->position + position[E] + glm::vec2(eps_X, 0.0), scale, disp, shad, tg, planeModel, textures);
-		//tiles[E]->setWater(new Water(tiles[E]->position, waterShader, scale, disp / 2.0, dudvMap, normalMap, waterModel));
+		tiles[E] = new Tile(t2->position + position[E] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
 
-		tiles[SE] = new Tile(t3->position + position[E] + glm::vec2(eps_X, 0.0), scale, disp, shad, tg, planeModel, textures);
-		//tiles[SE]->setWater(new Water(tiles[SE]->position, waterShader, scale, disp / 2.0, dudvMap, normalMap, waterModel));
+		tiles[SE] = new Tile(t3->position + position[E] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
 
 	}
 	else if (currentTile == W) {
@@ -218,16 +209,13 @@ void TileController::changeTiles(tPosition currentTile) {
 
 		Tile * t1 = tiles[NW], *t2 = tiles[W], *t3 = tiles[SW];
 
-		float eps_X = 0.02f*scale*3.0f;
+		float eps_X = 0.0;// 0.02f*scale*3.0f;
 
-		tiles[NW] = new Tile(t1->position + position[W] + glm::vec2(eps_X, 0.0), scale, disp, shad, tg, planeModel, textures);
-		//tiles[NW]->setWater(new Water(tiles[NW]->position, waterShader, scale, disp / 2.0, dudvMap, normalMap, waterModel));
+		tiles[NW] = new Tile(t1->position + position[W] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
 
-		tiles[W] = new Tile(t2->position + position[W] + glm::vec2(eps_X, 0.0), scale, disp, shad, tg, planeModel, textures);
-		//tiles[W]->setWater(new Water(tiles[W]->position, waterShader, scale, disp / 2.0, dudvMap, normalMap, waterModel));
+		tiles[W] = new Tile(t2->position + position[W] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
 
-		tiles[SW] = new Tile(t3->position + position[W] + glm::vec2(eps_X, 0.0), scale, disp, shad, tg, planeModel, textures);
-		//tiles[SW]->setWater(new Water(tiles[SW]->position, waterShader, scale, disp / 2.0, dudvMap, normalMap, waterModel));
+		tiles[SW] = new Tile(t3->position + position[W] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
 
 	}
 

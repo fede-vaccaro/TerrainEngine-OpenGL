@@ -11,7 +11,7 @@ enum tPosition {
 class TileController
 {
 public:
-	TileController(float scale, float disp, Camera * camera, TessellationShader * shad, Shader * waterShader, TerrainGenerator * tg);
+	TileController(float scale, float disp, Camera * camera, TessellationShader * shad, Shader * waterShader);
 	virtual ~TileController();
 	
 	void updateTiles();
@@ -27,7 +27,6 @@ private:
 	float scale, disp;
 	TessellationShader * shad;
 	Shader * waterShader;
-	TerrainGenerator * tg;
 	glm::vec2 * position;
 
 	void changeTiles(tPosition currentTile);

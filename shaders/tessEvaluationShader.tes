@@ -3,8 +3,8 @@
 layout(triangles, equal_spacing, ccw) in;                                                       
                                                                                                 
 uniform mat4 gVP;                                                                               
-uniform sampler2D gDisplacementMap;                                                             
 uniform float gDispFactor;      
+uniform float freq;
 
 uniform vec3 gEyeWorldPos;                                                                      
 uniform vec4 clipPlane;
@@ -28,7 +28,46 @@ vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2)
 vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2)                                                   
 {                                                                                               
     return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;   
-}                                                                                               
+}
+
+float Random2D(in vec2 st)
+{
+	return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
+float InterpolatedNoise(int ind, float x, float y) {
+	int integer_X = int(floor(x));
+	float fractional_X = fract(x);
+	int integer_Y = int(floor(y));
+	float fractional_Y = fract(y);
+	vec2 randomInput = vec2(integer_X, integer_Y);
+	float v1 = Random2D(randomInput);
+	float v2 = Random2D(randomInput + vec2(1.0, 0.0));
+	float v3 = Random2D(randomInput + vec2(0.0, 1.0));
+	float v4 = Random2D(randomInput + vec2(1.0, 1.0));
+	float i1 = mix(v1, v2, fractional_X);
+	float i2 = mix(v3, v4, fractional_X);
+	return mix(i1, i2, fractional_Y);
+}
+
+float perlin(float x, float y){
+	
+    int numOctaves = 10;
+	float persistence = 0.5;
+	float total = 0,
+		frequency = pow(2, numOctaves),
+		amplitude = 1;
+	for (int i = 0; i < numOctaves; ++i) {
+		frequency /= 2;
+		amplitude *= persistence;
+		
+		total += InterpolatedNoise( int(mod(0 + i,10)), x / frequency, y / frequency) * amplitude;
+	}
+	return total / frequency;
+}
+
+
+
                                                                                                 
 void main()                                                                                     
 {                                                                                               
@@ -40,8 +79,8 @@ void main()
     
 
     // Displace the vertex along the normal                                                     
-    float Displacement = texture(gDisplacementMap, texCoord.xy).x;                        
-    WorldPos += Normal * Displacement * gDispFactor;
+	float Displacement = perlin(WorldPos.x*freq, WorldPos.z*freq);
+	WorldPos += Normal * Displacement * gDispFactor;
 	
 	gl_ClipDistance[0] = dot(clipPlane, vec4(WorldPos, 1.0));
 

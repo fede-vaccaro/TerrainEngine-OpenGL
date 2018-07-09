@@ -46,7 +46,7 @@ const unsigned int SCR_HEIGHT = 1080;
 
 float dispFactor = 40.0;
 
-glm::vec3 startPosition(0.0f, dispFactor/2.0, 0.0f);
+glm::vec3 startPosition(0.0f, dispFactor / 2.0, 0.0f);
 
 // camera
 Camera camera(startPosition);
@@ -60,16 +60,7 @@ glm::mat4 identityMatrix;
 
 int main()
 {
-	/*
-	if (generateTerrain) {
-		// HEIGHT MAP & TERRAIN
-		int h = 4096; // Resolution
-		float HeightRange = 60;
 
-		srand(time(NULL));
-		HeightMap* hm = new HeightMap(h*2, HeightRange, 7, rand() % 10, 0.5);
-		hm->saveMap("resources/heightMap.bmp");
-	}*/
 	// glfw: initialize and configure
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -80,7 +71,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
 #endif
 
-														
+
 	// glfw window creation										 
 	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Tessellation Shader on terrain", NULL, NULL);
 	if (window == NULL)
@@ -114,7 +105,7 @@ int main()
 	TessellationShader tshader("shaders/tessVertexShader.vert", "shaders/tessControlShader.tcs", "shaders/tessEvaluationShader.tes", "shaders/tessFragmentShader.frag");
 	TessellationShader tshader2("shaders/tessSmoothingVertexShader.vert", "shaders/tessSmoothingControlShader.tcs", "shaders/tessSmoothingEvaluationShader.tes", "shaders/tessSmoothingFragmentShader2.frag");
 	TessellationShader lightShader2("shaders/tessSmoothingVertexShader.vert", "shaders/tessSmoothingControlShader.tcs", "shaders/tessSmoothingEvaluationShader.tes", "shaders/lightFragmentShader.frag");
-	
+
 	float skyboxVertices[] = {
 		// positions          
 		-1.0f,  1.0f, -1.0f,
@@ -159,7 +150,7 @@ int main()
 		-1.0f, -1.0f,  1.0f,
 		1.0f, -1.0f,  1.0f
 	};
-	
+
 	// skyboxVAO
 	unsigned int skyboxVAO, skyboxVBO;
 	glGenVertexArrays(1, &skyboxVAO);
@@ -179,17 +170,6 @@ int main()
 	//loading models
 	Model waterPlane("resources/plane.obj", GL_TRIANGLES);
 	Model plane_("resources/plane.obj", GL_PATCHES);
-	Model monkey("resources/head.obj", GL_PATCHES);
-	Model sphere("resources/sphere.obj", GL_PATCHES);
-
-	//init textures
-	//terrain textures
-	unsigned int heightMap = TextureFromFile("heightMap.bmp", "resources", false);
-	unsigned int terrainTexture = TextureFromFile("terrainTexture.jpg", "resources", false);
-
-	//
-	unsigned int waterDUDV = TextureFromFile("waterDUDV.png", "resources", false);
-	unsigned int normalMap = TextureFromFile("normalMap.png", "resources", false);
 
 	vector<std::string> faces =
 	{
@@ -210,71 +190,9 @@ int main()
 	glm::vec3 lightColor(255, 255, 153);
 	lightColor /= 255.0;
 
-	float waterHeight = dispFactor / 2.0;
-	float moveFactor = 0.0;
-
-	// refraction and reflection frame buffers
-	int refractionWidth = 1920;
-	int refractionHeight = 1080;
-
-	int reflectionWidth = 1920;
-	int reflectionHeight = 1080;
-
-	unsigned int refractionFBO = createFrameBuffer();
-	unsigned int refractionText = createTextureAttachment(refractionWidth, refractionHeight);
-	unsigned int refractionDepthText = createDepthTextureAttachment(refractionWidth, refractionHeight);
-	glm::vec4 refractionClipPlane(0.0, -1.0, 0.0, waterHeight + 0.009);
-
-
-	unsigned int reflectionFBO = createFrameBuffer();
-	unsigned int reflectionText = createTextureAttachment(reflectionWidth, reflectionHeight);
-	unsigned int reflectionDepthText = createDepthTextureAttachment(reflectionWidth, reflectionHeight);
-	glm::vec4 reflectionClipPlane = -refractionClipPlane;
-
-
-	unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
-
-	/*
-	// map generator
-	int resolution = 512;
-	float* inputPoints = TerrainGenerator::createMapCoords(resolution);
-	Object* terrain = new Object(inputPoints, 2 * resolution * resolution, 2);
-	terrain->setDrawMode(GL_POINTS);
-	Shader terrainShad("shaders/TerrainGeneratorVertex.vert", "shaders/TerrainGeneratorFragment.frag");
-
-	int seed = (int)rand() % 10;
-	unsigned int terrainFBO = createFrameBuffer();
-	unsigned int terrainTex = createTextureAttachment(resolution, resolution);
-	bindFrameBuffer(terrainFBO, resolution, resolution);
-	terrain->setShader(&terrainShad);
-	terrainShad.use();
-	terrainShad.setInt("PrimeIndex", seed);
-	terrainShad.setInt("resolution", resolution);
-	terrain->drawObject();
-
-	unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
-	heightMap = terrainTex;
-
-	*/
-	// render loop
-	// -----------
-
-	TerrainGenerator tg;
-
 	float scale = 10.0f;
 
-	//Model * planeModel = new Model("resources/plane.obj", GL_PATCHES);
-
-	glm::vec2 offset0(0.0, 0.0);
-	//Tile tile0(offset0, scale, 2.0, &tshader, &tg);
-
-	glm::vec2 offset1(1.0, 0.0);
-	//Tile tile1(offset1, scale, 2.0, &tshader, &tg);
-
-	glm::vec2 offset2(-1.0, 0.0);
-	//Tile tile2(offset2, scale, 2.0, &tshader, &tg);
-
-	TileController tc(scale, dispFactor, &camera, &tshader, &waterShader, &tg);
+	TileController tc(scale, dispFactor, &camera, &tshader, &waterShader);
 
 	float vertices[] = {
 		-1.0f, 0.0f, -1.0f, 0.0, 1.0, 0.0, 0.0, 0.0,
@@ -285,46 +203,31 @@ int main()
 		1.0f, 0.0f,  1.0f, 0.0, 1.0, 0.0, 1.0, 1.0
 	};
 
-	Object plane(vertices, 3, 0, 3, 3, 2, 6);
-
-	// first, configure the cube's VAO (and VBO)
-	unsigned int VBO, VAO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindVertexArray(VAO);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
 	while (!glfwWindowShouldClose(window))
 	{
 
 		float xSpeed = 0.025;
 		float xOffset = xSpeed * glfwGetTime();
 
-		t1 = glfwGetTime(); 
+		t1 = glfwGetTime();
 		float degreePerSecond = 10.0f;
-		float dist = 240.0;
+		float dist = 300.0;
 
 		float x = -20.9, z = -78.6;
 		float angle = glm::atan(x / z);
 
 		x = cos(-angle)*dist;
 		z = sin(-angle)*dist;
-		lightPosition = glm::vec3(x, dispFactor*2.0, z); //ruotate light
+		lightPosition = glm::vec3(x, dispFactor, z); //ruotate light
 
 		// input
 		processInput(window);
 
 		// render
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+
 		glClearColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -348,130 +251,53 @@ int main()
 		gWorld = glm::scale(gWorld, glm::vec3(10.0, 0.0, 10.0));
 		gVP = proj * view;
 
-		//tile0.drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight);
-		//tile1.drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight);
-		//tile2.drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight);
-		/*
-		int whichTile = -1;
-		if (tile0.inTile(camera)) {
-			whichTile = 0;
-			std::cout << "You are in Tile " << whichTile << std::endl;
+		Water * waterPtr = tc.tiles[0]->water;
+		if (waterPtr) {
+			camera.invertPitch();
+			//glm::vec3 cameraReflPos(camera.Position.x, reflectionCameraY, camera.Position.z);
+			camera.Position.y -= 2 * (camera.Position.y - tc.waterHeight);
+			glm::mat4 reflectionView = camera.GetViewMatrix();
+			glm::mat4 reflgVP = proj * reflectionView;
+
+			waterPtr->bindReflectionFBO();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			//draw skyBox
+			glDepthFunc(GL_LEQUAL);
+			skyboxShader.use();
+			glm::mat4 view2 = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation part from the view matrix
+			glm::mat4 model;
+			model = glm::translate(model, glm::vec3(0.0, -0.1, 0.0));
+			skyboxShader.setMat4("model", model);
+			skyboxShader.setMat4("view", view2);
+			skyboxShader.setMat4("projection", proj);
+			glBindVertexArray(skyboxVAO);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glDepthMask(GL_TRUE);
+			glDepthFunc(GL_LESS);
+
+			// draw light source
+			lightShader2.use();
+			glm::mat4 rot = glm::rotate(identityMatrix, glm::radians(-t1 * degreePerSecond), glm::vec3(0.0, 1.0, 0.0));
+			lightModel = glm::translate(idMat, lightPosition) * rot; //update light model
+			lightShader2.setMat4("gWorld", lightModel);
+			lightShader2.setMat4("gVP", reflgVP);
+			lightShader2.setFloat("gTessellationLevel", 5.0f);
+			lightShader2.setVec3("u_LightColor", lightColor);
+
+			// reset camera position
+			camera.invertPitch();
+			camera.Position.y += 2 * abs(camera.Position.y - tc.waterHeight);
+
+			//unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
+
+			waterPtr->unbindFBO();
 		}
-		if (tile0.inTile(camera)) {
-			whichTile = 1;
-			std::cout << "You are in Tile " << whichTile << std::endl;
-		}
-		if (tile0.inTile(camera)) {
-			whichTile = 2;
-			std::cout << "You are in Tile " << whichTile << std::endl;
-		}*/
-		//std::cout << "current position is: (" << camera.Position.x << ", " << camera.Position.z << ")" << std::endl;
-
-		//lightShader.use();
-		//lightShader.setMat4("mvpMatrix", proj*view*identityMatrix);
-		//glBindVertexArray(VAO);
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
-		//plane.drawObject();
-
-		// water shader - reflection
-		//bindFrameBuffer(reflectionFBO, reflectionWidth, reflectionHeight);
-		//glEnable(GL_CLIP_DISTANCE0);
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// Draw the terrain
-		// set uniform variables
-		//tshader.use();
 
 
-		// set reflection camera
-		//float reflectionCameraY = camera.Position.y - 2*(camera.Position.y - waterHeight);
-
-		for (int i = 0; i < tc.tiles.size(); i++) {
-			Water * waterPtr = tc.tiles[0]->water;
-			if (waterPtr) {
-				camera.invertPitch();
-				//glm::vec3 cameraReflPos(camera.Position.x, reflectionCameraY, camera.Position.z);
-				camera.Position.y -= 2 * (camera.Position.y - tc.waterHeight);
-				glm::mat4 reflectionView = camera.GetViewMatrix();
-				glm::mat4 reflgVP = proj * reflectionView;
-
-				waterPtr->bindReflectionFBO();
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-				//draw skyBox
-				glDepthFunc(GL_LEQUAL);
-				skyboxShader.use();
-				glm::mat4 view2 = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation part from the view matrix
-				glm::mat4 model;
-				model = glm::translate(model, glm::vec3(0.0, -0.1, 0.0));
-				skyboxShader.setMat4("model", model);
-				skyboxShader.setMat4("view", view2);
-				skyboxShader.setMat4("projection", proj);
-				glBindVertexArray(skyboxVAO);
-				glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-				glDrawArrays(GL_TRIANGLES, 0, 36);
-				glDepthMask(GL_TRUE);
-				glDepthFunc(GL_LESS);
-
-				// draw light source
-				lightShader2.use();
-				glm::mat4 rot = glm::rotate(identityMatrix, glm::radians(-t1 * degreePerSecond), glm::vec3(0.0, 1.0, 0.0));
-				lightModel = glm::translate(idMat, lightPosition) * rot; //update light model
-				lightShader2.setMat4("gWorld", lightModel);
-				lightShader2.setMat4("gVP", reflgVP);
-				lightShader2.setFloat("gTessellationLevel", 5.0f);
-				lightShader2.setVec3("u_LightColor", lightColor);
-				sphere.Draw(lightShader2);
-
-				// reset camera position
-				camera.invertPitch();
-				camera.Position.y += 2 * abs(camera.Position.y - tc.waterHeight);
-
-				//unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
-
-				waterPtr->unbindFBO();
-			}
-			else {
-				//std::cout << "WARNING (main)! TILES n." << i << " ERROR! WATERPTR is nullptr!" << std::endl;
-			}
-
-		}
 		tc.updateTiles();
 		tc.drawTiles(proj, lightPosition, lightColor, fogColor);
-
-		
-
-		// water shader - refraction
-
-		//bindFrameBuffer(refractionFBO, refractionWidth, refractionHeight);
-		//glEnable(GL_CLIP_DISTANCE0);
-		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// Draw the terrain
-		// set uniform variables
-		//tshader.use();
-		//glm::mat4 refrgVP = proj * view;
-		/*
-		tshader.setVec3("gEyeWorldPos", camera.Position); // terrain shader
-		tshader.setMat4("gWorld", gWorld);
-		tshader.setMat4("gVP", refrgVP);
-		tshader.setFloat("gDispFactor", dispFactor);
-		tshader.setVec4("clipPlane", refractionClipPlane);
-		tshader.setVec3("u_LightColor", lightColor);
-		tshader.setVec3("u_LightPosition", lightPosition);
-		tshader.setVec3("u_ViewPosition", camera.Position);
-		tshader.setVec3("fogColor", fogColor);
-
-		// set textures
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, heightMap);
-		tshader.setInt("gDisplacementMap", 0);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, terrainTexture);
-		tshader.setInt("tex", 1);
-		*/
-		// finally, draw
-		//plane_.Draw(tshader);
 
 		//draw skyBox
 		glDepthFunc(GL_LEQUAL);
@@ -490,8 +316,8 @@ int main()
 		//unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
 		glDisable(GL_CLIP_DISTANCE0);
 
-		
-		
+
+
 
 
 		// draw light source
@@ -503,66 +329,6 @@ int main()
 		lightShader2.setFloat("gTessellationLevel", 5.0f);
 		lightShader2.setVec3("u_LightColor", lightColor);
 		//sphere.Draw(lightShader2);
-
-		// draw water plane
-		waterShader.use();
-
-		//glEnable(GL_BLEND);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		glm::vec3 waterPosition(0.0, waterHeight, 0.0);
-		glm::mat4 waterMatrix = glm::translate(identityMatrix, waterPosition) * gWorld;
-		waterShader.setMat4("modelMatrix", waterMatrix);
-		waterShader.setMat4("gVP", proj * view);
-
-		waterShader.setVec3("u_LightColor", lightColor);
-		waterShader.setVec3("u_LightPosition", lightPosition);
-
-		
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, reflectionText);
-		waterShader.setInt("reflectionTex", 0);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, refractionText);
-		waterShader.setInt("refractionTex", 1);
-
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, waterDUDV);
-		waterShader.setInt("waterDUDV", 2);
-
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, normalMap);
-		waterShader.setInt("normalMap", 3);
-
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, refractionDepthText);
-		waterShader.setInt("depthMap", 4);
-
-		float waveSpeed = 0.01;
-		float time = glfwGetTime();
-
-		float moveFactor = waveSpeed * time;
-		waterShader.setFloat("moveFactor", moveFactor);
-
-		waterShader.setVec3("viewPosition", camera.Position);
-
-		//waterPlane.Draw(waterShader);
-		//glDisable(GL_BLEND);
-
-
-		// draw texture planes
-		texViewShader.use();
-
-		glm::mat4 scaleMatrix = glm::scale(identityMatrix, glm::vec3(0.10, 0.10, 0.10));
-		waterMatrix = glm::translate(identityMatrix, glm::vec3(-0.50, 0.50, -1.0));
-		glm::mat4 rotation = glm::rotate(identityMatrix, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-		waterMatrix = waterMatrix * rotation * scaleMatrix;
-		
-		texViewShader.setMat4("mvpMatrix", waterMatrix);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, heightMap);
-		texViewShader.setInt("texBuff", 0);
 
 		//draw skyBox
 		glDepthFunc(GL_LEQUAL);
@@ -581,9 +347,9 @@ int main()
 		// draw texture planes
 		texViewShader.use();
 
-		scaleMatrix = glm::scale(identityMatrix, glm::vec3(0.10, 0.10, 0.10));
-		waterMatrix = glm::translate(identityMatrix, glm::vec3(-0.50, 0.50, -1.0));
-		rotation = glm::rotate(identityMatrix, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
+		glm::mat4 scaleMatrix = glm::scale(identityMatrix, glm::vec3(0.10, 0.10, 0.10));
+		glm::mat4 waterMatrix = glm::translate(identityMatrix, glm::vec3(-0.50, 0.50, -1.0));
+		glm::mat4 rotation = glm::rotate(identityMatrix, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
 		waterMatrix = waterMatrix * rotation * scaleMatrix;
 
 		texViewShader.setMat4("mvpMatrix", waterMatrix);
@@ -592,9 +358,6 @@ int main()
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, tc.tiles[0]->water->reflectionTex);
 		texViewShader.setInt("texBuff", 0);
-
-		//waterPlane.Draw(texViewShader);
-
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
@@ -605,7 +368,7 @@ int main()
 		frameTime = t2 - t1;
 		float timeToSleep = 1000.0f / MAX_FPS - (t2 - t1)*1000.0f;
 		if (timeToSleep > 0.0f) {
-			Sleep(timeToSleep);
+		//	Sleep(timeToSleep);
 		}
 		t2 = glfwGetTime();
 		frameTime = t2 - t1;
@@ -636,7 +399,7 @@ void processInput(GLFWwindow *window)
 		camera.ProcessKeyboard(LEFT, frameTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, frameTime);
-	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) 
+	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
 		wireframe = !wireframe;
 }
 

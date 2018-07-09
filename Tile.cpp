@@ -9,9 +9,7 @@ float sign(float x) {
 	else return 0.0f;
 }
 
-//Model * Tile::planeModel = new Model("resources/plane.obj", GL_PATCHES);
-
-Tile::Tile(glm::vec2 position, float scale, float dispFactor, TessellationShader * shad, TerrainGenerator * tg, Model * planeModel, unsigned int * textures) : dispFactor(dispFactor), scaleFactor(scale), shad(shad), tg(tg), position(position), planeModel(planeModel), textures(textures)
+Tile::Tile(glm::vec2 position, float scale, float dispFactor, TessellationShader * shad, Model * planeModel, unsigned int * textures) : dispFactor(dispFactor), scaleFactor(scale), shad(shad), position(position), planeModel(planeModel), textures(textures)
 {
 	glm::mat4 id;
 	glm::mat4 scaleMatrix = glm::scale(id, glm::vec3(scale, 0.0, scale));
@@ -21,26 +19,10 @@ Tile::Tile(glm::vec2 position, float scale, float dispFactor, TessellationShader
 
 	eps = glm::vec2(eps_x, eps_y);
 
-	//std::cout << eps.y << " : eps_y" << std::endl;
 
-	//position.x += eps_x;
-	//position.y += eps_y;
-
-	glm::mat4 positionMatrix = glm::translate(id, glm::vec3(position.x + eps.x, 0.0, position.y + eps.y));
+	glm::mat4 positionMatrix = glm::translate(id, glm::vec3(position.x, 0.0, position.y));
 	modelMatrix = positionMatrix * scaleMatrix;
 
-	float t1 = glfwGetTime();
-
-	heightMap = tg->generateHeightMap((position+eps)*(1.0f/(scale*tileW)));
-	float t2 = glfwGetTime();
-
-	//load texture
-	//sand = TextureFromFile("sand.jpg", "resources", false);
-	//rock = TextureFromFile("rock.jpg", "resources", false);
-	//grass = TextureFromFile("grass.jpg", "resources", false);
-	//snow = TextureFromFile("snow.jpg", "resources", false);
-
-	std::cout << "heightmap generated in : " << t2 - t1 << "s" << std::endl;
 }
 
 void Tile::drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up) {
@@ -64,13 +46,13 @@ void Tile::drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, gl
 	shad->setVec3("u_LightPosition", lightPosition);
 	shad->setVec3("u_ViewPosition", camera->Position);
 	shad->setVec3("fogColor", fogColor);
+	//shad->setFloat("tessLevel", 0.0f);
+	shad->setFloat("freq", 15.0f);
+
 
 	shad->setBool("drawFog", Tile::drawFog);
 
 	// set textures
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, heightMap);
-	shad->setInt("gDisplacementMap", 0);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, textures[0]);
 	shad->setInt("sand", 1);
@@ -88,10 +70,16 @@ void Tile::drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, gl
 	shad->setInt("snow", 4);
 
 	planeModel->Draw(*shad);
-	//glBindVertexArray(VAO);
-	//glDrawArrays(GL_PATCHES, 0, 6);
 	glDisable(GL_CLIP_DISTANCE0);
 
+}
+
+void Tile::drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up, float tessLevel) {
+	shad->setFloat("tessLevel", tessLevel);
+	shad->setBool("normals", true);
+	this->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, up);
+	shad->setFloat("tessLevel", 0.0);
+	shad->setBool("normals", true);
 }
 
 bool Tile::inTile(Camera camera) {

@@ -58,9 +58,9 @@ float InterpolatedNoise(int ind, float x, float y) {
 		v2 = SmoothedNoise(ind, integer_X + 1, integer_Y),
 		v3 = SmoothedNoise(ind, integer_X, integer_Y + 1),
 		v4 = SmoothedNoise(ind, integer_X + 1, integer_Y + 1),
-		i1 = mix(v1, v2, fractional_X),
-		i2 = mix(v3, v4, fractional_X);
-	return mix(i1, i2, fractional_Y);
+		i1 = Interpolate(v1, v2, fractional_X),
+		i2 = Interpolate(v3, v4, fractional_X);
+	return Interpolate(i1, i2, fractional_Y);
 }
 
 float perlin(float x, float y){

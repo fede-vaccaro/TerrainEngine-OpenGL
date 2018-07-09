@@ -6,15 +6,15 @@
 #include "TerrainGenerator.h"
 #include "Water.h"
 #include <camera.h>
-//static TerrainGenerator tg;
 
 class Tile
 {
 public:
-	Tile(glm::vec2 position, float scale, float disp, TessellationShader * shad, TerrainGenerator * tg, Model * planeModel, unsigned int * textures);
+	Tile(glm::vec2 position, float scale, float disp, TessellationShader * shad, Model * planeModel, unsigned int * textures);
 	virtual ~Tile();
 	void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up);
-	unsigned int heightMap;
+	void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up, float tessLevel);
+
 	glm::vec2 position, eps;
 	
 	bool inTile(Camera camera);
@@ -29,8 +29,6 @@ private:
 	unsigned int * textures;
 
 	TessellationShader * shad;
-	TerrainGenerator * tg;
-
 	glm::mat4 modelMatrix;
 };
 

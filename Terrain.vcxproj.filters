@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MathEntity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TessShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="buffers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="perlin\PerlinNoise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="perlin\CustomTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="perlin\HeightMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="perlin\heightMapThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="perlin\NoiseThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TileController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Water.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stb_image_write.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stb_image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="perlin\PerlinNoise.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="perlin\HeightMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="perlin\heightMapThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="perlin\NoiseThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="buffers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TileController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Water.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\tessControlShader.tcs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\tessEvaluationShader.tes">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\tessFragmentShader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\tessSmoothingControlShader.tcs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\tessSmoothingEvaluationShader.tes">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\tessSmoothingFragmentShader2.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\tessSmoothingVertexShader.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\tessVertexShader.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\textureFragmentShader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\waterFragmentShader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\waterFragmentShader_.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\waterVertexShader.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\lightFragmentShader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\lightVertexShader.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\skyboxFrag.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\skyboxVert.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\TerrainGeneratorVertex.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\TerrainGeneratorFragment.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\terrainTCS.tcs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\terrainTES.tes">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\terrainVERT.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

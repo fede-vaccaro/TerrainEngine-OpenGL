@@ -1,5 +1,7 @@
 #include "Water.h"
 
+const int FBW = 1280;
+const int FBH = 720;
 
 Water::Water(glm::vec2 position, Shader* shad, float scale, float height, unsigned int dudvMap, unsigned int normalMap, Model * waterPlane) : shad(shad), dudvMap(dudvMap), normalMap(normalMap), waterPlane(waterPlane) {
 	glm::mat4 identity;
@@ -8,25 +10,25 @@ Water::Water(glm::vec2 position, Shader* shad, float scale, float height, unsign
 	this->modelMatrix = transMatrix * scaleMatrix;
 
 	reflectionFBO = createFrameBuffer();
-	reflectionTex = createTextureAttachment(1280, 720);
-	reflectionDepth = createDepthTextureAttachment(1280, 720);
+	reflectionTex = createTextureAttachment(FBW, FBH);
+	reflectionDepth = createDepthTextureAttachment(FBW, FBH);
 
 	unbindFBO();
 
 	refractionFBO = createFrameBuffer();
-	refractionTex = createTextureAttachment(1280, 720);
-	refractionDepth = createDepthTextureAttachment(1280, 720);
+	refractionTex = createTextureAttachment(FBW, FBH);
+	refractionDepth = createDepthTextureAttachment(FBW, FBH);
 
 	unbindFBO();
 
 }
 
 void Water::bindReflectionFBO() {
-	bindFrameBuffer(reflectionFBO, 1280, 720);
+	bindFrameBuffer(reflectionFBO, FBW, FBH);
 }
 
 void Water::bindRefractionFBO() {
-	bindFrameBuffer(refractionFBO, 1280, 720);
+	bindFrameBuffer(refractionFBO, FBW, FBH);
 }
 void Water::draw(glm::mat4 gVP, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 viewPosition) {
 	// draw water plane
