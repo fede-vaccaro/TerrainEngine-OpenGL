@@ -43,7 +43,7 @@ void main(){
 	float floorDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
 	float waterDistance = 2.0 * near * far / (far + near - (2.0 * gl_FragCoord.z - 1.0) * (far - near));
 	float waterDepth = floorDistance - waterDistance;
-	waterDepth = clamp(waterDepth, 0.0, 1.0);
+	waterDepth = clamp(waterDepth/5.0, 0.0, 1.0);
 
 	refractionTexCoords += totalDistortion;
 	refractionTexCoords = clamp(refractionTexCoords, 0.001, 0.999);
