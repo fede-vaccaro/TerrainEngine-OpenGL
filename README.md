@@ -7,7 +7,7 @@
 * OpenGL 4
 * *An OpenGL 4 ready graphics card!*
 
-Compile them and put in *Libraries/* directory (I'll upload the compiled libraries soon). *Include/* directory is been already uploaded.
+Compile them and put in *Libraries/* directory. *Include/* directory has been already uploaded.
 
 ![Demonstrative image](/resources/gitpic.jpg)
 ![Demonstrative image](/resources/gitpic2.jpg)
