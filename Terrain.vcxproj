@@ -70,13 +70,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>Include\;$(IncludePath)</IncludePath>
-    <LibraryPath>Libraries\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)Libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LibraryPath>C:\Users\Federico\Google Drive\Uni Magistrale\Computer Graphics &amp; 3D\Terrain\Terrain\Libraries;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)Include;C:\Users\Federico\Google Drive\Uni Magistrale\Computer Graphics &amp; 3D\Terrain\Terrain\Libraries;$(LibraryPath)</LibraryPath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <IncludePath>C:\Users\Federico\Google Drive\Uni Magistrale\Computer Graphics &amp; 3D\Terrain\Terrain\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)Include;C:\Users\Federico\Google Drive\Uni Magistrale\Computer Graphics &amp; 3D\Terrain\Terrain\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
