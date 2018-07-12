@@ -1,5 +1,7 @@
 /x64/*
 /Debug/*
+!/Debug/assimp-vc140-mt.dll
+!/Debug/freetype.dll
 resources/C6W.png
 resources/D6.png
 resources/c10.png

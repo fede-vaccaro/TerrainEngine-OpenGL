@@ -3,7 +3,6 @@
 #include <model.h>
 #include "texture.h"
 #include "TessShader.h"
-#include "TerrainGenerator.h"
 #include "Water.h"
 #include <camera.h>
 

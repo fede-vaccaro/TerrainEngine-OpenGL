@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include <vector>
 #include "shader.h"
-#include "perlin/CustomTypes.h"
+#include "CustomTypes.h"
 
 class Object
 {

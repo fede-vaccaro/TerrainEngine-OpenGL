@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\Federico\Google Drive\Uni Magistrale\Computer Graphics &amp; 3D\Terrain\Terrain\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Federico\Google Drive\Uni Magistrale\Computer Graphics &amp; 3D\Terrain\Terrain\Libraries;$(LibraryPath)</LibraryPath>
+    <IncludePath>Include\;$(IncludePath)</IncludePath>
+    <LibraryPath>Libraries\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LibraryPath>C:\Users\Federico\Google Drive\Uni Magistrale\Computer Graphics &amp; 3D\Terrain\Terrain\Libraries;$(LibraryPath)</LibraryPath>
