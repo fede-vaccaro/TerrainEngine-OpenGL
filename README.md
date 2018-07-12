@@ -8,7 +8,7 @@
 * *An OpenGL 4 ready graphics card!*
 
 *Include/* directory has been already uploaded.
-Put freetype.dll and assimp-vc140-mt.dll in .exe folder.
+Put freetype.dll, assimp-vc140-mt.dll resources/ and shaders/ in .exe folder.
 
 ![Demonstrative image](/resources/gitpic.jpg)
 ![Demonstrative image](/resources/gitpic2.jpg)
