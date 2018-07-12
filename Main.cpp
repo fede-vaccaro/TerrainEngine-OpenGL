@@ -1,20 +1,17 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <shaderUtils.h>
+#include "shader.h"
 #include "TessShader.h"
 #include "texture.h"
-//#include "buffers.h"
-//#include "Object.h"
 #include "TileController.h"
+#include "Tile.h"
 
 #include <camera.h>
 #include <stb_image.h>
 #include <model.h>
 
-#include "perlin/HeightMap.h"
-#include "TerrainGenerator.h"
-#include "Tile.h"
+#include "TextArea.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -24,16 +21,16 @@
 #include <map>
 #include <stdlib.h>
 #include <iostream>
-#include <stdlib.h> 
+#include <stdlib.h>
+#include <vector>
+#include <functional>
 
+const int MAX_FPS = 144;
 
-// HEIGHT MAP & TERRAIN
-float HeightRange = 60;
-bool generateTerrain = true;
-
-const int MAX_FPS = 144,
-HEIGHT_SCENE = 200,
-WIDTH_SCENE = 200;
+TextArea * gui = 0;
+int gui_i = 0;
+int gui_el;
+float deltaMagnitude = 1.0;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -48,6 +45,8 @@ float dispFactor = 40.0;
 
 glm::vec3 startPosition(0.0f, dispFactor / 2.0, 0.0f);
 
+bool keyBools[10] = { false, false,false, false, false, false, false, false, false, false };
+
 // camera
 Camera camera(startPosition);
 float lastX = SCR_WIDTH / 2.0f;
@@ -57,6 +56,10 @@ bool firstMouse = true;
 float t1 = 0.0, t2 = 0.0, frameTime = 0.0; // time variables
 bool wireframe = false;
 glm::mat4 identityMatrix;
+
+std::vector<std::function<float()>> getters;
+std::vector<std::function< void(float)> > setters;
+
 
 int main()
 {
@@ -98,13 +101,9 @@ int main()
 		return -1;
 	}
 
-	Shader texViewShader("shaders/waterVertexShader.vert", "shaders/textureFragmentShader.frag");
 	Shader skyboxShader("shaders/skyboxVert.vert", "shaders/skyboxFrag.frag");
 	Shader waterShader("shaders/waterVertexShader.vert", "shaders/waterFragmentShader.frag");
-	Shader lightShader("shaders/lightVertexShader.vert", "lightFragmentShader.frag");
 	TessellationShader tshader("shaders/tessVertexShader.vert", "shaders/tessControlShader.tcs", "shaders/tessEvaluationShader.tes", "shaders/tessFragmentShader.frag");
-	TessellationShader tshader2("shaders/tessSmoothingVertexShader.vert", "shaders/tessSmoothingControlShader.tcs", "shaders/tessSmoothingEvaluationShader.tes", "shaders/tessSmoothingFragmentShader2.frag");
-	TessellationShader lightShader2("shaders/tessSmoothingVertexShader.vert", "shaders/tessSmoothingControlShader.tcs", "shaders/tessSmoothingEvaluationShader.tes", "shaders/lightFragmentShader.frag");
 
 	float skyboxVertices[] = {
 		// positions          
@@ -187,7 +186,7 @@ int main()
 
 	glm::vec3 fogColor(204, 224, 255);
 	fogColor /= 255.0;
-	glm::vec3 lightColor(255, 255, 153);
+	glm::vec3 lightColor(255, 255, 200);
 	lightColor /= 255.0;
 
 	float scale = 10.0f;
@@ -203,25 +202,80 @@ int main()
 		1.0f, 0.0f,  1.0f, 0.0, 1.0, 0.0, 1.0, 1.0
 	};
 
+	TextArea::setWindow(window);
+	screen scr;
+	scr.WIDTH = SCR_WIDTH;
+	scr.HEIGHT = SCR_HEIGHT;
+	TextArea::setScreen(&scr);
+
+
+
+	gui = new TextArea(10, 10, 250, 0); // l'altezza è adattata al contenuto
+	int octaves = tc.getOctaves();
+	float df = tc.getDispFactor();
+	float wh = tc.getWaterHeight();
+	float gc = tc.getGrassCoverage();
+	float f = tc.getFreq();
+	float tm = tc.getTessMultiplier();
+
+	if (gui) gui->addElement(std::string("Octaves: "), &octaves);
+	if (gui) gui->addElement(std::string("Terrain Height: "), &df);
+	if (gui) gui->addElement(std::string("Water height: "), &wh);
+	if (gui) gui->addElement(std::string("Grass coverage factor:"), &gc);
+	if (gui) gui->addElement(std::string("Frequency: "), &f);
+	if (gui) gui->addElement(std::string("Tessellation Multiplier: "), &tm);
+	if (gui) gui->addElement(std::string("Delta magnitude: "), &deltaMagnitude);
+
+
+
+	getters.push_back(0);
+	getters.push_back([&tc] { return tc.getOctaves(); });
+	getters.push_back([&tc] { return tc.getDispFactor(); });
+	getters.push_back([&tc] { return tc.getWaterHeight(); });
+	getters.push_back([&tc] { return tc.getGrassCoverage(); });
+	getters.push_back([&tc] { return tc.getFreq(); });
+	getters.push_back([&tc] { return tc.getTessMultiplier(); });
+	getters.push_back(0);
+
+	setters.push_back(0);
+	setters.push_back( [&tc](float value) { tc.setOctaves(value);       });
+	setters.push_back( [&tc](float value) { tc.setDispFactor(value);    });
+	setters.push_back( [&tc](float value) { tc.setWaterHeight(value);   });
+	setters.push_back( [&tc](float value) { tc.setGrassCoverage(value); });
+	setters.push_back( [&tc](float value) { tc.setFreq(value);          });
+	setters.push_back([&tc](float value) { tc.setTessMultiplier(value);  });
+	setters.push_back(0);
+
+	gui_el = ( setters.size() == getters.size() ? setters.size() : -1);
+
+
 	while (!glfwWindowShouldClose(window))
 	{
-
-		float xSpeed = 0.025;
-		float xOffset = xSpeed * glfwGetTime();
+		octaves = getters[1]();
+		df = getters[2]();
+		wh = getters[3]();
+		gc = getters[4]();
+		f = getters[5]();
+		tm = getters[6]();
+		//if(t1 > 5.0) setters[1](12);
 
 		t1 = glfwGetTime();
 		float degreePerSecond = 10.0f;
 		float dist = 300.0;
 
-		float x = -20.9, z = -78.6;
+		float x = -73, z = -223;
 		float angle = glm::atan(x / z);
 
-		x = cos(-angle)*dist;
-		z = sin(-angle)*dist;
-		lightPosition = glm::vec3(x, dispFactor, z); //ruotate light
+		//std::cout << camera.Position.x << " " << camera.Position.z << std::endl;
 
+		//x = cos(-angle)*dist;
+		//z = sin(-angle)*dist;
+		lightPosition = glm::vec3(x*2.0, dispFactor, z*2.0); //rotate light
+		lightPosition += camera.Position;
 		// input
 		processInput(window);
+
+		tc.updateTiles();
 
 		// render
 		glEnable(GL_DEPTH_TEST);
@@ -243,7 +297,7 @@ int main()
 
 		// Camera (View Matrix) setting
 		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
 
 
 		// set terrain matrices
@@ -251,11 +305,11 @@ int main()
 		gWorld = glm::scale(gWorld, glm::vec3(10.0, 0.0, 10.0));
 		gVP = proj * view;
 
-		Water * waterPtr = tc.tiles[0]->water;
+		Water * const waterPtr = tc.getWaterPtr();
 		if (waterPtr) {
 			camera.invertPitch();
 			//glm::vec3 cameraReflPos(camera.Position.x, reflectionCameraY, camera.Position.z);
-			camera.Position.y -= 2 * (camera.Position.y - tc.waterHeight);
+			camera.Position.y -= 2 * (camera.Position.y - tc.getWaterHeight());
 			glm::mat4 reflectionView = camera.GetViewMatrix();
 			glm::mat4 reflgVP = proj * reflectionView;
 
@@ -277,18 +331,9 @@ int main()
 			glDepthMask(GL_TRUE);
 			glDepthFunc(GL_LESS);
 
-			// draw light source
-			lightShader2.use();
-			glm::mat4 rot = glm::rotate(identityMatrix, glm::radians(-t1 * degreePerSecond), glm::vec3(0.0, 1.0, 0.0));
-			lightModel = glm::translate(idMat, lightPosition) * rot; //update light model
-			lightShader2.setMat4("gWorld", lightModel);
-			lightShader2.setMat4("gVP", reflgVP);
-			lightShader2.setFloat("gTessellationLevel", 5.0f);
-			lightShader2.setVec3("u_LightColor", lightColor);
-
 			// reset camera position
 			camera.invertPitch();
-			camera.Position.y += 2 * abs(camera.Position.y - tc.waterHeight);
+			camera.Position.y += 2 * abs(camera.Position.y - tc.getWaterHeight());
 
 			//unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
 
@@ -296,7 +341,10 @@ int main()
 		}
 
 
-		tc.updateTiles();
+
+		float wps = 0.5;
+		//tc.setWaterHeight(wps*glfwGetTime());
+	
 		tc.drawTiles(proj, lightPosition, lightColor, fogColor);
 
 		//draw skyBox
@@ -309,56 +357,17 @@ int main()
 		skyboxShader.setMat4("projection", proj);
 		glBindVertexArray(skyboxVAO);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		//glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glDepthMask(GL_TRUE);
 		glDepthFunc(GL_LESS);
 
 		//unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
 		glDisable(GL_CLIP_DISTANCE0);
 
-
-
-
-
-		// draw light source
-		lightShader2.use();
-		glm::mat4 rot = glm::rotate(identityMatrix, glm::radians(-t1 * degreePerSecond), glm::vec3(0.0, 1.0, 0.0));
-		lightModel = glm::translate(idMat, lightPosition) * rot; //update light model
-		lightShader2.setMat4("gWorld", lightModel);
-		lightShader2.setMat4("gVP", gVP);
-		lightShader2.setFloat("gTessellationLevel", 5.0f);
-		lightShader2.setVec3("u_LightColor", lightColor);
-		//sphere.Draw(lightShader2);
-
-		//draw skyBox
-		glDepthFunc(GL_LEQUAL);
-		skyboxShader.use();
-		view2 = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
-		model = glm::translate(identityMatrix, glm::vec3(0.0, -0.1, 0.0));
-		skyboxShader.setMat4("model", model);
-		skyboxShader.setMat4("view", view2);
-		skyboxShader.setMat4("projection", proj);
-		glBindVertexArray(skyboxVAO);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glDepthMask(GL_TRUE);
-		glDepthFunc(GL_LESS);
-
-		// draw texture planes
-		texViewShader.use();
-
-		glm::mat4 scaleMatrix = glm::scale(identityMatrix, glm::vec3(0.10, 0.10, 0.10));
-		glm::mat4 waterMatrix = glm::translate(identityMatrix, glm::vec3(-0.50, 0.50, -1.0));
-		glm::mat4 rotation = glm::rotate(identityMatrix, glm::radians(90.0f), glm::vec3(1.0, 0.0, 0.0));
-		waterMatrix = waterMatrix * rotation * scaleMatrix;
-
-		texViewShader.setMat4("mvpMatrix", waterMatrix);
-		texViewShader.setMat4("modelMatrix", waterMatrix);
-		texViewShader.setMat4("gVP", identityMatrix);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, tc.tiles[0]->water->reflectionTex);
-		texViewShader.setInt("texBuff", 0);
-
+		glEnable(GL_DEPTH);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		if (gui) gui->draw();
+		glDisable(GL_DEPTH);
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window);
@@ -368,7 +377,7 @@ int main()
 		frameTime = t2 - t1;
 		float timeToSleep = 1000.0f / MAX_FPS - (t2 - t1)*1000.0f;
 		if (timeToSleep > 0.0f) {
-		//	Sleep(timeToSleep);
+			Sleep(timeToSleep);
 		}
 		t2 = glfwGetTime();
 		frameTime = t2 - t1;
@@ -388,6 +397,7 @@ int main()
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 void processInput(GLFWwindow *window)
 {
+
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
@@ -399,8 +409,110 @@ void processInput(GLFWwindow *window)
 		camera.ProcessKeyboard(LEFT, frameTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, frameTime);
-	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
-		wireframe = !wireframe;
+
+	// WIREFRAME
+	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+		if (keyBools[4] == false) {
+			std::cout << "WIREFRAME" << std::endl;
+			wireframe = !wireframe;
+			keyBools[4] = true;
+		}
+	}
+	else if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE) {
+		if (keyBools[4] == true) { keyBools[4] = false; } // Non aggiungere niente qui
+	}
+	if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+		if (keyBools[7] == false) {
+			std::cout << "GUI VISIBILITY" << std::endl;
+			if (gui) gui->setVisible(!gui->getVisible());
+			keyBools[7] = true;
+		}
+	}
+	else if (glfwGetKey(window, GLFW_KEY_I) == GLFW_RELEASE) {
+		if (keyBools[7] == true) { keyBools[7] = false; } // Non aggiungere niente qui
+	}
+	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+		if (keyBools[5] == false) {
+			std::cout << "Decrease delta magnitude" << std::endl;
+			deltaMagnitude /= 10.0;
+			keyBools[5] = true;
+		}
+	}
+	else if (glfwGetKey(window, GLFW_KEY_O) == GLFW_RELEASE) {
+		if (keyBools[5] == true) { keyBools[5] = false; } // Non aggiungere niente qui
+	}
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+		if (keyBools[6] == false) {
+			std::cout << "Increase magnitude" << std::endl;
+			deltaMagnitude *= 10.0;
+			keyBools[6] = true;
+		}
+	}
+	else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE) {
+		if (keyBools[6] == true) { keyBools[6] = false; } // Non aggiungere niente qui
+	}
+
+	// DOWN KEY
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		if (keyBools[0] == false) {
+			std::cout << "DOWN ARROW PRESSED" << std::endl;
+			if(gui) gui->bind(1);
+			keyBools[0] = true;
+			gui_i = (gui_i + 1) % gui_el;
+		}
+	}
+	else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE) {
+		if (keyBools[0] == true) {
+			std::cout << "DOWN ARROW RELEASED" << std::endl;
+			keyBools[0] = false;
+		}
+	}
+	// UP ARROW KEY
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		if (keyBools[1] == false) {
+			std::cout << "UP ARROW PRESSED" << std::endl;
+			if (gui) gui->bind(-1);
+			keyBools[1] = true;
+			gui_i = (gui_i - 1) % gui_el;
+		}
+	}
+	else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_RELEASE) {
+		if (keyBools[1] == true) {
+			std::cout << "UP ARROW RELEASED" << std::endl;
+			keyBools[1] = false;
+		}
+	}
+	// LEFT ARROW KEY
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		if (keyBools[2] == false) {
+			std::cout << "LEFT ARROW PRESSED" << std::endl;
+			keyBools[2] = true;
+			float value = getters[gui_i] ? getters[gui_i]() : 0.0;
+			if (setters[gui_i] != 0) setters[gui_i](value - deltaMagnitude);
+		}
+	}
+	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE) {
+		if (keyBools[2] == true) {
+			std::cout << "LEFT ARROW RELEASED" << std::endl;
+			keyBools[2] = false;
+		}
+	}
+	// RIGHT ARROW KEY
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		if (keyBools[3] == false) {
+			std::cout << "RIGHT ARROW PRESSED" << std::endl;
+			keyBools[3] = true;
+			std::cout << gui_i << std::endl;
+			if (setters[gui_i] != 0) { setters[gui_i](getters[gui_i]() + deltaMagnitude); }
+
+		}
+	}
+	else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE) {
+		if (keyBools[3] == true) {
+			std::cout << "RIGHT ARROW RELEASED" << std::endl;
+			keyBools[3] = false;
+		}
+	}
 }
 
 

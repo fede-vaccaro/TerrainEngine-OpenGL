@@ -20,12 +20,47 @@ public:
 	bool inTile(Camera camera);
 	static const int tileW = 5.0;
 	Model * planeModel;
-	Water * water;
 
-	void setWater(Water * w);
+	void setOctaves(int oct) {
+		if (oct > 0) octaves = oct;
+	}
+
+	void setFreq(float freq) {
+		if (freq > 0.0f) { this->frequency = freq; }
+	}
+
+	void setDispFactor(float disp) {
+		if (disp > 0.0f) { dispFactor = disp; }
+	}
+
+	void setScale(float scale) {
+		glm::mat4 id;
+		glm::mat4 scaleMatrix = glm::scale(id, glm::vec3(scale, 0.0, scale));
+		glm::mat4 positionMatrix = glm::translate(id, glm::vec3(position.x*scale/this->scaleFactor, 0.0, position.y*scale / this->scaleFactor));
+		modelMatrix = positionMatrix * scaleMatrix;
+		scaleFactor = scale;
+	}
+
+	void setGrassCoverage(float gc) {
+		grassCoverage = gc;
+	}
+
+	void setTessMultiplier(float tm) {
+		if (tm > 0.0) tessMultiplier = tm;
+	}
+
+	int getOctaves() const { return octaves; }
+	float getFreq() const { return frequency; }
+	float getDispFactor() const { return dispFactor; }
+	float getScale() const { return scaleFactor; }
+	float getGrassCoverage() const { return grassCoverage; }
+	float getTessMultiplier() const { return tessMultiplier; }
+
 	static bool drawFog;
 private:
-	float dispFactor, scaleFactor;
+	float dispFactor, scaleFactor, frequency, grassCoverage, tessMultiplier;
+	int octaves;
+
 	unsigned int * textures;
 
 	TessellationShader * shad;

@@ -13,15 +13,13 @@ Tile::Tile(glm::vec2 position, float scale, float dispFactor, TessellationShader
 {
 	glm::mat4 id;
 	glm::mat4 scaleMatrix = glm::scale(id, glm::vec3(scale, 0.0, scale));
-	float eps_x = 0.0f, eps_y = 0.0f;
-	if (abs(position.x) > 0.0f) eps_x = -sign(position.x)*0.02f*scale*3.0f;
-	if (abs(position.y) > 0.0f) eps_y = -sign(position.y)*0.02*scale*3.0;
-
-	eps = glm::vec2(eps_x, eps_y);
-
-
 	glm::mat4 positionMatrix = glm::translate(id, glm::vec3(position.x, 0.0, position.y));
 	modelMatrix = positionMatrix * scaleMatrix;
+
+	octaves = 10;
+	frequency = 10.0;
+	grassCoverage = 0.75;
+	tessMultiplier = 2.0;
 
 }
 
@@ -39,7 +37,7 @@ void Tile::drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, gl
 	shad->setMat4("gVP", gVP);
 	shad->setFloat("gDispFactor", dispFactor);
 	float correction = 0.0f;
-	if (up < 0.0f) correction = 0.050f;
+	if (up < 0.0f) correction = 0.0025f * dispFactor;
 	glm::vec4 clipPlane(0.0, 1.0, 0.0, -waterHeight -correction);
 	shad->setVec4("clipPlane", clipPlane*up);
 	shad->setVec3("u_LightColor", lightColor);
@@ -47,10 +45,16 @@ void Tile::drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, gl
 	shad->setVec3("u_ViewPosition", camera->Position);
 	shad->setVec3("fogColor", fogColor);
 	//shad->setFloat("tessLevel", 0.0f);
-	shad->setFloat("freq", 15.0f);
+	shad->setInt("octaves", octaves);
+	shad->setFloat("freq", frequency);
+	shad->setFloat("u_grassCoverage", grassCoverage);
+	shad->setFloat("waterHeight", waterHeight);
+	shad->setFloat("tessMultiplier", tessMultiplier);
 
 
+	shad->setBool("normals", true);
 	shad->setBool("drawFog", Tile::drawFog);
+
 
 	// set textures
 	glActiveTexture(GL_TEXTURE1);
@@ -107,10 +111,6 @@ bool Tile::inTile(Camera camera) {
 
 	return result;
 
-}
-
-void Tile::setWater(Water * w) {
-	this->water = w;
 }
 
 

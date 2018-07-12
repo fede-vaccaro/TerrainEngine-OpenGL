@@ -1,7 +1,7 @@
 #pragma once
-
+#include <glad/glad.h>
 #include <vector>
-#include <shaderUtils.h>
+#include "shader.h"
 #include "perlin/CustomTypes.h"
 
 class Object

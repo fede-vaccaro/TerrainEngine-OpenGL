@@ -73,6 +73,11 @@
     <IncludePath>C:\Users\Federico\Google Drive\Uni Magistrale\Computer Graphics &amp; 3D\Terrain\Terrain\Include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\Federico\Google Drive\Uni Magistrale\Computer Graphics &amp; 3D\Terrain\Terrain\Libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LibraryPath>C:\Users\Federico\Google Drive\Uni Magistrale\Computer Graphics &amp; 3D\Terrain\Terrain\Libraries;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <IncludePath>C:\Users\Federico\Google Drive\Uni Magistrale\Computer Graphics &amp; 3D\Terrain\Terrain\Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -81,7 +86,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -100,10 +105,15 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;freetype.lib;MSVCRT.LIB;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -122,15 +132,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="buffers.h" />
-    <ClInclude Include="MathEntity.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="perlin\CustomTypes.h" />
-    <ClInclude Include="perlin\HeightMap.h" />
-    <ClInclude Include="perlin\heightMapThread.h" />
-    <ClInclude Include="perlin\NoiseThread.h" />
-    <ClInclude Include="perlin\PerlinNoise.h" />
-    <ClInclude Include="TerrainGenerator.h" />
+    <ClInclude Include="shader.h" />
     <ClInclude Include="TessShader.h" />
+    <ClInclude Include="TextArea.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="TileController.h" />
@@ -141,39 +147,25 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Object.cpp" />
-    <ClCompile Include="perlin\HeightMap.cpp" />
-    <ClCompile Include="perlin\heightMapThread.cpp" />
-    <ClCompile Include="perlin\NoiseThread.cpp" />
-    <ClCompile Include="perlin\PerlinNoise.cpp" />
+    <ClCompile Include="shader.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="stb_image_write.cpp" />
-    <ClCompile Include="TerrainGenerator.cpp" />
+    <ClCompile Include="TextArea.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="Tile.cpp" />
     <ClCompile Include="TileController.cpp" />
     <ClCompile Include="Water.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\lightFragmentShader.frag" />
-    <None Include="shaders\lightVertexShader.vert" />
     <None Include="shaders\skyboxFrag.frag" />
     <None Include="shaders\skyboxVert.vert" />
-    <None Include="shaders\TerrainGeneratorFragment.frag" />
-    <None Include="shaders\TerrainGeneratorVertex.vert" />
-    <None Include="shaders\terrainTCS.tcs" />
-    <None Include="shaders\terrainTES.tes" />
-    <None Include="shaders\terrainVERT.vert" />
     <None Include="shaders\tessControlShader.tcs" />
     <None Include="shaders\tessEvaluationShader.tes" />
     <None Include="shaders\tessFragmentShader.frag" />
-    <None Include="shaders\tessSmoothingControlShader.tcs" />
-    <None Include="shaders\tessSmoothingEvaluationShader.tes" />
-    <None Include="shaders\tessSmoothingFragmentShader2.frag" />
-    <None Include="shaders\tessSmoothingVertexShader.vert" />
     <None Include="shaders\tessVertexShader.vert" />
-    <None Include="shaders\textureFragmentShader.frag" />
+    <None Include="shaders\TextArea.frag" />
+    <None Include="shaders\TextArea.vert" />
     <None Include="shaders\waterFragmentShader.frag" />
-    <None Include="shaders\waterFragmentShader_.frag" />
     <None Include="shaders\waterVertexShader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

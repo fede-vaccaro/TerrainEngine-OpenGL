@@ -178,7 +178,7 @@ void Object::drawObject()
 		glDrawArrays(drawMode, 0, size);
 	}
 	else {
-		std::cout << "DRAWING" << std::endl;
+		//std::cout << "DRAWING" << std::endl;
 		glDrawArrays(drawMode, 0, size);
 	}
 	glBindVertexArray(0);

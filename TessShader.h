@@ -1,5 +1,5 @@
 #pragma once
-#include "shaderUtils.h"
+#include "shader.h"
 class TessellationShader : public Shader {
 public:
 	TessellationShader(const char* vertexPath, const char* tessControlPath, const char* tessEvalPath, const char* fragmentPath) : Shader(vertexPath, fragmentPath) {

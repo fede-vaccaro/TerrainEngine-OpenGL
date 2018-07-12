@@ -20,16 +20,79 @@ public:
 	Model * planeModel, * waterModel;
 	unsigned int * textures, normalMap, dudvMap;
 	std::vector<Tile*> tiles;
-	float waterHeight;
+
+	void setWaterHeight(float height) {
+		waterHeight = height;
+		waterPtr->setPosition(tiles[C]->position, scale*3.0, waterHeight);
+	}
+
+	float getWaterHeight() const { return waterHeight; };
+
+	void setOctaves(int o) {
+		for (int i = 0; i < tiles.size(); i++) {
+			tiles[i]->setOctaves(o);
+		}
+	}
+
+	int getOctaves() const {
+		return tiles[0]->getOctaves();
+	}
+
+	void setFreq(float f) {
+		for (int i = 0; i < tiles.size(); i++) {
+			tiles[i]->setFreq(f);
+		}
+	}
+
+	float getFreq() const {
+		return tiles[0]->getFreq();
+	}
+
+	void setDispFactor(float df) {
+		for (int i = 0; i < tiles.size(); i++) {
+			tiles[i]->setDispFactor(df);
+		}
+		this->disp = df;
+	}
+
+	float getDispFactor() const{
+		return disp;
+	}
+
+	void setGrassCoverage(float gc) {
+		for (int i = 0; i < tiles.size(); i++) {
+			tiles[i]->setGrassCoverage(gc);
+		}
+	}
+
+	float getGrassCoverage() const {
+		return tiles[0]->getGrassCoverage();
+	}
+
+	void setTessMultiplier(float tm) {
+		for (int i = 0; i < tiles.size(); i++) {
+			tiles[i]->setTessMultiplier(tm);
+		}
+	}
+
+	float getTessMultiplier() const {
+		return tiles[0]->getTessMultiplier();
+	}
+
+	Water * const getWaterPtr() { return waterPtr; }
+
 
 private:
+	Water * waterPtr;
 	Camera * camera;
-	float scale, disp;
+	float scale, disp, waterHeight;
 	TessellationShader * shad;
 	Shader * waterShader;
 	glm::vec2 * position;
 
 	void changeTiles(tPosition currentTile);
+	void reset();
+
 
 	std::string inline direction(tPosition pos) {
 		switch (pos)

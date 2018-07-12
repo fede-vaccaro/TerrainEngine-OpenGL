@@ -26,8 +26,8 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 	this->textures = new unsigned int[4];
 	textures[0] = TextureFromFile("sand.jpg", "resources", false);
 	textures[1] = TextureFromFile("grass.jpg", "resources", false);
-	textures[2] = TextureFromFile("rock.jpg", "resources", false);
-	textures[3] = TextureFromFile("snow.jpg", "resources", false);
+	textures[2] = TextureFromFile("rock4.jpg", "resources", false);
+	textures[3] = TextureFromFile("snow2.jpg", "resources", false);
 
 	
 	dudvMap = TextureFromFile("waterDUDV.png", "resources", false);
@@ -38,14 +38,12 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 	for (int i = 0; i < totTiles; i++) {
 		tiles[i] = new Tile(position[i], scale, disp, shad, planeModel, textures);
 	}
-	tiles[C]->setWater(new Water(tiles[C]->position, waterShader, scale*3.0, waterHeight, dudvMap, normalMap, waterModel));
+	waterPtr = new Water(tiles[C]->position, waterShader, scale*3.0, waterHeight, dudvMap, normalMap, waterModel);
 
 };
 
 void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor) {
 	
-	Water * waterPtr = tiles[C]->water;
-
 	// reflection
 	waterPtr->bindReflectionFBO();
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -100,15 +98,24 @@ void TileController::updateTiles() {
 
 
 }
+void TileController::reset() {
+	int octaves = this->getOctaves();
+	float freq = this->getFreq();
+	float grassCoverage = this->getGrassCoverage();
+	float dispFactor = this->getDispFactor();
+	float tessMultiplier = this->getTessMultiplier();
+
+	setOctaves(octaves); 
+	setFreq(freq);
+	setGrassCoverage(grassCoverage); 
+	setDispFactor(dispFactor);
+	setTessMultiplier(tessMultiplier);
+}
 
 void TileController::changeTiles(tPosition currentTile) {
 	if (currentTile == N) {
 
 		std::cout << "CHANGING TILES: NORTH" << std::endl;
-
-		Water * waterPtr = tiles[C]->water;
-		tiles[C]->water = 0;
-
 
 		tiles[SE] = tiles[E];
 		tiles[SW] = tiles[W];
@@ -118,7 +125,6 @@ void TileController::changeTiles(tPosition currentTile) {
 		tiles[C] = tiles[N]; //to replace
 		tiles[W] = tiles[NW]; //to replace
 
-		tiles[C]->water = waterPtr;
 		waterPtr->setPosition(tiles[C]->position + tiles[C]->eps, scale*3.0, waterHeight);
 
 		Tile * t1 = tiles[NE], *t2 = tiles[N], *t3 = tiles[NW];
@@ -131,13 +137,10 @@ void TileController::changeTiles(tPosition currentTile) {
 		tiles[N] = new Tile(t2->position + position[N] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
 
 		tiles[NW] = new Tile(t3->position + position[N] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
-
+		this->reset();
 	}
 	else if (currentTile == S) {
 		std::cout << "CHANGING TILES: SOUTH" << std::endl;
-
-		Water * waterPtr = tiles[C]->water;
-		tiles[C]->water = 0;
 
 		tiles[NE] = tiles[E];
 		tiles[N] = tiles[C];
@@ -148,7 +151,6 @@ void TileController::changeTiles(tPosition currentTile) {
 		tiles[C] = tiles[S]; //S to replace
 		tiles[W] = tiles[SW]; //SW to replace
 
-		tiles[C]->water = waterPtr;
 		waterPtr->setPosition(tiles[C]->position + tiles[C]->eps, scale*3.0, waterHeight);
 
 		Tile * t1 = tiles[SE], *t2 = tiles[S], *t3 = tiles[SW];
@@ -160,13 +162,10 @@ void TileController::changeTiles(tPosition currentTile) {
 		tiles[S] = new Tile(t2->position + position[S] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
 
 		tiles[SW] = new Tile(t3->position + position[S] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
-
+		this->reset();
 	}
 	else if (currentTile == E) {
 		std::cout << "CHANGING TILES: EAST" << std::endl;
-
-		Water * waterPtr = tiles[C]->water;
-		tiles[C]->water = 0;
 
 		tiles[NW] = tiles[N];
 		tiles[W] = tiles[C];
@@ -176,7 +175,6 @@ void TileController::changeTiles(tPosition currentTile) {
 		tiles[C] = tiles[E]; //E to repleace
 		tiles[S] = tiles[SE]; //SE to repleace
 
-		tiles[C]->water = waterPtr;
 		waterPtr->setPosition(tiles[C]->position + tiles[C]->eps, scale*3.0, waterHeight);
 
 		Tile * t1 = tiles[NE], *t2 = tiles[E], *t3 = tiles[SE];
@@ -188,13 +186,10 @@ void TileController::changeTiles(tPosition currentTile) {
 		tiles[E] = new Tile(t2->position + position[E] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
 
 		tiles[SE] = new Tile(t3->position + position[E] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
-
+		this->reset();
 	}
 	else if (currentTile == W) {
 		std::cout << "CHANGING TILES: WEST" << std::endl;
-
-		Water * waterPtr = tiles[C]->water;
-		tiles[C]->water = 0;
 
 		tiles[NE] = tiles[N];
 		tiles[E] = tiles[C];
@@ -204,7 +199,6 @@ void TileController::changeTiles(tPosition currentTile) {
 		tiles[C] = tiles[W]; //W to repleace
 		tiles[S] = tiles[SW]; //SW to repleace
 
-		tiles[C]->water = waterPtr;
 		waterPtr->setPosition(tiles[C]->position + tiles[C]->eps, scale*3.0, waterHeight);
 
 		Tile * t1 = tiles[NW], *t2 = tiles[W], *t3 = tiles[SW];
@@ -216,9 +210,8 @@ void TileController::changeTiles(tPosition currentTile) {
 		tiles[W] = new Tile(t2->position + position[W] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
 
 		tiles[SW] = new Tile(t3->position + position[W] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
-
+		this->reset();
 	}
-
 }
 
 

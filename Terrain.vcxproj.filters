@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MathEntity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TessShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -27,25 +24,10 @@
     <ClInclude Include="buffers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="perlin\PerlinNoise.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="perlin\CustomTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="perlin\HeightMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="perlin\heightMapThread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="perlin\NoiseThread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Tile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TerrainGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TileController.h">
@@ -55,6 +37,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Water.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextArea.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -71,22 +59,7 @@
     <ClCompile Include="stb_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="perlin\PerlinNoise.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="perlin\HeightMap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="perlin\heightMapThread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="perlin\NoiseThread.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Tile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TerrainGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="buffers.cpp">
@@ -104,6 +77,12 @@
     <ClCompile Include="Water.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TextArea.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\tessControlShader.tcs">
@@ -115,37 +94,13 @@
     <None Include="shaders\tessFragmentShader.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\tessSmoothingControlShader.tcs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\tessSmoothingEvaluationShader.tes">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\tessSmoothingFragmentShader2.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\tessSmoothingVertexShader.vert">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="shaders\tessVertexShader.vert">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\textureFragmentShader.frag">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\waterFragmentShader.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\waterFragmentShader_.frag">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="shaders\waterVertexShader.vert">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\lightFragmentShader.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\lightVertexShader.vert">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\skyboxFrag.frag">
@@ -154,19 +109,10 @@
     <None Include="shaders\skyboxVert.vert">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\TerrainGeneratorVertex.vert">
+    <None Include="shaders\TextArea.vert">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\TerrainGeneratorFragment.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\terrainTCS.tcs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\terrainTES.tes">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\terrainVERT.vert">
+    <None Include="shaders\TextArea.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

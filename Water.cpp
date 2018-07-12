@@ -1,8 +1,5 @@
 #include "Water.h"
 
-const int FBW = 1280;
-const int FBH = 720;
-
 Water::Water(glm::vec2 position, Shader* shad, float scale, float height, unsigned int dudvMap, unsigned int normalMap, Model * waterPlane) : shad(shad), dudvMap(dudvMap), normalMap(normalMap), waterPlane(waterPlane) {
 	glm::mat4 identity;
 	glm::mat4 scaleMatrix = glm::scale(identity, glm::vec3(scale, scale, scale));
@@ -63,7 +60,7 @@ void Water::draw(glm::mat4 gVP, glm::vec3 lightPosition, glm::vec3 lightColor, g
 	glBindTexture(GL_TEXTURE_2D, refractionDepth);
 	shad->setInt("depthMap", 4);
 
-	float waveSpeed = 0.01;
+	float waveSpeed = 0.005;
 	float time = glfwGetTime();
 
 	float moveFactor = waveSpeed * time;
@@ -76,10 +73,7 @@ void Water::draw(glm::mat4 gVP, glm::vec3 lightPosition, glm::vec3 lightColor, g
 }
 
 void Water::unbindFBO() {
-	const int SCR_WIDTH = 1920;
-	const int SCR_HEIGHT = 1080;
-	unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
-
+	unbindCurrentFrameBuffer(SCR_WIDTH_, SCR_HEIGHT_);
 }
 
 

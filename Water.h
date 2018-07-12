@@ -1,7 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_access.hpp>
 #include <model.h>
-#include <shaderUtils.h>
+#include "shader.h"
 #include "buffers.h"
 #include <GLFW/glfw3.h>
 
@@ -14,7 +15,6 @@ public:
 	void bindRefractionFBO();
 	void bindReflectionFBO();
 	void unbindFBO();
-	unsigned int reflectionFBO, reflectionTex, reflectionDepth;
 
 	void setPosition(glm::vec2 position, float scale, float height) {
 		glm::mat4 identity;
@@ -23,8 +23,21 @@ public:
 		this->modelMatrix = transMatrix * scaleMatrix;
 	}
 
+	void setHeight(float height) {
+		float scale = modelMatrix[0][0];
+		float position_x = modelMatrix[3][1];
+		float position_z = modelMatrix[3][2];
+		std::cout << position_x << " " << position_z << std::endl;
+
+		glm::mat4 identity;
+		glm::mat4 scaleMatrix = glm::scale(identity, glm::vec3(scale, scale, scale));
+		glm::mat4 transMatrix = glm::translate(identity, glm::vec3(position_x, height, position_z));
+		this->modelMatrix = transMatrix * scaleMatrix;
+	}
+
 private:
 
+	unsigned int reflectionFBO, reflectionTex, reflectionDepth;
 	unsigned int refractionFBO, refractionTex, refractionDepth;
 	unsigned int dudvMap, normalMap;
 	glm::mat4 modelMatrix;

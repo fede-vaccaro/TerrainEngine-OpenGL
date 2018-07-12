@@ -13,7 +13,7 @@
 
 
 #include <mesh.h>
-#include <shaderUtils.h>
+#include "shader.h"
 
 #include <string>
 #include <fstream>

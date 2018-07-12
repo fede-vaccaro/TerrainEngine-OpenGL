@@ -19,7 +19,7 @@ uniform sampler2D depthMap;
 
 out vec4 FragColor;
 
-const float distFactor = 0.008;
+const float distFactor = 0.015;
 
 void main(){
 	vec2 ndc = (clipSpaceCoords.xy/clipSpaceCoords.w)/2.0 + 0.5;
@@ -38,12 +38,12 @@ void main(){
 	vec2 refractionTexCoords = ndc;
 	
 	float near = 0.1;
-	float far = 100.0;
+	float far = 1000.0;
 	float depth = texture(depthMap, refractionTexCoords).r;
 	float floorDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
 	float waterDistance = 2.0 * near * far / (far + near - (2.0 * gl_FragCoord.z - 1.0) * (far - near));
 	float waterDepth = floorDistance - waterDistance;
-	waterDepth = clamp(waterDepth/5.0, 0.0, 1.0);
+	waterDepth = clamp(waterDepth/15.0, 0.0, 1.0);
 
 	refractionTexCoords += totalDistortion;
 	refractionTexCoords = clamp(refractionTexCoords, 0.001, 0.999);
@@ -52,7 +52,7 @@ void main(){
 
 	vec3 toCameraVector =  position.xyz - cameraPosition;
 	float fresnelFactor = max(dot(normalize(toCameraVector), vec3(0.0, 1.0, 0.0)), 0.0);
-	fresnelFactor = pow(fresnelFactor, 0.75);
+	fresnelFactor = pow(fresnelFactor, 2.0);
 	vec4 refr_reflCol = mix(reflectionColor, refractionColor, fresnelFactor);
 
 	// calculate diffuse illumination
@@ -67,11 +67,11 @@ void main(){
 	vec3 diffuse = diffuseFactor * vec3(1.0);
 
 	// calculate specular illumination 
-	float specularFactor = 0.05f;
+	float specularFactor = 1.2f;
 	vec3 viewDir = normalize(cameraPosition - position.xyz);
 	vec3 reflectDir = reflect(-lightDir, norm);  
-	float spec = pow(max(dot(-viewDir, reflectDir), 0.0), 64.0);
-	vec3 specular = spec * u_LightColor * specularFactor * waterDepth;  
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64.0);
+	vec3 specular = spec * u_LightColor * waterDepth * specularFactor;  
 
 
 	vec4 color = vec4(0, 154, 255, 255)/255.0;
