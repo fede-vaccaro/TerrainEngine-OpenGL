@@ -25,6 +25,23 @@
 #include <vector>
 #include <functional>
 
+void clear() {
+	COORD topLeft = { 0, 0 };
+	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_SCREEN_BUFFER_INFO screen;
+	DWORD written;
+
+	GetConsoleScreenBufferInfo(console, &screen);
+	FillConsoleOutputCharacterA(
+		console, ' ', screen.dwSize.X * screen.dwSize.Y, topLeft, &written
+	);
+	FillConsoleOutputAttribute(
+		console, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE,
+		screen.dwSize.X * screen.dwSize.Y, topLeft, &written
+	);
+	SetConsoleCursorPosition(console, topLeft);
+}
+
 const int MAX_FPS = 144;
 
 TextArea * gui = 0;
@@ -46,6 +63,7 @@ float dispFactor = 40.0;
 glm::vec3 startPosition(0.0f, dispFactor / 2.0, 0.0f);
 
 bool keyBools[10] = { false, false,false, false, false, false, false, false, false, false };
+bool updateShell = true;
 
 // camera
 Camera camera(startPosition);
@@ -257,8 +275,19 @@ int main()
 		gc = getters[4]();
 		f = getters[5]();
 		tm = getters[6]();
-		//if(t1 > 5.0) setters[1](12);
+		float dm = deltaMagnitude;
 
+		if (updateShell) {
+			clear();
+			std::cout << (gui_i == 1 ? "->" : "  ") << "Octaves: " << octaves << std::endl;
+			std::cout << (gui_i == 2 ? "->" : "  ") << "Terrain Height : " << df << std::endl;
+			std::cout << (gui_i == 3 ? "->" : "  ") << "Water height: " << wh << std::endl;
+			std::cout << (gui_i == 4 ? "->" : "  ") << "Grass coverage factor:" << gc << std::endl;
+			std::cout << (gui_i == 5 ? "->" : "  ") << "Frequency: " << f << std::endl;
+			std::cout << (gui_i == 6 ? "->" : "  ") << "Tessellation Multiplier: " << tm << std::endl;
+			std::cout << (gui_i == 7 ? "->" : "  ") << "Delta magnitude: " << dm << std::endl;
+			updateShell = false;
+		}
 		t1 = glfwGetTime();
 		float degreePerSecond = 10.0f;
 		float dist = 300.0;
@@ -413,7 +442,7 @@ void processInput(GLFWwindow *window)
 	// WIREFRAME
 	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
 		if (keyBools[4] == false) {
-			std::cout << "WIREFRAME" << std::endl;
+			//std::cout << "WIREFRAME" << std::endl;
 			wireframe = !wireframe;
 			keyBools[4] = true;
 		}
@@ -423,7 +452,7 @@ void processInput(GLFWwindow *window)
 	}
 	if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
 		if (keyBools[7] == false) {
-			std::cout << "GUI VISIBILITY" << std::endl;
+			//std::cout << "GUI VISIBILITY" << std::endl;
 			if (gui) gui->setVisible(!gui->getVisible());
 			keyBools[7] = true;
 		}
@@ -433,83 +462,90 @@ void processInput(GLFWwindow *window)
 	}
 	if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
 		if (keyBools[5] == false) {
-			std::cout << "Decrease delta magnitude" << std::endl;
+			//std::cout << "Decrease delta magnitude" << std::endl;
 			deltaMagnitude /= 10.0;
 			keyBools[5] = true;
+
 		}
 	}
 	else if (glfwGetKey(window, GLFW_KEY_O) == GLFW_RELEASE) {
-		if (keyBools[5] == true) { keyBools[5] = false; } // Non aggiungere niente qui
+		if (keyBools[5] == true) { keyBools[5] = false;
+		updateShell = true; } // Non aggiungere niente qui
 	}
 	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
 		if (keyBools[6] == false) {
-			std::cout << "Increase magnitude" << std::endl;
+			//std::cout << "Increase magnitude" << std::endl;
 			deltaMagnitude *= 10.0;
 			keyBools[6] = true;
 		}
 	}
 	else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE) {
-		if (keyBools[6] == true) { keyBools[6] = false; } // Non aggiungere niente qui
+		if (keyBools[6] == true) { keyBools[6] = false; updateShell = true;
+		} // Non aggiungere niente qui
 	}
 
 	// DOWN KEY
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
 		if (keyBools[0] == false) {
-			std::cout << "DOWN ARROW PRESSED" << std::endl;
+			//std::cout << "DOWN ARROW PRESSED" << std::endl;
 			if(gui) gui->bind(1);
 			keyBools[0] = true;
 			gui_i = (gui_i + 1) % gui_el;
+			updateShell = true;
 		}
 	}
 	else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE) {
 		if (keyBools[0] == true) {
-			std::cout << "DOWN ARROW RELEASED" << std::endl;
+			//std::cout << "DOWN ARROW RELEASED" << std::endl;
 			keyBools[0] = false;
 		}
 	}
 	// UP ARROW KEY
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
 		if (keyBools[1] == false) {
-			std::cout << "UP ARROW PRESSED" << std::endl;
+			//std::cout << "UP ARROW PRESSED" << std::endl;
 			if (gui) gui->bind(-1);
 			keyBools[1] = true;
 			gui_i = (gui_i - 1) % gui_el;
+			updateShell = true;
 		}
 	}
 	else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_RELEASE) {
 		if (keyBools[1] == true) {
-			std::cout << "UP ARROW RELEASED" << std::endl;
+			//std::cout << "UP ARROW RELEASED" << std::endl;
 			keyBools[1] = false;
 		}
 	}
 	// LEFT ARROW KEY
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
 		if (keyBools[2] == false) {
-			std::cout << "LEFT ARROW PRESSED" << std::endl;
+			//std::cout << "LEFT ARROW PRESSED" << std::endl;
 			keyBools[2] = true;
 			float value = getters[gui_i] ? getters[gui_i]() : 0.0;
 			if (setters[gui_i] != 0) setters[gui_i](value - deltaMagnitude);
+			updateShell = true;
 		}
 	}
 	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE) {
 		if (keyBools[2] == true) {
-			std::cout << "LEFT ARROW RELEASED" << std::endl;
+			//std::cout << "LEFT ARROW RELEASED" << std::endl;
 			keyBools[2] = false;
 		}
 	}
 	// RIGHT ARROW KEY
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
 		if (keyBools[3] == false) {
-			std::cout << "RIGHT ARROW PRESSED" << std::endl;
+			//std::cout << "RIGHT ARROW PRESSED" << std::endl;
 			keyBools[3] = true;
 			std::cout << gui_i << std::endl;
 			if (setters[gui_i] != 0) { setters[gui_i](getters[gui_i]() + deltaMagnitude); }
+			updateShell = true;
 
 		}
 	}
 	else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE) {
 		if (keyBools[3] == true) {
-			std::cout << "RIGHT ARROW RELEASED" << std::endl;
+			//std::cout << "RIGHT ARROW RELEASED" << std::endl;
 			keyBools[3] = false;
 		}
 	}
