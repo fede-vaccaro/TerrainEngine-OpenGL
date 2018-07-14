@@ -167,9 +167,18 @@ vec4 getTexture(vec3 normal){
 
 void main()
 {
+	// calculate fog color 
+	vec2 u_FogDist = vec2(40.0, 80.0);
+	float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
+
+	bool normals_fog = true;
+	float eps = 0.1;
+	if(fogFactor >= 0.0 && fogFactor < eps){
+		normals_fog = false;
+	}
 	
 	vec3 n; 
-	if(normals){
+	if(normals && normals_fog){
 		n = computeNormals(WorldPos);
 	}else{
 		n = vec3(0,1,0);
@@ -180,11 +189,6 @@ void main()
 	vec3 specular = specular(n);
 
 	vec4 heightColor = getTexture(n);
-
-
-	// calculate fog color 
-	vec2 u_FogDist = vec2(40.0, 80.0);
-	float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
 
 	// putting all together
     vec4 color = heightColor*vec4((ambient + specular + diffuse)*vec3(1.0) , 1.0f);
