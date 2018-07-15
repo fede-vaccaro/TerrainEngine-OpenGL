@@ -22,7 +22,7 @@ out vec4 FragColor;
 const float distFactor = 0.025;
 
 void main(){
-	float grain = 50.0;
+	float grain = 40.0;
 	vec2 ndc = (clipSpaceCoords.xy/clipSpaceCoords.w)/2.0 + 0.5;
 	vec2 distortion1 = texture(waterDUDV, vec2(TexCoords.x + moveFactor, TexCoords.y)*grain).rg*2.0 - 1.0;
 	vec2 distortion2 = texture(waterDUDV, vec2(TexCoords.x + moveFactor, TexCoords.y - moveFactor)*grain).rg*2.0 - 1.0;
@@ -44,7 +44,7 @@ void main(){
 	float floorDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
 	float waterDistance = 2.0 * near * far / (far + near - (2.0 * gl_FragCoord.z - 1.0) * (far - near));
 	float waterDepth = floorDistance - waterDistance;
-	waterDepth = clamp(waterDepth/15.0, 0.0, 1.0);
+	waterDepth = clamp(waterDepth/5.0, 0.0, 1.0);
 
 	refractionTexCoords += totalDistortion;
 	refractionTexCoords = clamp(refractionTexCoords, 0.001, 0.999);

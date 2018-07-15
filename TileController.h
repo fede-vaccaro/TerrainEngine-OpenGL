@@ -78,11 +78,25 @@ public:
 	float getTessMultiplier() const {
 		return tiles[0]->getTessMultiplier();
 	}
+	
+	bool snowy(glm::vec3 &lightColor) {
+		if (snowy_) {
+			lightColor = glm::vec3(220, 255, 255) / 255.0f;
+		}
+		else {
+			lightColor = glm::vec3(255, 255, 200) / 255.0f;
+		}
+		std::swap(textures[1], textures[3]);
+		std::swap(textures[2], textures[5]);
+		this->snowy_ = !snowy_;
+		return !(this->snowy_) ;
+	}
 
 	Water * const getWaterPtr() { return waterPtr; }
 
 
 private:
+	bool snowy_ = true;
 	Water * waterPtr;
 	Camera * camera;
 	float scale, disp, waterHeight;

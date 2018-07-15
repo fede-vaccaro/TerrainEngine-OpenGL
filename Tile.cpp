@@ -16,7 +16,7 @@ Tile::Tile(glm::vec2 position, float scale, float dispFactor, TessellationShader
 	glm::mat4 positionMatrix = glm::translate(id, glm::vec3(position.x, 0.0, position.y));
 	modelMatrix = positionMatrix * scaleMatrix;
 
-	octaves = 10;
+	octaves = 9;
 	frequency = 10.0;
 	grassCoverage = 0.75;
 	tessMultiplier = 2.0;

@@ -60,7 +60,7 @@ void Water::draw(glm::mat4 gVP, glm::vec3 lightPosition, glm::vec3 lightColor, g
 	glBindTexture(GL_TEXTURE_2D, refractionDepth);
 	shad->setInt("depthMap", 4);
 
-	float waveSpeed = 0.005;
+	float waveSpeed = 0.0025;
 	float time = glfwGetTime();
 
 	float moveFactor = waveSpeed * time;

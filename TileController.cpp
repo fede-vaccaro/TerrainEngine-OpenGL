@@ -23,12 +23,12 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 	planeModel = new Model("resources/plane.obj", GL_PATCHES);
 	waterModel = new Model("resources/plane.obj", GL_TRIANGLES);
 
-	this->textures = new unsigned int[4];
+	this->textures = new unsigned int[5];
 	textures[0] = TextureFromFile("sand.jpg", "resources", false);
 	textures[1] = TextureFromFile("grass.jpg", "resources", false);
 	textures[2] = TextureFromFile("rock4.jpg", "resources", false);
-	textures[3] = TextureFromFile("snow2.jpg", "resources", false);
-
+	textures[3] = TextureFromFile("snow.jpg", "resources", false);
+	textures[5] = TextureFromFile("rock.jpg", "resources", false);
 	
 	dudvMap = TextureFromFile("waterDUDV.png", "resources", false);
 	normalMap = TextureFromFile("normalMap.png", "resources", false);

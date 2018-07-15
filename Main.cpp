@@ -48,6 +48,7 @@ TextArea * gui = 0;
 int gui_i = 0;
 int gui_el;
 float deltaMagnitude = 1.0;
+bool snow = false;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -235,6 +236,7 @@ int main()
 	float gc = tc.getGrassCoverage();
 	float f = tc.getFreq();
 	float tm = tc.getTessMultiplier();
+	bool snowy = false;
 
 	if (gui) gui->addElement(std::string("Octaves: "), &octaves);
 	if (gui) gui->addElement(std::string("Terrain Height: "), &df);
@@ -243,7 +245,6 @@ int main()
 	if (gui) gui->addElement(std::string("Frequency: "), &f);
 	if (gui) gui->addElement(std::string("Tessellation Multiplier: "), &tm);
 	if (gui) gui->addElement(std::string("Delta magnitude: "), &deltaMagnitude);
-
 
 
 	getters.push_back(0);
@@ -265,6 +266,7 @@ int main()
 	setters.push_back(0);
 
 	gui_el = ( setters.size() == getters.size() ? setters.size() : -1);
+	//tc.snowy(lightColor, true);
 
 
 	while (!glfwWindowShouldClose(window))
@@ -288,6 +290,12 @@ int main()
 			std::cout << (gui_i == 7 ? "->" : "  ") << "Delta magnitude: " << dm << std::endl;
 			updateShell = false;
 		}
+
+		if (snow) {
+			tc.snowy(lightColor);
+			snow = false;
+		}
+
 		t1 = glfwGetTime();
 		float degreePerSecond = 10.0f;
 		float dist = 300.0;
@@ -333,6 +341,7 @@ int main()
 		glm::mat4 gWorld, gVP;
 		gWorld = glm::scale(gWorld, glm::vec3(10.0, 0.0, 10.0));
 		gVP = proj * view;
+
 
 		Water * const waterPtr = tc.getWaterPtr();
 		if (waterPtr) {
@@ -406,7 +415,7 @@ int main()
 		frameTime = t2 - t1;
 		float timeToSleep = 1000.0f / MAX_FPS - (t2 - t1)*1000.0f;
 		if (timeToSleep > 0.0f) {
-			Sleep(timeToSleep);
+		//	Sleep(timeToSleep);
 		}
 		t2 = glfwGetTime();
 		frameTime = t2 - t1;
@@ -449,6 +458,16 @@ void processInput(GLFWwindow *window)
 	}
 	else if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE) {
 		if (keyBools[4] == true) { keyBools[4] = false; } // Non aggiungere niente qui
+	}	
+	if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+		if (keyBools[8] == false) {
+			//std::cout << "SNOW MODE" << std::endl;
+			snow = true;
+			keyBools[8] = true;
+		}
+	}
+	else if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_RELEASE) {
+		if (keyBools[8] == true) { keyBools[8] = false; } // Non aggiungere niente qui
 	}
 	if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
 		if (keyBools[7] == false) {
