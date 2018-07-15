@@ -19,12 +19,13 @@ uniform sampler2D depthMap;
 
 out vec4 FragColor;
 
-const float distFactor = 0.015;
+const float distFactor = 0.025;
 
 void main(){
+	float grain = 50.0;
 	vec2 ndc = (clipSpaceCoords.xy/clipSpaceCoords.w)/2.0 + 0.5;
-	vec2 distortion1 = texture(waterDUDV, vec2(TexCoords.x + moveFactor, TexCoords.y)*10.0).rg*2.0 - 1.0;
-	vec2 distortion2 = texture(waterDUDV, vec2(TexCoords.x + moveFactor, TexCoords.y - moveFactor)*10.0).rg*2.0 - 1.0;
+	vec2 distortion1 = texture(waterDUDV, vec2(TexCoords.x + moveFactor, TexCoords.y)*grain).rg*2.0 - 1.0;
+	vec2 distortion2 = texture(waterDUDV, vec2(TexCoords.x + moveFactor, TexCoords.y - moveFactor)*grain).rg*2.0 - 1.0;
 	vec2 totalDistortion = distortion1 + distortion2;
 
 	totalDistortion *= distFactor;
@@ -52,7 +53,7 @@ void main(){
 
 	vec3 toCameraVector =  position.xyz - cameraPosition;
 	float fresnelFactor = max(dot(normalize(toCameraVector), vec3(0.0, 1.0, 0.0)), 0.0);
-	fresnelFactor = pow(fresnelFactor, 2.0);
+	fresnelFactor = pow(fresnelFactor, 0.5);
 	vec4 refr_reflCol = mix(reflectionColor, refractionColor, fresnelFactor);
 
 	// calculate diffuse illumination
@@ -67,11 +68,11 @@ void main(){
 	vec3 diffuse = diffuseFactor * vec3(1.0);
 
 	// calculate specular illumination 
-	float specularFactor = 1.2f;
+	float specularFactor = 3.0f;
 	vec3 viewDir = normalize(cameraPosition - position.xyz);
-	vec3 reflectDir = reflect(-lightDir, norm);  
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 64.0);
-	vec3 specular = spec * u_LightColor * waterDepth * specularFactor;  
+	vec3 reflectDir = reflect(-lightDir, norm );  
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256.0);
+	vec3 specular = spec * u_LightColor * specularFactor;  
 
 
 	vec4 color = vec4(0, 154, 255, 255)/255.0;
