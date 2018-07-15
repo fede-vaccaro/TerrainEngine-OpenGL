@@ -23,7 +23,7 @@ public:
 
 	void setWaterHeight(float height) {
 		waterHeight = height;
-		waterPtr->setPosition(tiles[C]->position, scale*3.0, waterHeight);
+		waterPtr->setPosition(glm::vec2(0.0,0.0), scale*15.0, waterHeight);
 	}
 
 	float getWaterHeight() const { return waterHeight; };
@@ -91,6 +91,7 @@ private:
 	glm::vec2 * position;
 
 	void changeTiles(tPosition currentTile);
+	void addColumn(int direction);
 	void reset();
 
 

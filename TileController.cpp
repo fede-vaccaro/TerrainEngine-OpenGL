@@ -33,12 +33,23 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 	dudvMap = TextureFromFile("waterDUDV.png", "resources", false);
 	normalMap = TextureFromFile("normalMap.png", "resources", false);
 
-	waterHeight = disp / 2.5;
+	waterHeight = 0.0;
 
-	for (int i = 0; i < totTiles; i++) {
+	int gridLenght = 15;
+	tiles.resize(gridLenght*gridLenght);
+
+	/*for (int i = 0; i < totTiles; i++) {
 		tiles[i] = new Tile(position[i], scale, disp, shad, planeModel, textures);
+	}*/
+
+	for (int i = 0; i < gridLenght; i++) {
+		for (int j = 0; j < gridLenght; j++) {
+			glm::vec2 pos = (float)(j - gridLenght / 2)*position[S] + (float)(i - gridLenght / 2)*position[E];
+			tiles[i + j * gridLenght] = new Tile(pos, scale, disp, shad, planeModel, textures);
+		}
 	}
-	waterPtr = new Water(tiles[C]->position, waterShader, scale*3.0, waterHeight, dudvMap, normalMap, waterModel);
+
+	waterPtr = new Water(glm::vec2(0.0,0.0), waterShader, scale*gridLenght, waterHeight, dudvMap, normalMap, waterModel);
 
 };
 
@@ -79,7 +90,7 @@ void TileController::updateTiles() {
 	int whichTile = -1;
 	int howManyTiles = 0;
 	bool found = false;
-	for (int i = 0; (i < totTiles) && !found; i++) {
+	for (int i = 0; i < tiles.size() && !found; i++) {
 		if (tiles[i]->inTile(*camera)) {
 			whichTile = i;
 			howManyTiles++;
@@ -217,4 +228,25 @@ void TileController::changeTiles(tPosition currentTile) {
 
 TileController::~TileController()
 {
+}
+
+
+void TileController::addColumn(int direction) {
+	if (direction > 0) {
+		int gridLenght = 9;
+		for (int i = 0; i < gridLenght - 1; i++) {
+			for (int j = 0; j < gridLenght; j++) {
+				tiles[i + j * gridLenght] = tiles[i + 1 + j * gridLenght];
+			}
+		}
+
+		int i = gridLenght - 1;
+		for (int j = 0; j < gridLenght; j++) {
+			glm::vec2 pos = (float)(j - gridLenght / 2)*position[S] + (float)(i - gridLenght / 2)*position[E];
+			tiles[i + j*gridLenght] = new Tile(tiles[(gridLenght*gridLenght)/2 + 1]->position + pos, scale, disp, shad, planeModel, textures);
+		}
+	}
+	else if (direction < 0) {
+
+	}
 }
