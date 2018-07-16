@@ -17,8 +17,8 @@ Tile::Tile(glm::vec2 position, float scale, float dispFactor, TessellationShader
 	modelMatrix = positionMatrix * scaleMatrix;
 
 	octaves = 10;
-	frequency = 10.0;
-	grassCoverage = 0.75;
+	frequency = 0.05;
+	grassCoverage = 0.70;
 	tessMultiplier = 2.0;
 
 }
@@ -37,7 +37,7 @@ void Tile::drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, gl
 	shad->setMat4("gVP", gVP);
 	shad->setFloat("gDispFactor", dispFactor);
 	float correction = 0.0f;
-	if (up < 0.0f) correction = 0.0025f * dispFactor;
+	if (up < 0.0f) correction = 0.05f * dispFactor;
 	glm::vec4 clipPlane(0.0, 1.0, 0.0, -waterHeight -correction);
 	shad->setVec4("clipPlane", clipPlane*up);
 	shad->setVec3("u_LightColor", lightColor);

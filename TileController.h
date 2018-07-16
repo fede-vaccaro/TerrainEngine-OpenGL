@@ -23,7 +23,7 @@ public:
 
 	void setWaterHeight(float height) {
 		waterHeight = height;
-		waterPtr->setPosition(glm::vec2(0.0,0.0), scale*15.0, waterHeight);
+		waterPtr->setPosition(glm::vec2(0.0,0.0), scale*gridLenght, waterHeight);
 	}
 
 	float getWaterHeight() const { return waterHeight; };
@@ -74,7 +74,7 @@ public:
 			tiles[i]->setTessMultiplier(tm);
 		}
 	}
-
+	
 	float getTessMultiplier() const {
 		return tiles[0]->getTessMultiplier();
 	}
@@ -83,6 +83,7 @@ public:
 
 
 private:
+	int gridLenght;
 	Water * waterPtr;
 	Camera * camera;
 	float scale, disp, waterHeight;

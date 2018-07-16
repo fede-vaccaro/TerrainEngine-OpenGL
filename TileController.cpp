@@ -33,9 +33,9 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 	dudvMap = TextureFromFile("waterDUDV.png", "resources", false);
 	normalMap = TextureFromFile("normalMap.png", "resources", false);
 
-	waterHeight = 0.0;
+	waterHeight = 9.0;
 
-	int gridLenght = 15;
+	gridLenght = 20;
 	tiles.resize(gridLenght*gridLenght);
 
 	/*for (int i = 0; i < totTiles; i++) {
@@ -61,9 +61,15 @@ void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec
 	camera->invertPitch();
 	camera->Position.y -= 2 * (camera->Position.y - waterHeight);
 
+	float t1, t2;
+
+	t1 = glfwGetTime();
 	for (int j = 0; j < tiles.size(); j++) {
 		tiles[j]->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 1.0f, 15.0f);
 	}
+	t2 = glfwGetTime();
+	std::cout << t2 - t1 << " : time to reflect" << std::endl;
+
 
 	camera->invertPitch();
 	camera->Position.y += 2 * abs(camera->Position.y - waterHeight);
@@ -72,15 +78,22 @@ void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec
 	// refraction
 	waterPtr->bindRefractionFBO();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	t1 = glfwGetTime();
 	for (int j = 0; j < tiles.size(); j++) {
 		tiles[j]->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, -1.0f, 15.0f);
 	};
 	waterPtr->unbindFBO();
+	t2 = glfwGetTime();
+	std::cout << t2 - t1 << " : time to refract" << std::endl;
+
+	t1 = glfwGetTime();
 
 	for (int i = 0; i < tiles.size(); i++)
 	{
 		tiles[i]->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 0.0f);
 	};
+	t2 = glfwGetTime();
+	std::cout << t2 - t1 << " : time to draw" << std::endl;
 	waterPtr->draw(proj* (camera->GetViewMatrix()), lightPosition, lightColor, camera->Position);
 
 }

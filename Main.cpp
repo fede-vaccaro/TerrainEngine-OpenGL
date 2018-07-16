@@ -58,7 +58,7 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
-float dispFactor = 40.0;
+float dispFactor = 5.0;
 
 glm::vec3 startPosition(0.0f, dispFactor / 2.0, 0.0f);
 
@@ -87,6 +87,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
@@ -204,7 +205,7 @@ int main()
 
 	glm::vec3 fogColor(204, 224, 255);
 	fogColor /= 255.0;
-	glm::vec3 lightColor(255, 255, 200);
+	glm::vec3 lightColor(255, 255, 190);
 	lightColor /= 255.0;
 
 	float scale = 10.0f;
@@ -269,6 +270,7 @@ int main()
 
 	while (!glfwWindowShouldClose(window))
 	{
+
 		octaves = getters[1]();
 		df = getters[2]();
 		wh = getters[3]();
@@ -310,6 +312,7 @@ int main()
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
+		glEnable(GL_MULTISAMPLE);
 
 		glClearColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -326,7 +329,7 @@ int main()
 
 		// Camera (View Matrix) setting
 		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 2000.0f);
 
 
 		// set terrain matrices

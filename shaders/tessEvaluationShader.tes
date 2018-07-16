@@ -76,34 +76,31 @@ float InterpolatedNoise(int ind, float x, float y) {
 	float v2 = Random2D(randomInput + vec2(1.0, 0.0));
 	float v3 = Random2D(randomInput + vec2(0.0, 1.0));
 	float v4 = Random2D(randomInput + vec2(1.0, 1.0));
-	//float v1 = Noise(2, integer_X, integer_Y); //uncomment in case of glitches
-	//float v2 = Noise(2, integer_X+1, integer_Y);
-	//float v3 = Noise(2, integer_X, integer_Y+1);
-	//float v4 = Noise(2, integer_X+1, integer_Y+1);
+	//float v1 = Random2D(randomInput);
+	//float v2 = Random2D(randomInput + vec2(1.0, 0.0));
+	//float v3 = Random2D(randomInput + vec2(0.0, 1.0));
+	//float v4 = Random2D(randomInput + vec2(1.0, 1.0));
 
-	float i1 = Interpolate(v1, v2, fractional_X);
-	float i2 = Interpolate(v3, v4, fractional_X);
-	return Interpolate(i1, i2, fractional_Y);
-
-	//float i1 = mix(v1, v2, smoothstep(0, 1, fractional_X));
-	//float i2 = mix(v3, v4, smoothstep(0, 1, fractional_X));
-	//return mix(i1, i2, smoothstep(0, 1, fractional_Y));
+	float i1 = mix(v1, v2, smoothstep(0, 1, fractional_X));
+	float i2 = mix(v3, v4, smoothstep(0, 1, fractional_X));
+	return mix(i1, i2, smoothstep(0, 1, fractional_Y));
 }
+
 
 float perlin(float x, float y){
 	
     int numOctaves = octaves;
 	float persistence = 0.5;
 	float total = 0,
-		frequency = pow(2, numOctaves),
-		amplitude = 1;
+		frequency = 0.05*freq,
+		amplitude = gDispFactor;
 	for (int i = 0; i < numOctaves; ++i) {
-		frequency /= 2;
+		frequency *= 2;
 		amplitude *= persistence;
 		
-		total += InterpolatedNoise( int(mod(0 + i,10)), x / frequency, y / frequency) * amplitude;
+		total += InterpolatedNoise( 0, x * frequency, y * frequency) * amplitude;
 	}
-	return total / frequency;
+	return pow(total, 3.0);
 }
 
 
@@ -119,8 +116,8 @@ void main()
     
 
     // Displace the vertex along the normal                                                     
-	float Displacement = perlin(WorldPos.x*freq, WorldPos.z*freq);
-	WorldPos += Normal * Displacement * gDispFactor;
+	float Displacement = perlin(WorldPos.x, WorldPos.z);
+	WorldPos += Normal * Displacement;
 	
 	gl_ClipDistance[0] = dot(clipPlane, vec4(WorldPos, 1.0));
 
