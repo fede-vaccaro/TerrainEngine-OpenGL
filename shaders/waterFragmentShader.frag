@@ -68,7 +68,7 @@ void main(){
 	vec3 diffuse = diffuseFactor * vec3(1.0);
 
 	// calculate specular illumination 
-	float specularFactor = 3.0f;
+	float specularFactor = 1.2f;
 	vec3 viewDir = normalize(cameraPosition - position.xyz);
 	vec3 reflectDir = reflect(-lightDir, norm );  
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256.0);
