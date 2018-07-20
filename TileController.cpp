@@ -35,7 +35,7 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 
 	waterHeight = 9.0;
 
-	gridLenght = 20;
+	gridLenght = 10;
 	tiles.resize(gridLenght*gridLenght);
 
 	/*for (int i = 0; i < totTiles; i++) {
@@ -68,7 +68,7 @@ void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec
 		tiles[j]->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 1.0f, 15.0f);
 	}
 	t2 = glfwGetTime();
-	std::cout << t2 - t1 << " : time to reflect" << std::endl;
+	//std::cout << t2 - t1 << " : time to reflect" << std::endl;
 
 
 	camera->invertPitch();
@@ -84,7 +84,7 @@ void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec
 	};
 	waterPtr->unbindFBO();
 	t2 = glfwGetTime();
-	std::cout << t2 - t1 << " : time to refract" << std::endl;
+	//std::cout << t2 - t1 << " : time to refract" << std::endl;
 
 	t1 = glfwGetTime();
 
@@ -93,7 +93,7 @@ void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec
 		tiles[i]->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 0.0f);
 	};
 	t2 = glfwGetTime();
-	std::cout << t2 - t1 << " : time to draw" << std::endl;
+	//std::cout << t2 - t1 << " : time to draw" << std::endl;
 	waterPtr->draw(proj* (camera->GetViewMatrix()), lightPosition, lightColor, camera->Position);
 
 }

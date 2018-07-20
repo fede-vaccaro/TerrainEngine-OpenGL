@@ -93,7 +93,7 @@ float perlin(float x, float y){
 }
 
 vec3 computeNormals(vec3 WorldPos){
-	float st = 0.1;
+	float st = 0.2;
 	float dhdu = (perlin((WorldPos.x + st), WorldPos.z) - perlin((WorldPos.x - st), WorldPos.z))/(2.0*st);
 	float dhdv = (perlin( WorldPos.x, (WorldPos.z + st)) - perlin(WorldPos.x, (WorldPos.z - st)))/(2.0*st);
 

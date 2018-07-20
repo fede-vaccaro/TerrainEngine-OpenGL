@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="buffers.h" />
+    <ClInclude Include="glError.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="perlin\CustomTypes.h" />
     <ClInclude Include="shader.h" />
@@ -145,6 +146,7 @@
   <ItemGroup>
     <ClCompile Include="buffers.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="glError.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="shader.cpp" />

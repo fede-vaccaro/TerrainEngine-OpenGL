@@ -50,6 +50,12 @@ public:
 			meshes[i].Draw(shader, drawMode);
 	}
 
+	void Draw(Shader shader, unsigned int nIstance)
+	{
+		for (unsigned int i = 0; i < meshes.size(); i++)
+			meshes[i].DrawIstances(shader, drawMode, nIstance);
+	}
+
 private:
 	/*  Functions   */
 	// loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.

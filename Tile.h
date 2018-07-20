@@ -5,6 +5,8 @@
 #include "TessShader.h"
 #include "Water.h"
 #include <camera.h>
+#include "glError.h"
+
 
 class Tile
 {
@@ -13,6 +15,8 @@ public:
 	virtual ~Tile();
 	void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up);
 	void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up, float tessLevel);
+	void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up, std::vector<glm::vec2> & pos);
+	void setPositionsUniforms(std::vector<glm::vec2> & pos);
 
 	glm::vec2 position, eps;
 	

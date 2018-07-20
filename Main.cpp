@@ -17,6 +17,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/random.hpp>
+#include "glError.h"
 
 #include <map>
 #include <stdlib.h>
@@ -58,7 +59,7 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
-float dispFactor = 5.0;
+float dispFactor = 6.0;
 
 glm::vec3 startPosition(0.0f, dispFactor / 2.0, 0.0f);
 
@@ -267,6 +268,24 @@ int main()
 
 	gui_el = ( setters.size() == getters.size() ? setters.size() : -1);
 
+	unsigned int * textures = new unsigned int[4];
+	textures[0] = TextureFromFile("sand.jpg", "resources", false);
+	textures[1] = TextureFromFile("grass.jpg", "resources", false);
+	textures[2] = TextureFromFile("rock4.jpg", "resources", false);
+	textures[3] = TextureFromFile("snow2.jpg", "resources", false);
+
+	
+	Tile tile1(glm::vec2(0, 0), scale, dispFactor, &tshader, &plane_, textures);
+	std::vector<glm::vec2> pos;
+	int gridLenght = 30;
+	for (int i = 0; i < gridLenght; i++) {
+		for (int j = 0; j < gridLenght; j++) {
+			glm::vec2 vec = (float)(j - gridLenght / 2)*glm::vec2(1*scale*Tile::tileW,0) + (float)(i - gridLenght / 2)*glm::vec2(0, 1 * scale*Tile::tileW);
+			pos.push_back(vec);
+		}
+	}
+	tile1.setPositionsUniforms(pos);
+
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -306,7 +325,7 @@ int main()
 		// input
 		processInput(window);
 
-		tc.updateTiles();
+		//tc.updateTiles();
 
 		// render
 		glEnable(GL_DEPTH_TEST);
@@ -377,7 +396,11 @@ int main()
 		float wps = 0.5;
 		//tc.setWaterHeight(wps*glfwGetTime());
 	
-		tc.drawTiles(proj, lightPosition, lightColor, fogColor);
+		//tc.drawTiles(proj, lightPosition, lightColor, fogColor);
+
+
+
+		tile1.drawTile(&camera, proj, lightPosition, lightColor, fogColor, 5.0, 0.0, pos);
 
 		//draw skyBox
 		glDepthFunc(GL_LEQUAL);
