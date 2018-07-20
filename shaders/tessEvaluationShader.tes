@@ -101,7 +101,7 @@ float perlin(float x, float y){
 		frequency /= 2;
 		amplitude *= persistence;
 		
-		total += InterpolatedNoise( int(mod(0 + i,10)), x / frequency, y / frequency) * amplitude;
+		total += InterpolatedNoise( 3, x / frequency, y / frequency) * amplitude;
 	}
 	return total / frequency;
 }
