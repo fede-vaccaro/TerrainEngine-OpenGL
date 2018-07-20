@@ -45,7 +45,6 @@ void main(){
 	float waterDistance = 2.0 * near * far / (far + near - (2.0 * gl_FragCoord.z - 1.0) * (far - near));
 	float waterDepth = floorDistance - waterDistance;
 	waterDepth = clamp(waterDepth/15.0, 0.0, 1.0);
-
 	refractionTexCoords += totalDistortion;
 	refractionTexCoords = clamp(refractionTexCoords, 0.001, 0.999);
 	vec4 refractionColor = texture(refractionTex, refractionTexCoords);

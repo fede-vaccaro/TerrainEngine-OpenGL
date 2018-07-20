@@ -17,10 +17,15 @@ public:
 	void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up, float tessLevel);
 	void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up, std::vector<glm::vec2> & pos);
 	void setPositionsUniforms(std::vector<glm::vec2> & pos);
+	void setPositionsArray(std::vector<glm::vec2> & pos);
+	void deleteBuffer() {
+		glDeleteBuffers(1, &posBuffer);
+		posBuffer = 0;
+	}
 
 	glm::vec2 position, eps;
 	
-	bool inTile(Camera camera);
+	bool inTile(Camera camera, glm::vec2 pos);
 	static const int tileW = 5.0;
 	Model * planeModel;
 
@@ -64,7 +69,7 @@ private:
 	float dispFactor, scaleFactor, frequency, grassCoverage, tessMultiplier;
 	int octaves;
 
-	unsigned int * textures;
+	unsigned int * textures, posBuffer;
 
 	TessellationShader * shad;
 	glm::mat4 modelMatrix;

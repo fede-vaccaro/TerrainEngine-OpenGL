@@ -1,8 +1,8 @@
 #pragma once
 #include <glad/glad.h>
 
-const int SCR_WIDTH_ = 1920;
-const int SCR_HEIGHT_ = 1080;
+const int SCR_WIDTH_ = 1600;
+const int SCR_HEIGHT_ = 900;
 
 const int FBW = 1280;
 const int FBH = 720;

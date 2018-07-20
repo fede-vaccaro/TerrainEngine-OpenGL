@@ -11,6 +11,8 @@ enum tPosition {
 class TileController
 {
 public:
+	glm::vec2 I, J;
+
 	TileController(float scale, float disp, Camera * camera, TessellationShader * shad, Shader * waterShader);
 	virtual ~TileController();
 	
@@ -19,7 +21,15 @@ public:
 	void drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor);
 	Model * planeModel, * waterModel;
 	unsigned int * textures, normalMap, dudvMap;
-	std::vector<Tile*> tiles;
+	Tile * tile;
+
+	Tile * getTile() {
+		return tile;
+	}
+
+	std::vector<glm::vec2> & getPos(){
+		return position;
+	}
 
 	void setWaterHeight(float height) {
 		waterHeight = height;
@@ -29,29 +39,24 @@ public:
 	float getWaterHeight() const { return waterHeight; };
 
 	void setOctaves(int o) {
-		for (int i = 0; i < tiles.size(); i++) {
-			tiles[i]->setOctaves(o);
-		}
+		tile->setOctaves(o);
 	}
 
 	int getOctaves() const {
-		return tiles[0]->getOctaves();
+		return tile->getOctaves();
 	}
 
 	void setFreq(float f) {
-		for (int i = 0; i < tiles.size(); i++) {
-			tiles[i]->setFreq(f);
-		}
+		tile->setFreq(f);
 	}
 
 	float getFreq() const {
-		return tiles[0]->getFreq();
+		return tile->getFreq();
 	}
 
 	void setDispFactor(float df) {
-		for (int i = 0; i < tiles.size(); i++) {
-			tiles[i]->setDispFactor(df);
-		}
+		tile->setDispFactor(df);
+		
 		this->disp = df;
 	}
 
@@ -60,23 +65,20 @@ public:
 	}
 
 	void setGrassCoverage(float gc) {
-		for (int i = 0; i < tiles.size(); i++) {
-			tiles[i]->setGrassCoverage(gc);
-		}
+		tile->setGrassCoverage(gc);
+		
 	}
 
 	float getGrassCoverage() const {
-		return tiles[0]->getGrassCoverage();
+		return tile->getGrassCoverage();
 	}
 
 	void setTessMultiplier(float tm) {
-		for (int i = 0; i < tiles.size(); i++) {
-			tiles[i]->setTessMultiplier(tm);
-		}
+		tile->setTessMultiplier(tm);
 	}
 	
 	float getTessMultiplier() const {
-		return tiles[0]->getTessMultiplier();
+		return tile->getTessMultiplier();
 	}
 
 	Water * const getWaterPtr() { return waterPtr; }
@@ -89,10 +91,20 @@ private:
 	float scale, disp, waterHeight;
 	TessellationShader * shad;
 	Shader * waterShader;
-	glm::vec2 * position;
+	std::vector<glm::vec2> position;
+
+	void setPos(int row, int col, glm::vec2 pos) {
+		position[col + row * gridLenght] = pos;
+	}
+
+	glm::vec2 getPos(int row, int col) {
+		return position[col + row * gridLenght];
+	}
 
 	void changeTiles(tPosition currentTile);
 	void addColumn(int direction);
+	void addRow(int direction);
+
 	void reset();
 
 

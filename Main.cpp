@@ -56,12 +56,12 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 // screen settings
-const unsigned int SCR_WIDTH = 1920;
-const unsigned int SCR_HEIGHT = 1080;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 900;
 
 float dispFactor = 6.0;
 
-glm::vec3 startPosition(0.0f, dispFactor / 2.0, 0.0f);
+glm::vec3 startPosition(0.0f, 100.0, 0.0f);
 
 bool keyBools[10] = { false, false,false, false, false, false, false, false, false, false };
 bool updateShell = true;
@@ -123,7 +123,9 @@ int main()
 
 	Shader skyboxShader("shaders/skyboxVert.vert", "shaders/skyboxFrag.frag");
 	Shader waterShader("shaders/waterVertexShader.vert", "shaders/waterFragmentShader.frag");
+	std::cout << "============= CREATING TSHADER ==============" << std::endl;
 	TessellationShader tshader("shaders/tessVertexShader.vert", "shaders/tessControlShader.tcs", "shaders/tessEvaluationShader.tes", "shaders/tessFragmentShader.frag");
+	std::cout << "============= TSHADER CREATED ==============" << std::endl;
 
 	float skyboxVertices[] = {
 		// positions          
@@ -274,19 +276,6 @@ int main()
 	textures[2] = TextureFromFile("rock4.jpg", "resources", false);
 	textures[3] = TextureFromFile("snow2.jpg", "resources", false);
 
-	
-	Tile tile1(glm::vec2(0, 0), scale, dispFactor, &tshader, &plane_, textures);
-	std::vector<glm::vec2> pos;
-	int gridLenght = 30;
-	for (int i = 0; i < gridLenght; i++) {
-		for (int j = 0; j < gridLenght; j++) {
-			glm::vec2 vec = (float)(j - gridLenght / 2)*glm::vec2(1*scale*Tile::tileW,0) + (float)(i - gridLenght / 2)*glm::vec2(0, 1 * scale*Tile::tileW);
-			pos.push_back(vec);
-		}
-	}
-	tile1.setPositionsUniforms(pos);
-
-
 	while (!glfwWindowShouldClose(window))
 	{
 
@@ -299,7 +288,7 @@ int main()
 		float dm = deltaMagnitude;
 
 		if (updateShell) {
-			clear();
+			//clear();
 			std::cout << (gui_i == 1 ? "->" : "  ") << "Octaves: " << octaves << std::endl;
 			std::cout << (gui_i == 2 ? "->" : "  ") << "Terrain Height : " << df << std::endl;
 			std::cout << (gui_i == 3 ? "->" : "  ") << "Water height: " << wh << std::endl;
@@ -320,12 +309,12 @@ int main()
 
 		//x = cos(-angle)*dist;
 		//z = sin(-angle)*dist;
-		lightPosition = glm::vec3(x*2.0, dispFactor, z*2.0); //rotate light
+		lightPosition = glm::vec3(x*10, dispFactor*3.0, z*10); //rotate light
 		lightPosition += camera.Position;
 		// input
 		processInput(window);
 
-		//tc.updateTiles();
+		tc.updateTiles();
 
 		// render
 		glEnable(GL_DEPTH_TEST);
@@ -396,11 +385,7 @@ int main()
 		float wps = 0.5;
 		//tc.setWaterHeight(wps*glfwGetTime());
 	
-		//tc.drawTiles(proj, lightPosition, lightColor, fogColor);
-
-
-
-		tile1.drawTile(&camera, proj, lightPosition, lightColor, fogColor, 5.0, 0.0, pos);
+		tc.drawTiles(proj, lightPosition, lightColor, fogColor);
 
 		//draw skyBox
 		glDepthFunc(GL_LEQUAL);

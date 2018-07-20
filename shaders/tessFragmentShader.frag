@@ -93,7 +93,7 @@ float perlin(float x, float y){
 }
 
 vec3 computeNormals(vec3 WorldPos){
-	float st = 0.2;
+	float st = 0.35;
 	float dhdu = (perlin((WorldPos.x + st), WorldPos.z) - perlin((WorldPos.x - st), WorldPos.z))/(2.0*st);
 	float dhdv = (perlin( WorldPos.x, (WorldPos.z + st)) - perlin(WorldPos.x, (WorldPos.z - st)))/(2.0*st);
 
@@ -121,10 +121,10 @@ vec3 diffuse(vec3 normal){
 
 vec3 specular(vec3 normal){
 	vec3 lightDir = normalize(u_LightPosition - WorldPos);
-	float specularFactor = 0.12f;
+	float specularFactor = 0.009f;
 	vec3 viewDir = normalize(u_ViewPosition - WorldPos);
 	vec3 reflectDir = reflect(-lightDir, normal);  
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 16.0);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 35.0);
 	vec3 specular = spec * u_LightColor; 
 	return specular;
 }
