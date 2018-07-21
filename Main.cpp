@@ -17,6 +17,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/random.hpp>
+#include "glError.h"
 
 #include <map>
 #include <stdlib.h>
@@ -56,12 +57,12 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 // screen settings
-const unsigned int SCR_WIDTH = 1920;
-const unsigned int SCR_HEIGHT = 1080;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 900;
 
-float dispFactor = 40.0;
+float dispFactor = 6.0;
 
-glm::vec3 startPosition(0.0f, dispFactor / 2.0, 0.0f);
+glm::vec3 startPosition(0.0f, 100.0, 0.0f);
 
 bool keyBools[10] = { false, false,false, false, false, false, false, false, false, false };
 bool updateShell = true;
@@ -88,6 +89,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
@@ -122,7 +124,9 @@ int main()
 
 	Shader skyboxShader("shaders/skyboxVert.vert", "shaders/skyboxFrag.frag");
 	Shader waterShader("shaders/waterVertexShader.vert", "shaders/waterFragmentShader.frag");
+	std::cout << "============= CREATING TSHADER ==============" << std::endl;
 	TessellationShader tshader("shaders/tessVertexShader.vert", "shaders/tessControlShader.tcs", "shaders/tessEvaluationShader.tes", "shaders/tessFragmentShader.frag");
+	std::cout << "============= TSHADER CREATED ==============" << std::endl;
 
 	float skyboxVertices[] = {
 		// positions          
@@ -205,7 +209,7 @@ int main()
 
 	glm::vec3 fogColor(204, 224, 255);
 	fogColor /= 255.0;
-	glm::vec3 lightColor(255, 255, 200);
+	glm::vec3 lightColor(255, 255, 190);
 	lightColor /= 255.0;
 
 	float scale = 10.0f;
@@ -268,9 +272,15 @@ int main()
 	gui_el = ( setters.size() == getters.size() ? setters.size() : -1);
 	//tc.snowy(lightColor, true);
 
+	unsigned int * textures = new unsigned int[4];
+	textures[0] = TextureFromFile("sand.jpg", "resources", false);
+	textures[1] = TextureFromFile("grass.jpg", "resources", false);
+	textures[2] = TextureFromFile("rock4.jpg", "resources", false);
+	textures[3] = TextureFromFile("snow2.jpg", "resources", false);
 
 	while (!glfwWindowShouldClose(window))
 	{
+
 		octaves = getters[1]();
 		df = getters[2]();
 		wh = getters[3]();
@@ -280,7 +290,7 @@ int main()
 		float dm = deltaMagnitude;
 
 		if (updateShell) {
-			clear();
+			//clear();
 			std::cout << (gui_i == 1 ? "->" : "  ") << "Octaves: " << octaves << std::endl;
 			std::cout << (gui_i == 2 ? "->" : "  ") << "Terrain Height : " << df << std::endl;
 			std::cout << (gui_i == 3 ? "->" : "  ") << "Water height: " << wh << std::endl;
@@ -307,7 +317,7 @@ int main()
 
 		//x = cos(-angle)*dist;
 		//z = sin(-angle)*dist;
-		lightPosition = glm::vec3(x*2.0, dispFactor, z*2.0); //rotate light
+		lightPosition = glm::vec3(x*10, dispFactor*3.0, z*10); //rotate light
 		lightPosition += camera.Position;
 		// input
 		processInput(window);
@@ -318,6 +328,7 @@ int main()
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
+		glEnable(GL_MULTISAMPLE);
 
 		glClearColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -334,7 +345,7 @@ int main()
 
 		// Camera (View Matrix) setting
 		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 2000.0f);
 
 
 		// set terrain matrices

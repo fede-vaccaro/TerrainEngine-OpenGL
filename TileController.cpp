@@ -4,21 +4,15 @@
 
 TileController::TileController(float scale, float disp, Camera * camera, TessellationShader * shad, Shader * waterShader) : scale(scale), disp(disp), camera(camera), shad(shad), waterShader(waterShader)
 {
-	position = new glm::vec2[9];
+	gridLenght = 61;
+
+	//position.resize(gridLenght*gridLenght);
 
 	float s = scale * Tile::tileW;
 
-	position[C] = glm::vec2(0, 0);
-	position[N] = glm::vec2(0, -1)*s;
-	position[S] = glm::vec2(0, 1)*s;
-	position[E] = glm::vec2(1, 0)*s;
-	position[W] = glm::vec2(-1, 0)*s;
-	position[SE] = position[S] + position[E];
-	position[SW] = position[S] + position[W];
-	position[NE] = position[N] + position[E];
-	position[NW] = position[N] + position[W];
+	this->I = glm::vec2(1, 0)*s;
+	this->J = glm::vec2(0, 1)*s;
 
-	tiles.resize(9);
 
 	planeModel = new Model("resources/plane.obj", GL_PATCHES);
 	waterModel = new Model("resources/plane.obj", GL_TRIANGLES);
@@ -33,13 +27,20 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 	dudvMap = TextureFromFile("waterDUDV.png", "resources", false);
 	normalMap = TextureFromFile("normalMap.png", "resources", false);
 
-	waterHeight = disp / 2.5;
+	waterHeight = 9.0;
 
-	for (int i = 0; i < totTiles; i++) {
-		tiles[i] = new Tile(position[i], scale, disp, shad, planeModel, textures);
+	position.resize(gridLenght*gridLenght);
+	for (int i = 0; i < gridLenght; i++) {
+		for (int j = 0; j < gridLenght; j++) {
+			glm::vec2 pos = (float)(j - gridLenght / 2)*glm::vec2(I) + (float)(i - gridLenght / 2)*glm::vec2(J);
+			setPos(i, j, pos);
+		}
 	}
-	waterPtr = new Water(tiles[C]->position, waterShader, scale*3.0, waterHeight, dudvMap, normalMap, waterModel);
 
+	tile = new Tile(glm::vec2(0,0), scale, disp, shad, planeModel, textures);
+	tile->setPositionsArray(position);
+
+	waterPtr = new Water(glm::vec2(0.0,0.0), waterShader, scale*gridLenght, waterHeight, dudvMap, normalMap, waterModel);
 };
 
 void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor) {
@@ -48,12 +49,9 @@ void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec
 	waterPtr->bindReflectionFBO();
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	camera->invertPitch();
-	camera->Position.y -= 2 * (camera->Position.y - waterHeight);
-
-	for (int j = 0; j < tiles.size(); j++) {
-		tiles[j]->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 1.0f, 15.0f);
-	}
-
+	camera->Position.y -= 2 * (camera->Position.y - waterHeight);	
+	tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 1.0f, position);
+	
 	camera->invertPitch();
 	camera->Position.y += 2 * abs(camera->Position.y - waterHeight);
 	waterPtr->unbindFBO();
@@ -61,15 +59,14 @@ void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec
 	// refraction
 	waterPtr->bindRefractionFBO();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	for (int j = 0; j < tiles.size(); j++) {
-		tiles[j]->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, -1.0f, 15.0f);
-	};
+	
+	tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, -1.0f, position);
 	waterPtr->unbindFBO();
+	
+	// real draw
+	tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 0.0, position);
 
-	for (int i = 0; i < tiles.size(); i++)
-	{
-		tiles[i]->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 0.0f);
-	};
+	//waterPtr->setPosition(glm::vec2(camera->Position.x, camera->Position.z), scale*gridLenght, waterHeight);
 	waterPtr->draw(proj* (camera->GetViewMatrix()), lightPosition, lightColor, camera->Position);
 
 }
@@ -79,23 +76,29 @@ void TileController::updateTiles() {
 	int whichTile = -1;
 	int howManyTiles = 0;
 	bool found = false;
-	for (int i = 0; (i < totTiles) && !found; i++) {
-		if (tiles[i]->inTile(*camera)) {
-			whichTile = i;
-			howManyTiles++;
-			//std::cout << "You are in Tile " << direction((tPosition)whichTile) << std::endl;
-		}
-	}
-	//std::cout << "current position is: (" << camPosition.x << ", " << camPosition.y << ")" << std::endl;
 
-	if (howManyTiles <= 1) {
-		//	std::cout << "The current Tile is: " << direction((tPosition)whichTile) << std::endl;
+	glm::vec2 posC = getPos(gridLenght / 2, gridLenght / 2),
+		posS = posC - I,
+		posN = posC + I,
+		posE = posC + J,
+		posW = posC - J;
+
+	//if (tile->inTile(*camera, posC)) std::cout << "IN C" << std::endl;
+	if (tile->inTile(*camera, posS)) whichTile = S, howManyTiles++;// , std::cout << "IN S" << std::endl;
+	if (tile->inTile(*camera, posE)) whichTile = E, howManyTiles++;// , std::cout << "IN E" << std::endl;
+	if (tile->inTile(*camera, posW)) whichTile = W, howManyTiles++;// , std::cout << "IN W" << std::endl;
+	if (tile->inTile(*camera, posN)) whichTile = N, howManyTiles++;// , std::cout << "IN N" << std::endl;
+
+	//std::cout << camPosition.x << " " << camPosition.y << std::endl;
+
+	if (howManyTiles == 1) {
+		std::cout << "Changing tile reference system to: " << direction((tPosition)whichTile) << std::endl;
 		changeTiles((tPosition)whichTile);
+		tile->setPositionsArray(position);
 	}
-	else {
+	else if (howManyTiles > 1) {
 		std::cout << "You're on a border!" << std::endl;
 	}
-
 
 }
 void TileController::reset() {
@@ -114,107 +117,83 @@ void TileController::reset() {
 
 void TileController::changeTiles(tPosition currentTile) {
 	if (currentTile == N) {
-
-		std::cout << "CHANGING TILES: NORTH" << std::endl;
-
-		tiles[SE] = tiles[E];
-		tiles[SW] = tiles[W];
-		tiles[S] = tiles[C];
-
-		tiles[E] = tiles[NE]; //to replace 
-		tiles[C] = tiles[N]; //to replace
-		tiles[W] = tiles[NW]; //to replace
-
-		waterPtr->setPosition(tiles[C]->position + tiles[C]->eps, scale*3.0, waterHeight);
-
-		Tile * t1 = tiles[NE], *t2 = tiles[N], *t3 = tiles[NW];
-
-		float eps_y = 0.0f;//-0.02f*scale*3.0f;
-
-
-		tiles[NE] = new Tile(t1->position + position[N] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
-
-		tiles[N] = new Tile(t2->position + position[N] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
-
-		tiles[NW] = new Tile(t3->position + position[N] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
-		this->reset();
+		addRow(1);
 	}
 	else if (currentTile == S) {
-		std::cout << "CHANGING TILES: SOUTH" << std::endl;
-
-		tiles[NE] = tiles[E];
-		tiles[N] = tiles[C];
-		tiles[NW] = tiles[W];
-
-
-		tiles[E] = tiles[SE]; //SE to replace 
-		tiles[C] = tiles[S]; //S to replace
-		tiles[W] = tiles[SW]; //SW to replace
-
-		waterPtr->setPosition(tiles[C]->position + tiles[C]->eps, scale*3.0, waterHeight);
-
-		Tile * t1 = tiles[SE], *t2 = tiles[S], *t3 = tiles[SW];
-
-		float eps_y = 0.0f;//-0.02f*scale*3.0f;
-
-		tiles[SE] = new Tile(t1->position + position[S] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
-
-		tiles[S] = new Tile(t2->position + position[S] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
-
-		tiles[SW] = new Tile(t3->position + position[S] + glm::vec2(0.0, eps_y), scale, disp, shad, planeModel, textures);
-		this->reset();
+		addRow(-1);
 	}
 	else if (currentTile == E) {
-		std::cout << "CHANGING TILES: EAST" << std::endl;
-
-		tiles[NW] = tiles[N];
-		tiles[W] = tiles[C];
-		tiles[SW] = tiles[S];
-
-		tiles[N] = tiles[NE]; //NE to repleace
-		tiles[C] = tiles[E]; //E to repleace
-		tiles[S] = tiles[SE]; //SE to repleace
-
-		waterPtr->setPosition(tiles[C]->position + tiles[C]->eps, scale*3.0, waterHeight);
-
-		Tile * t1 = tiles[NE], *t2 = tiles[E], *t3 = tiles[SE];
-
-		float eps_X = 0.0;// 0.02f*scale*3.0f;
-
-		tiles[NE] = new Tile(t1->position + position[E] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
-
-		tiles[E] = new Tile(t2->position + position[E] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
-
-		tiles[SE] = new Tile(t3->position + position[E] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
-		this->reset();
+		addColumn(1);
 	}
-	else if (currentTile == W) {
-		std::cout << "CHANGING TILES: WEST" << std::endl;
-
-		tiles[NE] = tiles[N];
-		tiles[E] = tiles[C];
-		tiles[SE] = tiles[S];
-
-		tiles[N] = tiles[NW]; //NW to repleace
-		tiles[C] = tiles[W]; //W to repleace
-		tiles[S] = tiles[SW]; //SW to repleace
-
-		waterPtr->setPosition(tiles[C]->position + tiles[C]->eps, scale*3.0, waterHeight);
-
-		Tile * t1 = tiles[NW], *t2 = tiles[W], *t3 = tiles[SW];
-
-		float eps_X = 0.0;// 0.02f*scale*3.0f;
-
-		tiles[NW] = new Tile(t1->position + position[W] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
-
-		tiles[W] = new Tile(t2->position + position[W] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
-
-		tiles[SW] = new Tile(t3->position + position[W] + glm::vec2(eps_X, 0.0), scale, disp, shad, planeModel, textures);
-		this->reset();
+	else if (currentTile = W) {
+		addColumn(-1);
 	}
+
+	waterPtr->setPosition(getPos(gridLenght / 2, gridLenght / 2), scale*gridLenght, waterHeight);
 }
 
 
 TileController::~TileController()
 {
+}
+
+
+void TileController::addColumn(int direction) {
+	if (direction > 0) {
+
+		for (int i = 0; i < gridLenght - 1; i++) {
+			for (int j = 0; j < gridLenght; j++) {
+				setPos(i, j, getPos(i + 1, j));
+			}
+		}
+
+		int i = gridLenght - 1;
+		for (int j = 0; j < gridLenght; j++) {
+			setPos(i, j, getPos(i, j) + this->J);
+		}
+
+	}
+	else if (direction < 0) {
+		for (int i = gridLenght - 1; i > 0; i--) {
+			for (int j = 0; j < gridLenght; j++) {
+				setPos(i, j, getPos(i - 1, j));
+			}
+		}
+
+		int i = 0;
+		for (int j = 0; j < gridLenght; j++) {
+			setPos(i, j, getPos(i, j) - this->J);
+		}
+
+	}
+}
+
+void TileController::addRow(int direction) {
+	if (direction > 0) {
+
+		for (int i = 0; i < gridLenght; i++) {
+			for (int j = 0; j < gridLenght - 1; j++) {
+				setPos(i, j, getPos(i, j + 1));
+			}
+		}
+
+		int j = gridLenght - 1;
+		for (int i = 0; i < gridLenght; i++) {
+			setPos(i, j, getPos(i, j) + this->I);
+		}
+
+	}
+	else if (direction < 0) {
+		for (int i = 0; i < gridLenght; i++) {
+			for (int j = gridLenght - 1; j > 0; j--) {
+				setPos(i, j, getPos(i, j - 1));
+			}
+		}
+
+		int j = 0;
+		for (int i = 0; i < gridLenght; i++) {
+			setPos(i, j, getPos(i, j) - this->I);
+		}
+
+	}
 }

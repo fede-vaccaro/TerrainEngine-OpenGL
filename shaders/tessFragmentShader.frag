@@ -66,18 +66,14 @@ float InterpolatedNoise(int ind, float x, float y) {
 	float v2 = Random2D(randomInput + vec2(1.0, 0.0));
 	float v3 = Random2D(randomInput + vec2(0.0, 1.0));
 	float v4 = Random2D(randomInput + vec2(1.0, 1.0));
-	//float v1 = Noise(2, integer_X, integer_Y); //uncomment in case of glitches
-	//float v2 = Noise(2, integer_X+1, integer_Y);
-	//float v3 = Noise(2, integer_X, integer_Y+1);
-	//float v4 = Noise(2, integer_X+1, integer_Y+1);
+	//float v1 = Random2D(randomInput);
+	//float v2 = Random2D(randomInput + vec2(1.0, 0.0));
+	//float v3 = Random2D(randomInput + vec2(0.0, 1.0));
+	//float v4 = Random2D(randomInput + vec2(1.0, 1.0));
 
-	float i1 = Interpolate(v1, v2, fractional_X);
-	float i2 = Interpolate(v3, v4, fractional_X);
-	return Interpolate(i1, i2, fractional_Y);
-
-	//float i1 = mix(v1, v2, smoothstep(0, 1, fractional_X));
-	//float i2 = mix(v3, v4, smoothstep(0, 1, fractional_X));
-	//return mix(i1, i2, smoothstep(0, 1, fractional_Y));
+	float i1 = mix(v1, v2, smoothstep(0, 1, fractional_X));
+	float i2 = mix(v3, v4, smoothstep(0, 1, fractional_X));
+	return mix(i1, i2, smoothstep(0, 1, fractional_Y));
 }
 
 float perlin(float x, float y){
@@ -85,21 +81,21 @@ float perlin(float x, float y){
     int numOctaves = octaves;
 	float persistence = 0.5;
 	float total = 0,
-		frequency = pow(2, numOctaves),
-		amplitude = 1;
+		frequency = 0.05*freq,
+		amplitude = gDispFactor;
 	for (int i = 0; i < numOctaves; ++i) {
-		frequency /= 2;
+		frequency *= 2;
 		amplitude *= persistence;
 		
-		total += InterpolatedNoise( 3, x / frequency, y / frequency) * amplitude;
+		total += InterpolatedNoise( int(mod(0 + i,10)), x * frequency, y * frequency) * amplitude;
 	}
-	return total / frequency;
+	return pow(total, 3.0);
 }
 
 vec3 computeNormals(vec3 WorldPos){
-	float st = 0.1;
-	float dhdu = (perlin((WorldPos.x + st)*freq, WorldPos.z*freq)*gDispFactor - perlin((WorldPos.x - st)*freq, WorldPos.z*freq)*gDispFactor)/(2.0*st);
-	float dhdv = (perlin( WorldPos.x*freq, (WorldPos.z + st)*freq)*gDispFactor - perlin(WorldPos.x*freq, (WorldPos.z - st)*freq)*gDispFactor)/(2.0*st);
+	float st = 0.35;
+	float dhdu = (perlin((WorldPos.x + st), WorldPos.z) - perlin((WorldPos.x - st), WorldPos.z))/(2.0*st);
+	float dhdv = (perlin( WorldPos.x, (WorldPos.z + st)) - perlin(WorldPos.x, (WorldPos.z - st)))/(2.0*st);
 
 	vec3 X = vec3(1.0, dhdu, 1.0);
 	vec3 Z = vec3(0.0, dhdv, 1.0);
@@ -125,16 +121,16 @@ vec3 diffuse(vec3 normal){
 
 vec3 specular(vec3 normal){
 	vec3 lightDir = normalize(u_LightPosition - WorldPos);
-	float specularFactor = 0.12f;
+	float specularFactor = 0.009f;
 	vec3 viewDir = normalize(u_ViewPosition - WorldPos);
 	vec3 reflectDir = reflect(-lightDir, normal);  
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 16.0);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 35.0);
 	vec3 specular = spec * u_LightColor; 
 	return specular;
 }
 
 vec4 getTexture(vec3 normal){
-	float trans = 0.4;
+	float trans = 0.5;
 
 	vec4 sand_t = vec4(244, 231, 127, 255)/255;//texture(sand, texCoord*5.0);
 	vec4 rock_t = vec4(142, 75, 44, 255)/255;//texture(rock, texCoord*15.0);
@@ -168,7 +164,7 @@ vec4 getTexture(vec3 normal){
 void main()
 {
 	// calculate fog color 
-	vec2 u_FogDist = vec2(40.0, 80.0);
+	vec2 u_FogDist = vec2(800.0, 1400.0);
 	float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
 
 	bool normals_fog = true;

@@ -39,13 +39,12 @@ void main(){
 	vec2 refractionTexCoords = ndc;
 	
 	float near = 0.1;
-	float far = 1000.0;
+	float far = 2000.0;
 	float depth = texture(depthMap, refractionTexCoords).r;
 	float floorDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
 	float waterDistance = 2.0 * near * far / (far + near - (2.0 * gl_FragCoord.z - 1.0) * (far - near));
 	float waterDepth = floorDistance - waterDistance;
-	waterDepth = clamp(waterDepth/5.0, 0.0, 1.0);
-
+	waterDepth = clamp(waterDepth/15.0, 0.0, 1.0);
 	refractionTexCoords += totalDistortion;
 	refractionTexCoords = clamp(refractionTexCoords, 0.001, 0.999);
 	vec4 refractionColor = texture(refractionTex, refractionTexCoords);
@@ -62,16 +61,16 @@ void main(){
 	vec3 Z = vec3(0.0, totalDistortion.g, 1.0);
 	vec3 norm = texture(normalMap, totalDistortion).rgb;
 	norm = vec3(norm.r*2 - 1, norm.b*1.5, norm.g*2 - 1);
-	norm = normalize(norm);
+	norm = normalize(cross(X, Z));
 	vec3 lightDir = normalize(u_LightPosition - position.xyz);
 	float diffuseFactor = max(0.0, dot(lightDir, norm.rgb));
 	vec3 diffuse = diffuseFactor * vec3(1.0);
 
 	// calculate specular illumination 
-	float specularFactor = 1.2f;
+	float specularFactor = 1.0f;
 	vec3 viewDir = normalize(cameraPosition - position.xyz);
-	vec3 reflectDir = reflect(-lightDir, norm );  
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256.0);
+	vec3 reflectDir = reflect(-lightDir,  normalize(mix(norm, vec3(0,1,0), 0.80)) );  
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 512.0 + 512.0);
 	vec3 specular = spec * u_LightColor * specularFactor;  
 
 

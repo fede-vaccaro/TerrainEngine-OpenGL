@@ -74,7 +74,7 @@
     <LibraryPath>$(ProjectDir)Libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LibraryPath>C:\Users\Federico\Documents\TessellationOpenGL\Libraries;$(LibraryPath)</LibraryPath>
+    <LibraryPath>Libraries/;$(LibraryPath)</LibraryPath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
     <IncludePath>$(ProjectDir)Include;C:\Users\Federico\Google Drive\Uni Magistrale\Computer Graphics &amp; 3D\Terrain\Terrain\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="buffers.h" />
+    <ClInclude Include="glError.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="perlin\CustomTypes.h" />
     <ClInclude Include="shader.h" />
@@ -145,6 +146,7 @@
   <ItemGroup>
     <ClCompile Include="buffers.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="glError.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="shader.cpp" />
