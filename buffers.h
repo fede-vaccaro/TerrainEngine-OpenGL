@@ -4,8 +4,8 @@
 const int SCR_WIDTH_ = 1600;
 const int SCR_HEIGHT_ = 900;
 
-const int FBW = 1280;
-const int FBH = 720;
+const int FBW = 1600;
+const int FBH = 900;
 
 void bindFrameBuffer(int frameBuffer, int width, int height);
 

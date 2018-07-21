@@ -4,7 +4,7 @@
 
 TileController::TileController(float scale, float disp, Camera * camera, TessellationShader * shad, Shader * waterShader) : scale(scale), disp(disp), camera(camera), shad(shad), waterShader(waterShader)
 {
-	gridLenght = 60;
+	gridLenght = 61;
 
 	//position.resize(gridLenght*gridLenght);
 
@@ -64,7 +64,9 @@ void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec
 	waterPtr->unbindFBO();
 	
 	// real draw
-	tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, 0.0, 0.0, position);
+	tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 0.0, position);
+
+	//waterPtr->setPosition(glm::vec2(camera->Position.x, camera->Position.z), scale*gridLenght, waterHeight);
 	waterPtr->draw(proj* (camera->GetViewMatrix()), lightPosition, lightColor, camera->Position);
 
 }

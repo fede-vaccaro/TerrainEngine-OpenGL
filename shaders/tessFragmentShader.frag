@@ -130,7 +130,7 @@ vec3 specular(vec3 normal){
 }
 
 vec4 getTexture(vec3 normal){
-	float trans = 0.4;
+	float trans = 0.5;
 
 	vec4 sand_t = vec4(244, 231, 127, 255)/255;//texture(sand, texCoord*5.0);
 	vec4 rock_t = vec4(142, 75, 44, 255)/255;//texture(rock, texCoord*15.0);
