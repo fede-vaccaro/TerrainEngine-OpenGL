@@ -33,7 +33,7 @@ public:
 
 	void setWaterHeight(float height) {
 		waterHeight = height;
-		waterPtr->setPosition(glm::vec2(0.0,0.0), scale*gridLenght, waterHeight);
+		waterPtr->setPosition( getPos(gridLenght/2, gridLenght/2) , scale*gridLenght, waterHeight);
 	}
 
 	float getWaterHeight() const { return waterHeight; };

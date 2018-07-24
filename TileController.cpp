@@ -27,7 +27,7 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 	dudvMap = TextureFromFile("waterDUDV.png", "resources", false);
 	normalMap = TextureFromFile("normalMap.png", "resources", false);
 
-	waterHeight = 9.0;
+	waterHeight = 19.0;
 
 	position.resize(gridLenght*gridLenght);
 	for (int i = 0; i < gridLenght; i++) {
@@ -81,13 +81,21 @@ void TileController::updateTiles() {
 		posS = posC - I,
 		posN = posC + I,
 		posE = posC + J,
-		posW = posC - J;
+		posW = posC - J,
+		posSE = posS + posE,
+		posSW = posS + posW,
+		posNE = posN + posE,
+		posNW = posN + posW;
 
 	//if (tile->inTile(*camera, posC)) std::cout << "IN C" << std::endl;
 	if (tile->inTile(*camera, posS)) whichTile = S, howManyTiles++;// , std::cout << "IN S" << std::endl;
 	if (tile->inTile(*camera, posE)) whichTile = E, howManyTiles++;// , std::cout << "IN E" << std::endl;
 	if (tile->inTile(*camera, posW)) whichTile = W, howManyTiles++;// , std::cout << "IN W" << std::endl;
 	if (tile->inTile(*camera, posN)) whichTile = N, howManyTiles++;// , std::cout << "IN N" << std::endl;
+	//if (tile->inTile(*camera, posNE)) whichTile = NE, howManyTiles++;
+	//if (tile->inTile(*camera, posNW)) whichTile = NW, howManyTiles++;
+	//if (tile->inTile(*camera, posSE)) whichTile = SE, howManyTiles++;
+	//if (tile->inTile(*camera, posSW)) whichTile = SW, howManyTiles++;
 
 	//std::cout << camPosition.x << " " << camPosition.y << std::endl;
 
@@ -127,6 +135,22 @@ void TileController::changeTiles(tPosition currentTile) {
 	}
 	else if (currentTile = W) {
 		addColumn(-1);
+	}
+	else if (currentTile = NW) {
+		addRow(1);
+		addColumn(-1);
+	}
+	else if (currentTile = NE) {
+		addRow(1);
+		addColumn(1);
+	}
+	else if (currentTile = SW) {
+		addRow(-1);
+		addColumn(-1);
+	}
+	else if (currentTile = SE) {
+		addRow(-1);
+		addColumn(1);
 	}
 
 	waterPtr->setPosition(getPos(gridLenght / 2, gridLenght / 2), scale*gridLenght, waterHeight);

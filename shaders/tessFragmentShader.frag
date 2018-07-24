@@ -176,6 +176,20 @@ void main()
 	vec3 n; 
 	if(normals && normals_fog){
 		n = computeNormals(WorldPos);
+
+		//smoothing
+		float st = 0.1;
+		vec3 n1 = computeNormals(WorldPos + vec3(-st, 0, st));
+		vec3 n3 = computeNormals(WorldPos + vec3(0, 0, st));
+		vec3 n2 = computeNormals(WorldPos + vec3(st, 0, st));
+		vec3 n4 = computeNormals(WorldPos + vec3(-st, 0, 0));
+		vec3 n5 = computeNormals(WorldPos + vec3(st, 0, 0));
+		vec3 n6 = computeNormals(WorldPos + vec3(0, 0, -st));
+		vec3 n7 = computeNormals(WorldPos + vec3(-st, 0, -st));
+		vec3 n8 = computeNormals(WorldPos + vec3(st, 0, -st));
+
+		//n = n + n1 + n2 + n3 + n4 + n5 + n6 + n7 + n8;
+		//n = normalize(n);
 	}else{
 		n = vec3(0,1,0);
 	}
