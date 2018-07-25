@@ -121,5 +121,14 @@
     <None Include="shaders\TextArea.frag">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="shaders\screen.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\screen.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\raymarch_cube.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

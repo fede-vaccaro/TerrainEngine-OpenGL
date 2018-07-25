@@ -159,6 +159,9 @@
     <ClCompile Include="Water.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\raymarch_cube.frag" />
+    <None Include="shaders\screen.frag" />
+    <None Include="shaders\screen.vert" />
     <None Include="shaders\skyboxFrag.frag" />
     <None Include="shaders\skyboxVert.vert" />
     <None Include="shaders\tessControlShader.tcs" />
