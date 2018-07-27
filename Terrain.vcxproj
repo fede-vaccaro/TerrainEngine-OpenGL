@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="buffers.h" />
+    <ClInclude Include="computeShader.h" />
     <ClInclude Include="glError.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="perlin\CustomTypes.h" />
@@ -145,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="buffers.cpp" />
+    <ClCompile Include="computeShader.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="glError.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -159,6 +161,9 @@
     <ClCompile Include="Water.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\perlin3D.comp" />
+    <None Include="shaders\perlinworley.comp" />
+    <None Include="shaders\post_processing.frag" />
     <None Include="shaders\raymarch_cube.frag" />
     <None Include="shaders\screen.frag" />
     <None Include="shaders\screen.vert" />
@@ -172,6 +177,9 @@
     <None Include="shaders\TextArea.vert" />
     <None Include="shaders\waterFragmentShader.frag" />
     <None Include="shaders\waterVertexShader.vert" />
+    <None Include="shaders\weather.comp" />
+    <None Include="shaders\worley.comp" />
+    <None Include="shaders\worley3d.comp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

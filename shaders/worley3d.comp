@@ -1,0 +1,84 @@
+#version 430
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout(rgba32f, binding = 0) uniform image3D img_output;
+
+uniform float time;
+uniform vec3 u_resolution;
+
+vec3 random3( vec3 p ) {
+    return fract(sin(vec3(dot(p,vec3(127.1,311.7, 194.1729)),dot(p,vec3(269.5,183.3, 72.0192)), dot(p,vec3(183.3,72.0192,311.7))))*43758.5453);
+}
+
+float worley(vec3 st) {
+	float color = 0.0;
+
+    // Scale
+    st *= 15.;
+
+    // Tile the space
+    vec3 i_st = floor(st);
+    vec3 f_st = fract(st);
+
+    float m_dist = 1.;  // minimun distance
+
+    for (int y= -1; y <= 1; y++) {
+        for (int x= -1; x <= 1; x++) {
+		for (int z = -1; z<=1 ; z++) {
+
+            // Neighbor place in the grid
+            vec3 neighbor = vec3(float(x),float(y), float(z));
+
+            // Random position from current + neighbor place in the grid
+            vec3 point = random3(i_st + neighbor);
+
+
+			// Vector between the pixel and the point
+            vec3 diff = neighbor + point - f_st;
+
+            // Distance to the point
+            float dist = pow(length(diff), 1.0);
+
+            // Keep the closer distance
+            m_dist = min(m_dist, dist);
+			}
+        }
+    }
+
+    // Draw the min distance (distance field)
+    color += m_dist;
+
+    return 1. - color;
+}
+
+float worleyFBM(vec3 st){
+	float color = 0;
+	float amplitude = 1;
+	float freq = 2.0;
+	int octaves = 10;
+	float persistence = 0.5;
+	for(int i = 0; i < octaves; i++){
+		amplitude *= persistence;
+		freq *= 0.5;
+
+		color += worley(st/freq)*amplitude;
+	}
+	return color;
+
+}
+
+void main()
+{
+    vec3 pixel_coords = vec3(gl_GlobalInvocationID.xyz);
+
+	vec3 st = pixel_coords/u_resolution;
+	//st.x *= u_resolution.x/u_resolution.y;
+
+    float value = worleyFBM(st);
+	
+	value = clamp(value, 0.0, 1.0);
+	vec4 pixel = vec4(vec3(value),1.0);
+
+
+
+	imageStore(img_output, ivec3(pixel_coords), pixel);
+}

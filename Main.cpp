@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "computeShader.h"
 #include "shader.h"
 #include "TessShader.h"
 #include "texture.h"
@@ -218,10 +219,10 @@ int main()
 
 	float vertices[] = {
 		-1.0f, -1.0f, 0.0, 0.0,
-		-1.0f,  1.0f, 1.0, 1.0,
-		 1.0f, -1.0f, 0.0, 1.0,
-		 1.0f, -1.0f, 0.0, 0.0,
-		-1.0f,  1.0f, 1.0, 0.0,
+		-1.0f,  1.0f, 0.0, 1.0,
+		 1.0f, -1.0f, 1.0, 0.0,
+		 1.0f, -1.0f, 1.0, 0.0,
+		-1.0f,  1.0f, 0.0, 1.0,
 		 1.0f,  1.0f, 1.0, 1.0
 	};
 
@@ -233,6 +234,10 @@ int main()
 	};
 	std::cout << "============ OPENING SCREEN SHADER ============" << std::endl;
 	Shader screenShader("shaders/screen.vert", "shaders/raymarch_cube.frag");
+
+	std::cout << "============ OPENING POST PROCESSING SHADER ============" << std::endl;
+	Shader post("shaders/screen.vert", "shaders/post_processing.frag");
+
 
 	// screenVAO
 	unsigned int screenVAO, screenVBO;
@@ -246,6 +251,43 @@ int main()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2* sizeof(float)));
 	glEnableVertexAttribArray(1);
 
+	//post processing rbo
+	unsigned int fbo = createFrameBuffer();
+	//unsigned int texDepth = createDepthBufferAttachment(SCR_WIDTH, SCR_HEIGHT);
+	unsigned int rbo = createRenderBufferAttachment(SCR_WIDTH, SCR_HEIGHT);
+	unsigned int texFBO = createTextureAttachment(SCR_WIDTH, SCR_HEIGHT);
+	unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
+
+
+	//compute shaders
+	ComputeShader comp("shaders/perlinworley.comp");
+
+	//make texture
+	unsigned int perlinTex = Texture3D(256, 256, 256);
+
+	//compute
+	comp.use();
+	comp.setVec3("u_resolution", glm::vec3(256, 256, 256));
+	std::cout << "computing perlinworley!" << std::endl;
+	glDispatchCompute((GLuint)256, (GLuint)256, (GLuint)256);
+	std::cout << "computed!!" << std::endl;
+
+	////////////////////////
+	//compute shaders
+	ComputeShader weather("shaders/weather.comp");
+
+	//make texture
+	unsigned int weatherTex = Texture2D(1024, 1024);
+
+	//compute
+	weather.use();
+	std::cout << "computing weather!" << std::endl;
+	glDispatchCompute((GLuint)1024, (GLuint)1024, (GLuint)1);
+	std::cout << "weather computed!!" << std::endl;
+
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
@@ -255,17 +297,48 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		float aspect = SCR_WIDTH / SCR_HEIGHT;
-
+		
 		glm::mat4 proj = glm::perspective(60.0f, aspect, 0.1f, 1000.0f);
 
+		// fbo
+		bindFrameBuffer(fbo, SCR_WIDTH, SCR_HEIGHT);
 		screenShader.use();
 		screenShader.setVec2("iResolution", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
 		screenShader.setFloat("iTime", glfwGetTime());
 		screenShader.setMat4("proj", proj);
 		screenShader.setMat4("view", camera.GetViewMatrix());
 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_3D, perlinTex);
+		screenShader.setInt("cloud", 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, weatherTex);
+		screenShader.setInt("weatherTex", 1);
+
 		glBindVertexArray(screenVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+		unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
+
+
+		
+		// draw to screen
+		post.use();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, weatherTex);
+		post.setInt("screenTexture", 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_3D, perlinTex);
+		post.setInt("volTex", 1);
+
+		post.setFloat("time", glfwGetTime());
+
+		glBindVertexArray(screenVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
 
 		// toggle/untoggle wireframe mode
 		if (wireframe) {

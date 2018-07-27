@@ -48,6 +48,9 @@
     <ClInclude Include="glError.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="computeShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stb_image_write.cpp">
@@ -89,6 +92,9 @@
     <ClCompile Include="glError.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="computeShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\tessControlShader.tcs">
@@ -128,6 +134,24 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\raymarch_cube.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\post_processing.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\perlin3D.comp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\weather.comp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\worley.comp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\worley3d.comp">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shaders\perlinworley.comp">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
