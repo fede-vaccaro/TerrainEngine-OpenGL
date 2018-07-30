@@ -28,71 +28,18 @@ const vec3 cloud_bright = vec3(0.99, 0.96, 0.95);
 const vec3 cloud_dark = vec3(0.671, 0.725, 0.753);
 const float qLenght = 2.;
 
+const vec3 noiseKernel[1] = vec3[1](vec3(1,-1,0));
+
+// Cloud types height density gradients
+#define STRATUS_GRADIENT vec4(0.0, 0.1, 0.2, 0.3)
+#define STRATOCUMULUS_GRADIENT vec4(0.02, 0.2, 0.48, 0.625)
+#define CUMULUS_GRADIENT vec4(0.00, 0.1625, 0.88, 0.98)
+
 float Random2D(in vec3 st)
 {
 	return fract(sin(dot(st.xyz, vec3(12.9898, 78.233, 57.152))) * 43758.5453123);
 }
 
-float Interpolate(float a, float b, float x) {  // cosine interpolation
-	float ft = x * 3.1415927f;
-	float f = (1. - cos(ft)) * 0.5;
-	return  a * (1. - f) + b * f;
-}
-
-float InterpolatedNoise(int ind, float x, float y, float z) {
-	int integer_X = int(floor(x));
-	float fractional_X = fract(x);
-	int integer_Y = int(floor(y));
-	float fractional_Y = fract(y);
-    int integer_Z = int(floor(z));
-    float fractional_Z = fract(z);
-    
-	vec3 randomInput = vec3(integer_X, integer_Y, integer_Z);
-	float v1 = Random2D(randomInput + vec3(0.0, 0.0, 0.0));
-	float v2 = Random2D(randomInput + vec3(1.0, 0.0, 0.0));
-	float v3 = Random2D(randomInput + vec3(0.0, 1.0, 0.0));
-	float v4 = Random2D(randomInput + vec3(1.0, 1.0, 0.0));
-    
-    float v5 = Random2D(randomInput + vec3(0.0, 0.0, 1.0));
-	float v6 = Random2D(randomInput + vec3(1.0, 0.0, 1.0));
-	float v7 = Random2D(randomInput + vec3(0.0, 1.0, 1.0));
-	float v8 = Random2D(randomInput + vec3(1.0, 1.0, 1.0));
-    
-    
-	float i1 = Interpolate(v1, v2, fractional_X);
-	float i2 = Interpolate(v3, v4,  fractional_X);
-    
-    float i3 = Interpolate(v5, v6, fractional_X);
-    float i4 = Interpolate(v7, v8, fractional_X);
-    
-    float y1 = Interpolate(i1, i2, fractional_Y);
-    float y2 = Interpolate(i3, i4, fractional_Y);
-    
-    
-	return Interpolate(y1, y2, fractional_Z);
-}
-
-float weather(float x, float y, float z){
-
-	float threshold = 0.4;
-	float amp = 1.0;
-
-
-    int numOctaves = 10;
-	float persistence = 0.6;
-	float total = 0.,
-		frequency = .25,
-		amplitude = amp;
-	for (int i = 0; i < numOctaves; ++i) {
-		frequency *= 2.;
-		amplitude *= persistence;
-		total += InterpolatedNoise(0, x * frequency, y * frequency, 0) * amplitude;
-	}
-
-	if(total < threshold) total = 0; else total = 1.0;
-
-	return total;
-}
 
 /**
  * Signed distance function for a cube centered at the origin
@@ -144,15 +91,137 @@ float sceneSDF(vec3 samplePoint) {
  * end: the max distance away from the ey to march before giving up
  */
 
- float HG(float costheta) {
-	float g = 0.9;
-	return 0.25 * PI_r * (1 - pow(g, 2.0)) / pow((1 + pow(g, 2.0) - 2 * g * costheta), 1.5);
+ float getHeightFraction(vec3 inPos, vec2 cloudMinMax){
+	float height = (inPos.y - cloudMinMax.x)/(cloudMinMax.y - cloudMinMax.x);
+
+	return clamp(height, .0, 1.);
+
+ }
+
+
+
+ float remap(float originalValue, float originalMin, float originalMax, float newMin, float newMax)
+{
+	return newMin + (((originalValue - originalMin) / (originalMax - originalMin)) * (newMax - newMin));
 }
 
- float phase(vec3 v1, vec3 v2) {
-	float costheta = dot(v1, v2) / length(v1) / length(v2);
-	return HG(costheta);
+float getDensityForCloud(float heightFraction, float cloudType)
+{
+	float stratusFactor = 1.0 - clamp(cloudType * 2.0, 0.0, 1.0);
+	float stratoCumulusFactor = 1.0 - abs(cloudType - 0.5) * 2.0;
+	float cumulusFactor = clamp(cloudType - 0.5, 0.0, 1.0) * 2.0;
+
+	vec4 baseGradient = stratusFactor * STRATUS_GRADIENT + stratoCumulusFactor * STRATOCUMULUS_GRADIENT + cumulusFactor * CUMULUS_GRADIENT;
+
+	// gradicent computation (see Siggraph 2017 Nubis-Decima talk)
+	return remap(heightFraction, baseGradient.x, baseGradient.y, 0.0, 1.0) * remap(heightFraction, baseGradient.z, baseGradient.w, 1.0, 0.0);
+}
+
+float sampleCloudDensity(vec3 p, vec3 weather_data){
+	vec4 low_frequency_noise = texture(cloud, p);
+
+	float lowFreqFBM = low_frequency_noise.g*0.625 + low_frequency_noise.b*0.25 + low_frequency_noise.a*0.125;
+	float base_cloud = remap(low_frequency_noise.r, 1. - lowFreqFBM, 1., .0, 1.);
+	
+	float density = getDensityForCloud(p.y, weather_data.b);
+	base_cloud *= density;
+
+	float cloud_coverage = weather_data.r;
+
+	float base_cloud_with_coverage = remap(base_cloud , cloud_coverage , 1.0 , 0.0 , 1.0);
+	base_cloud_with_coverage *= cloud_coverage;
+
+	return base_cloud_with_coverage;
+}
+
+float sampleCloudDensityAlongCone(vec3 p, vec3 dir){
+	float density_along_cone = 0.0;
+
+	for(int i = 0; i <= 6; i++)
+	{
+		vec3 lightStep = dir;
+		float coneSpreadMultiplier = length(lightStep);
+		p += lightStep + coneSpreadMultiplier * noiseKernel[0] * float(i);
+
+		if(density_along_cone < 0.3)
+		{
+			density_along_cone += sampleCloudDensity(p, texture(weatherTex, p.xz).rgb);
+		}
+		else
+		{
+			density_along_cone += sampleCloudDensity(p, texture(weatherTex, p.xz).rgb);
+		}
+	}
+
+	return density_along_cone;
+}
+
+vec2 march(vec3 o, vec3 d)
+{
+	float density = 0.0, density_along_cone = 0.0;
+	float cloud_test = 0.0;
+	int zero_density_sample_count = 0;
+	int sample_count = 6;
+
+	for (int i = 0; i < sample_count; i++)
+	{
+		float depth = 0.0, delta = 0.5;
+		if(cloud_test > 0.0)
+		{
+		vec3 p = o + d*depth;
+			float sampled_density = sampleCloudDensity(o + d*depth, texture(weatherTex, p.xz).rgb);
+			if(sampled_density == 0.0)
+			{
+				zero_density_sample_count ++;
+			}
+
+			if(zero_density_sample_count != 6)
+			{
+				density += sampled_density;
+				if(sampled_density != 0.0){
+
+					density_along_cone = sampleCloudDensityAlongCone(p, sunPosition - p);
+
+				}
+				depth += delta;
+			}else
+			{
+				zero_density_sample_count = 0;
+				cloud_test = 0.0;
+			}
+
+
+		}else
+		{
+			vec3 p = o + d*depth;
+			float sampled_density = sampleCloudDensity(o + d*depth, texture(weatherTex, p.xz).rgb);
+			cloud_test = sampled_density;
+			if(cloud_test == 0.0){
+				depth += delta;
+			}
+		}
+		
+
+	}
+	return vec2(density, density_along_cone);
+}
+ float HG(float costheta, float g) {
+	float g2 = g*g;
+	return 0.25 * PI_r * (1 - g2) / ( 1 + g2 - 2 * g * pow(costheta, 1.5) );
+}
+
+ float phase(vec3 inLightVec, vec3 inViewVec) {
+	float costheta = dot(inLightVec, inViewVec) / length(inLightVec) / length(inViewVec);
+	return HG(costheta, 0.9);
 	//return Mie(costheta);
+}
+
+float beer(float p, float d){
+	return exp(-d*p);
+}
+
+float powder(float d){
+	return (1. - exp(-2*d));
 }
 
 float filterY(float value, float y){
@@ -175,11 +244,11 @@ float cast_scatter_ray(vec3 origin, vec3 dir) {
 
 	for (float t = 0.0; t < end; t += delta) {
 
-		sp = origin + dir * t;
-		float increment = filterY(texture(cloud, sp/(2*qLenght) + 0.5).r, sp.y);
-		float weather = texture(weatherTex, sp.xz/(2*qLenght) + 0.5).r;
-		increment *= weather;
-		if( increment > 0) inside+=increment;
+		vec3 sp = origin + t*dir; 
+		sp = sp/(2*qLenght) + 0.5;
+		vec3 weather = texture(weatherTex, sp.xz).rgb;
+		float cloudSample = sampleCloudDensity(sp, weather);
+		if( cloudSample > 0) inside+=cloudSample;
 	}
 	float d = 3.0;
 	float scatter = 2* exp(-d * inside) * (1.0 - exp(-2*d * inside));
@@ -189,15 +258,16 @@ float cast_scatter_ray(vec3 origin, vec3 dir) {
 
  vec4 march_in_cloud(vec3 p, vec3 dir, float delta){
 	float alpha = 0.0;
-	float depth = abs(Random2D(p))/50.0;
+	float depth = abs(Random2D(p))/30.0;
 	for(int i = 0; i < 1000; i++){
 		float dist = sceneSDF(p + dir*depth);
 		if(dist < EPSILON){
 			vec3 sp = p + depth*dir; 
-			float increment = filterY(texture(cloud, sp/(2*qLenght) + 0.5).r, sp.y);
-			float weather = texture(weatherTex, sp.xz/(2*qLenght) + 0.5).r;
-			increment *= weather;
-			if( increment > 0) alpha+=increment;
+			sp = sp/(2*qLenght) + 0.5;
+			vec3 weather = texture(weatherTex, sp.xz).rgb;
+			//float cloudSample = sampleCloudDensity(sp, weather)*100.0;
+			float cloudSample = texture(cloud, sp).r;
+			if( cloudSample > 0) alpha+=cloudSample;
 			if(alpha >= 1.0){
 				return vec4(sp, 1.0);
 			}
@@ -214,7 +284,7 @@ vec4 shortestDistanceToSurface(vec3 eye, vec3 marchingDirection, float start, fl
     for (int i = 0; i < MAX_MARCHING_STEPS; i++) {
         float dist = sceneSDF(eye + depth * marchingDirection);
         if (dist < EPSILON) {
-			vec4 alpha = march_in_cloud(eye + depth*marchingDirection, marchingDirection, 0.02);
+			vec4 alpha = march_in_cloud(eye + depth*marchingDirection, marchingDirection, 0.005);
 			return alpha;
         }
         depth += dist;

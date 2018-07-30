@@ -53,7 +53,8 @@ void main()
     
     FragColor = vec4(col, 1.0);
 	}else{
-		FragColor = texture(screenTexture, TexCoords);
-		//FragColor = texture(volTex, vec3(TexCoords.xy, time/10.0));
+		//FragColor = texture(screenTexture, TexCoords);
+		FragColor = texture(volTex, vec3(TexCoords, time/10.0));
+		//FragColor = vec4(FragColor);
 	}
 }  

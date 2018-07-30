@@ -1,6 +1,6 @@
 #version 430
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-layout(rgba32f, binding = 0) uniform image3D img_output;
+layout(rgba8, binding = 0) uniform image3D img_output;
 
 uniform vec3 u_resolution;
 uniform float time;
@@ -49,21 +49,7 @@ float InterpolatedNoise(int ind, float x, float y, float z) {
 	return Interpolate(y1, y2, fractional_Z);
 }
 
-float perlin(float x, float y, float z){
-	
-    int numOctaves = 5;
-	float persistence = 0.5;
-	float total = 0.,
-		frequency = .05,
-		amplitude = 1.0;
-	for (int i = 0; i < numOctaves; ++i) {
-		frequency *= 2.;
-		amplitude *= persistence;
-		
-		total += InterpolatedNoise(0, x * frequency, y * frequency, z * frequency) * amplitude;
-	}
-	return pow(total, 1.0);
-}
+
 
 vec3 random3( vec3 p ) {
     return fract(sin(vec3(dot(p,vec3(127.1,311.7, 194.1729)),dot(p,vec3(269.5,183.3, 72.0192)), dot(p,vec3(183.3,72.0192,311.7))))*43758.5453);
@@ -114,7 +100,7 @@ float worleyFBM(vec3 st){
 	float color = 0;
 	float amplitude = 1;
 	float freq = 2.0;
-	int octaves = 5;
+	int octaves = 3;
 	float persistence = 0.5;
 	for(int i = 0; i < octaves; i++){
 		amplitude *= persistence;
@@ -124,6 +110,22 @@ float worleyFBM(vec3 st){
 	}
 	return color;
 
+}
+
+float perlinFBM(vec3 st){
+	float x = st.x, y = st.y, z = st.z;
+    int numOctaves = 10;
+	float persistence = 0.5;
+	float total = 0.,
+		frequency = .05,
+		amplitude = 1.0;
+	for (int i = 0; i < numOctaves; ++i) {
+		frequency *= 2.;
+		amplitude *= persistence;
+		
+		total += InterpolatedNoise(0, x * frequency, y * frequency, z * frequency) * amplitude;
+	}
+	return pow(total, 1.0);
 }
 
 float remap(float originalValue, float originalMin, float originalMax, float newMin, float newMax)
@@ -136,14 +138,21 @@ void main()
     vec3 pixel_coords = vec3(gl_GlobalInvocationID.xyz);
 
 
-    float perlin = perlin(pixel_coords.x, pixel_coords.y, pixel_coords.z);
-	float worley = worleyFBM(pixel_coords/u_resolution);
-	perlin = clamp(perlin, 0.0, 1.0);
-	worley = clamp(worley, 0.0, 1.0);
+    //float perlin = perlinFBM(pixel_coords/u_resolution);
+	//float worley = worleyFBM(pixel_coords/u_resolution);
+	//perlin = clamp(perlin, 0.0, 1.0);
+	//worley = clamp(worley, 0.0, 1.0);
 
-	float value = remap(perlin, 0.0, 1.0, worley, 1.0);
+	//float perinWorley = remap(perlin, worley, 1.0, 0.0, 1.0);
+	//float worley1 = worleyFBM(pixel_coords*2.0/u_resolution);
+	//float worley2 = worleyFBM(pixel_coords*4.0/u_resolution);
+	//float worley3 = worleyFBM(pixel_coords*8.0/u_resolution);
 
-	vec4 pixel = vec4(vec3(value),1.0);
+
+
+	//vec4 pixel = vec4(perinWorley, worley1, worley2, worley3);
+
+	vec4 pixel = vec4(1.0)*255;
 
 	imageStore(img_output, ivec3(pixel_coords), pixel);
    
