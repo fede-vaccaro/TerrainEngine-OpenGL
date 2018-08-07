@@ -134,6 +134,7 @@
     <ClInclude Include="buffers.h" />
     <ClInclude Include="computeShader.h" />
     <ClInclude Include="glError.h" />
+    <ClInclude Include="Include\camera.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="perlin\CustomTypes.h" />
     <ClInclude Include="shader.h" />
@@ -165,6 +166,7 @@
     <None Include="shaders\perlinworley.comp" />
     <None Include="shaders\post_processing.frag" />
     <None Include="shaders\raymarch_cube.frag" />
+    <None Include="shaders\raymarch_cube_box.frag" />
     <None Include="shaders\screen.frag" />
     <None Include="shaders\screen.vert" />
     <None Include="shaders\skyboxFrag.frag" />
@@ -175,6 +177,7 @@
     <None Include="shaders\tessVertexShader.vert" />
     <None Include="shaders\TextArea.frag" />
     <None Include="shaders\TextArea.vert" />
+    <None Include="shaders\volumetricclouds.frag" />
     <None Include="shaders\waterFragmentShader.frag" />
     <None Include="shaders\waterVertexShader.vert" />
     <None Include="shaders\weather.comp" />

@@ -51,6 +51,9 @@
     <ClInclude Include="computeShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stb_image_write.cpp">
@@ -152,6 +155,12 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="shaders\perlinworley.comp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\volumetricclouds.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\raymarch_cube_box.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

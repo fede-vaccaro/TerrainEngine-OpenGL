@@ -263,13 +263,28 @@ int main()
 	ComputeShader comp("shaders/perlinworley.comp");
 
 	//make texture
-	unsigned int perlinTex = Texture3D(256, 256, 256);
+	unsigned int perlinTex = Texture3D(64, 64, 64);
 
 	//compute
 	comp.use();
-	comp.setVec3("u_resolution", glm::vec3(256, 256, 256));
+	comp.setVec3("u_resolution", glm::vec3(64, 64, 64));
 	std::cout << "computing perlinworley!" << std::endl;
-	glDispatchCompute((GLuint)256, (GLuint)256, (GLuint)256);
+	glDispatchCompute((GLuint)64, (GLuint)64, (GLuint)64);
+	std::cout << "computed!!" << std::endl;
+
+
+
+	//compute shaders
+	ComputeShader worley_git("shaders/worley.comp");
+
+	//make texture
+	unsigned int worley32 = Texture3D(32, 32, 32);
+
+	//compute
+	comp.use();
+	comp.setVec3("u_resolution", glm::vec3(32, 32, 32));
+	std::cout << "computing worley 32!" << std::endl;
+	glDispatchCompute((GLuint)32, (GLuint)32, (GLuint)32);
 	std::cout << "computed!!" << std::endl;
 
 	////////////////////////
@@ -287,18 +302,24 @@ int main()
 
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
+	camera.Position = glm::vec3(3000.0, 3000.0, 3000.0);
 
+
+	int frame = 0;
 	while (!glfwWindowShouldClose(window))
 	{
+
+
 		processInput(window);
 
+		//camera.Position += glm::vec3(10, 10, 10);
 
 		glClearColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		float aspect = SCR_WIDTH / SCR_HEIGHT;
 		
-		glm::mat4 proj = glm::perspective(60.0f, aspect, 0.1f, 1000.0f);
+		glm::mat4 proj = glm::perspective(20.0f, aspect, 0.1f, 100.0f);
 
 		// fbo
 		bindFrameBuffer(fbo, SCR_WIDTH, SCR_HEIGHT);
@@ -307,10 +328,16 @@ int main()
 		screenShader.setFloat("iTime", glfwGetTime());
 		screenShader.setMat4("proj", proj);
 		screenShader.setMat4("view", camera.GetViewMatrix());
+		screenShader.setVec3("cameraPosition", camera.Position);
+		screenShader.setInt("frame", ++frame);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_3D, perlinTex);
 		screenShader.setInt("cloud", 0);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_3D, worley32);
+		screenShader.setInt("worley32", 2);
 
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, weatherTex);
@@ -326,7 +353,7 @@ int main()
 		post.use();
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, weatherTex);
+		glBindTexture(GL_TEXTURE_2D, texFBO);
 		post.setInt("screenTexture", 0);
 
 		glActiveTexture(GL_TEXTURE1);
