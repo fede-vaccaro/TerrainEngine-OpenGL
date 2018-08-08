@@ -263,13 +263,13 @@ int main()
 	ComputeShader comp("shaders/perlinworley.comp");
 
 	//make texture
-	unsigned int perlinTex = Texture3D(64, 64, 64);
+	unsigned int perlinTex = Texture3D(128, 128, 128);
 
 	//compute
 	comp.use();
-	comp.setVec3("u_resolution", glm::vec3(64, 64, 64));
+	comp.setVec3("u_resolution", glm::vec3(128, 128, 128));
 	std::cout << "computing perlinworley!" << std::endl;
-	glDispatchCompute((GLuint)64, (GLuint)64, (GLuint)64);
+	glDispatchCompute((GLuint)128, (GLuint)128, (GLuint)128);
 	std::cout << "computed!!" << std::endl;
 
 

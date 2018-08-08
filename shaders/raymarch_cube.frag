@@ -44,8 +44,8 @@ uniform vec3 noiseKernel[6u] = vec3[]
 	vec3(-0.16852403,  0.14748697,  0.97460106)
 );
 
-vec3 planeMin = vec3(-1.1,0.35 + 0.0,-2.2 -0.2)*qLenght;
-vec3 planeMax = vec3(1.1,0.35 + 0.6,-0.2)*qLenght;
+vec3 planeMin = vec3(-2.0,0.35 + 0.0,-2.0)*qLenght;
+vec3 planeMax = vec3( 2.0,0.35 + 1.15, 2.0)*qLenght;
 vec2 planeDim = vec2(planeMax.xz - planeMin.xz);
 vec3 planeDim_ = vec3(planeMax - planeMin);
 
@@ -55,8 +55,8 @@ vec3 planeDim_ = vec3(planeMax - planeMin);
 #define STRATOCUMULUS_GRADIENT vec4(0.02, 0.2, 0.48, 0.625)
 #define CUMULUS_GRADIENT vec4(0.00, 0.1625, 0.88, 0.98)
 
-#define SPHERE_INNER_RADIUS 2000.0
-#define SPHERE_OUTER_RADIUS 2125.0
+#define SPHERE_INNER_RADIUS 125000.0
+#define SPHERE_OUTER_RADIUS 125000.0*0.6
 #define SPHERE_DELTA float(SPHERE_OUTER_RADIUS - SPHERE_INNER_RADIUS)
 
 
@@ -65,11 +65,11 @@ float chunkLen;
 bool intersectSphere(vec3 o, vec3 d, out vec3 minT, out vec3 maxT)
 {
 	// Intersect inner sphere
-	vec3 sphereToOrigin = o - sphereCenter;
+	vec3 sphereToOrigin = sphereCenter - o;
 	float b = dot(d, sphereToOrigin);
 	float c = dot(sphereToOrigin, sphereToOrigin);
 	float sqrtOpInner = b*b - (c - SPHERE_INNER_RADIUS*SPHERE_INNER_RADIUS);
-
+	// t_hc*t_hc - (L*L - r*r) 
 	// No solution (we are outside the sphere, looking away from it)
 	float maxSInner;
 	if(sqrtOpInner < 0.0)
@@ -111,7 +111,29 @@ bool intersectSphere(vec3 o, vec3 d, out vec3 minT, out vec3 maxT)
 
 	chunkLen = length(maxT - minT);
 
-	return minT.y > -500.0; // only above the horizon
+	return minT.y > -0.0; // only above the horizon
+}
+
+bool sphereIntersection(vec3 o, vec3 d, out vec3 inPos, out vec3 outPos){
+	sphereCenter = vec3(10000.0, 0.0, 10000.0);
+	d = normalize(d);
+	vec3 L = sphereCenter - o;
+	float t_ca = dot(L, d);
+	if(t_ca < 0) return false;
+
+	float D2 = dot(L,L) - t_ca*t_ca;
+	if(D2 > SPHERE_INNER_RADIUS*SPHERE_INNER_RADIUS)
+	{
+		return false;
+	}
+	float t_hc = sqrt(SPHERE_INNER_RADIUS*SPHERE_INNER_RADIUS - D2);
+	float t_0 = t_ca - t_hc;
+	float t_1 = t_ca + t_hc;
+
+	inPos = o + d*t_0;
+	outPos = o + d*t_1;
+
+	return true;
 }
 
 
@@ -142,6 +164,58 @@ bool intersectBox(vec3 o, vec3 d, out vec3 minT, out vec3 maxT)
 	maxT = o + d * tfar;
 
 	return hit;
+}
+
+bool intersectCubeMap(vec3 o, vec3 d, out vec3 minT, out vec3 maxT)
+{		
+	vec3 cubeMin = vec3(-0.5, -0.2, -0.5);
+	vec3 cubeMax = vec3(0.5, 1 + cubeMin.y, 0.5);
+
+	// compute intersection of ray with all six bbox planes
+	vec3 invR = 1.0 / d;
+	vec3 tbot = invR * (cubeMin - o);
+	vec3 ttop = invR * (cubeMax - o);
+	// re-order intersections to find smallest and largest on each axis
+	vec3 tmin = min (ttop, tbot);
+	vec3 tmax = max (ttop, tbot);
+	// find the largest tmin and the smallest tmax
+	vec2 t0 = max (tmin.xx, tmin.yz);
+	float tnear = max (t0.x, t0.y);
+	t0 = min (tmax.xx, tmax.yz);
+	float tfar = min (t0.x, t0.y);
+	
+	// check for hit
+	bool hit;
+	if ((tnear > tfar) || tfar < 0.0)
+		hit = false;
+	else
+		hit = true;
+
+	minT = tnear < 0.0? o : o + d * tnear; // if we are inside the bb, start point is cam pos
+	maxT = o + d * tfar;
+
+	return hit;
+}
+
+vec4 colorCubeMap(vec3 endPos)
+{
+	vec3 col = vec3(0.0);
+
+	vec3 sp = endPos + 0.2;
+
+	// Normalized pixel coordinates (from 0 to 1)
+    vec3 color1 = vec3(0.0, 0.4, 0.8);
+
+    // Time varying pixel color
+    vec3 color2 = vec3(0.5, 1.0, 1.0);
+
+    vec3 color3 = color1*0.8;
+        
+    col = mix(color1, color2, exp(-5.0*sp.y));
+    
+    col = mix(col, color3, clamp(1.-exp(-2.*(sp.y - 0.5)), 0.0, 1.0)  );
+
+	return vec4(col, 1.0);
 }
 
 
@@ -260,7 +334,7 @@ float sampleCloudDensity(vec3 p){
 	vec2 uv = (p.xz - planeMin.xz) / planeDim;
 
 	//uv *= 2.0;
-	vec2 uv_scaled = uv*3.0;
+	vec2 uv_scaled = uv*4.0;
 
 	float heightFraction = getHeightFraction(p);
 
@@ -287,7 +361,7 @@ float sampleCloudDensity(vec3 p){
 	{
 		vec3 erodeCloudNoise = texture(worley32, vec3(uv_scaled*1.5, heightFraction)*0.1 ).rgb;
 		float highFreqFBM = (erodeCloudNoise.r * 0.625) + (erodeCloudNoise.g * 0.25) + (erodeCloudNoise.b * 0.125);
-		float highFreqNoiseModifier = mix(highFreqFBM, 1.0 - highFreqFBM, clamp(heightFraction * 5.0, 0.0, 1.0));
+		float highFreqNoiseModifier = mix(highFreqFBM, 1.0 - highFreqFBM, clamp(heightFraction * 10.0, 0.0, 1.0));
 
 		base_cloud_with_coverage = base_cloud_with_coverage - highFreqNoiseModifier * (1.0 - base_cloud_with_coverage);
 
@@ -296,7 +370,7 @@ float sampleCloudDensity(vec3 p){
 
 	base_cloud_with_coverage = threshold(base_cloud_with_coverage, 0.05);
 
-	return clamp(base_cloud_with_coverage*2.0, 0.0, 1.0);
+	return clamp(base_cloud_with_coverage, 0.0, 1.0);
 }
 
 
@@ -371,11 +445,11 @@ float raymarchToLight(vec3 o, float stepSize, vec3 lightDir, float originalDensi
 	//float powder_ = powder1*powder2*2.0;
 	//foat pow = powder(originalDensity, -0.6);
 
-	float energy = mix(beer(coneDensity), 1.0, 0.25)*powder(originalDensity*coneDensity, -0.25)*phase*2.0;
+	float energy = mix(beer(coneDensity), 1.0, 0.25)*powder(originalDensity*coneDensity, -0.25)*phase*2.5;
 	return clamp(energy, 0.0, 1.0);
 }
 
-vec3 ambientlight = vec3(255, 240, 230)/255;
+vec3 ambientlight = vec3(255, 255, 255)/255;
 
 float ambientFactor = 1.0;
 vec3 lc = ambientlight * ambientFactor;// * cloud_bright;
@@ -461,7 +535,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos){
 
 	float volumeHeight = planeMax.y - planeMin.y;
 
-	int nSteps = int(mix(48.0, 96.0, clamp( (len - volumeHeight) / volumeHeight ,0.0,1.0) ));
+	int nSteps = int(mix(64.0, 128.0, clamp( (len - volumeHeight) / volumeHeight ,0.0,1.0) ));
 
 	
 	
@@ -480,7 +554,9 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos){
 	float lightDotEye = -dot(lightDir, dir);
 
 	for(int i = 0; i < nSteps; ++i)
-	{		
+	{	
+		if( dot(pos, pos) <= pow(dot(planeDim/2.0, vec2(0.6, 0.6)), 2.0) )
+		{
 		float density_sample = sampleCloudDensity(pos);//*(step_*0.01);
 
 		if(density_sample > 0.0)
@@ -504,53 +580,48 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos){
 			col = (1.0 - col.a) * src + col;
 			if(col.a > 0.95)
 			{
-				return col;
+				break;
+			}
 			}
 		}
 		pos += dir;
 	}
 
-	return col;
+	density = clamp(density, 0.0, 1.0);
+	return vec4(col.rgb, density);
 }
 
 void main()
 {
-	//qLenght = iTime/5.0;
-
 	vec2 fragCoord = gl_FragCoord.xy;
 	vec2 fulluv = fragCoord - iResolution / 2.0;
-	float z =  iResolution.y / tan(radians(20.0));
-	vec3 viewDir = normalize(vec3(fulluv, -z / 2.0));
+	float z =  iResolution.y / tan(radians(40.0));
+	vec3 viewDir = normalize(vec3(fulluv, -z / 1.0));
 	vec3 worldDir = normalize( (inverse(view) * vec4(viewDir, 0)).xyz);
 
 
-	//vec3 viewDir = rayDirection(90.0, iResolution.xy, fragCoord);
-    //eye = cameraPosition;
-    //mat4 viewToWorld = viewMatrix(eye, vec3(0.0, 0, 0.0), vec3(0.0, 1.0, 0.0));
-    //viewToWorld = view;
-    //vec3 worldDir = (viewToWorld * vec4(viewDir, 0.0)).xyz;
-    
-    //vec4 pos_alpha = shortestDistanceToSurface(eye, worldDir, MIN_DIST, MAX_DIST);
-    
-	//vec4 v = march_(vec3(eye), ray_wor);
 	vec3 startPos, endPos;
-	bool hit;
-	hit = intersectBox(cameraPosition, worldDir, startPos, endPos);
+	
+	bool hit = intersectBox(cameraPosition, worldDir, startPos, endPos);
+	//bool hit = intersectSphere(cameraPosition, worldDir, startPos, endPos);
+	//bool hit = sphereIntersection(cameraPosition, worldDir, startPos, endPos);
+	vec3 csp, cep;
+	intersectCubeMap(vec3(0.0,0.0,0.0), worldDir, csp, cep);
 
 	vec4 v = vec4(0.0);
-	vec4 bg = vec4(0.0, 0.7, 1.0, 1.0);
+	vec4 bg = colorCubeMap(cep);
 
+	//vec4 bg = vec4(0.0);
 	if(hit)
 	{
 		v = marchToCloud(startPos,endPos);
-		//v = mix( bg, v, v.a);
+		v = mix( bg, v, pow(v.a, 3.0));
+
 	}else
 	{
-		//v = bg;
+		v = bg;
 	}
 
-    //fragColor = vec4( v.r >= 0.95 ?  1.0 : 0.0  );
-	//vec3 ambient = vec3(255, 255, 230)/255;
 
 
 	//vec4 cloud_color = vec4(mix(ambient*cloud_bright, mix(cloud_dark, ambient, 0.1) , 1 - v.g/1), v.r);
