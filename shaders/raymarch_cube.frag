@@ -8,6 +8,7 @@
 
 in vec2 TexCoords;
 
+uniform float FOV;
 uniform vec2 iResolution;
 uniform float iTime;
 uniform mat4 view;
@@ -31,7 +32,7 @@ const float PI_r = 0.3183098;
 
 const vec3 cloud_bright = vec3(0.99, 0.96, 0.95);
 const vec3 cloud_dark = vec3(0.671, 0.725, 0.753);
-float qLenght = 5*500*50;
+float qLenght = 5*500;
 
 // Cone sampling random offsets
 uniform vec3 noiseKernel[6u] = vec3[] 
@@ -44,8 +45,8 @@ uniform vec3 noiseKernel[6u] = vec3[]
 	vec3(-0.16852403,  0.14748697,  0.97460106)
 );
 
-vec3 planeMin = vec3(-2.0,0.35 + 0.0,-2.0)*qLenght;
-vec3 planeMax = vec3( 2.0,0.35 + 1.15, 2.0)*qLenght;
+vec3 planeMin = vec3(-2.0,0.5 + 0.0, -2.0)*qLenght;
+vec3 planeMax = vec3( 2.0,0.5 + 0.7,  2.0)*qLenght;
 vec2 planeDim = vec2(planeMax.xz - planeMin.xz);
 vec3 planeDim_ = vec3(planeMax - planeMin);
 
@@ -334,7 +335,7 @@ float sampleCloudDensity(vec3 p){
 	vec2 uv = (p.xz - planeMin.xz) / planeDim;
 
 	//uv *= 2.0;
-	vec2 uv_scaled = uv*4.0;
+	vec2 uv_scaled = uv*8.0;
 
 	float heightFraction = getHeightFraction(p);
 
@@ -349,7 +350,7 @@ float sampleCloudDensity(vec3 p){
 	float density = getDensityForCloud(heightFraction, weather_data.g);
 	base_cloud *= density/heightFraction;
 
-	float cloud_coverage = weather_data.r*0.15;
+	float cloud_coverage = weather_data.r*0.1;
 	float base_cloud_with_coverage = remap(base_cloud , cloud_coverage , 1.0 , 0.0 , 1.0);
 	base_cloud_with_coverage *= cloud_coverage;
 	
@@ -370,7 +371,7 @@ float sampleCloudDensity(vec3 p){
 
 	base_cloud_with_coverage = threshold(base_cloud_with_coverage, 0.05);
 
-	return clamp(base_cloud_with_coverage, 0.0, 1.0);
+	return clamp(base_cloud_with_coverage*2.0, 0.0, 1.0);
 }
 
 
@@ -555,7 +556,8 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos){
 
 	for(int i = 0; i < nSteps; ++i)
 	{	
-		if( dot(pos, pos) <= pow(dot(planeDim/2.0, vec2(0.6, 0.6)), 2.0) )
+		//if( dot(pos, pos) <= pow(dot(planeDim/2.0, vec2(0.6, 0.6)), 2.0) )
+		if(true)
 		{
 		float density_sample = sampleCloudDensity(pos);//*(step_*0.01);
 
@@ -595,7 +597,7 @@ void main()
 {
 	vec2 fragCoord = gl_FragCoord.xy;
 	vec2 fulluv = fragCoord - iResolution / 2.0;
-	float z =  iResolution.y / tan(radians(40.0));
+	float z =  iResolution.y / tan(radians(FOV));
 	vec3 viewDir = normalize(vec3(fulluv, -z / 1.0));
 	vec3 worldDir = normalize( (inverse(view) * vec4(viewDir, 0)).xyz);
 
@@ -609,13 +611,12 @@ void main()
 	intersectCubeMap(vec3(0.0,0.0,0.0), worldDir, csp, cep);
 
 	vec4 v = vec4(0.0);
-	vec4 bg = colorCubeMap(cep);
+	vec4 bg = vec4(0.0);//colorCubeMap(cep);
 
 	//vec4 bg = vec4(0.0);
 	if(hit)
 	{
 		v = marchToCloud(startPos,endPos);
-		v = mix( bg, v, pow(v.a, 3.0));
 
 	}else
 	{
