@@ -163,5 +163,8 @@
     <None Include="shaders\raymarch_cube_box.frag">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="shaders\cloud_post.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -43,31 +43,34 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 	waterPtr = new Water(glm::vec2(0.0,0.0), waterShader, scale*gridLenght, waterHeight, dudvMap, normalMap, waterModel);
 };
 
-void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor) {
+void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, unsigned int fbo) {
 	
 	// reflection
-	//waterPtr->bindReflectionFBO();
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//camera->invertPitch();
-	//camera->Position.y -= 2 * (camera->Position.y - waterHeight);	
-	//tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 1.0f, position);
+	waterPtr->bindReflectionFBO();
+	glClearColor(0.0, 0.4*0.8, 0.7*0.8, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	camera->invertPitch();
+	camera->Position.y -= 2 * (camera->Position.y - waterHeight);	
+	tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 1.0f, position);
 	
-	//camera->invertPitch();
-	//camera->Position.y += 2 * abs(camera->Position.y - waterHeight);
+	camera->invertPitch();
+	camera->Position.y += 2 * abs(camera->Position.y - waterHeight);
 	//waterPtr->unbindFBO();
 
 	// refraction
-	//waterPtr->bindRefractionFBO();
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	waterPtr->bindRefractionFBO();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	//tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, -1.0f, position);
-	//waterPtr->unbindFBO();
-	
+	tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, -1.0f, position);
+	//waterPtr->unbindFBO(); 
+	//bind off screen drawing FBO
+	bindFrameBuffer(fbo, SCR_WIDTH_, SCR_HEIGHT_);
+
 	// real draw
 	tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 0.0, position);
 
-	//waterPtr->setPosition(glm::vec2(camera->Position.x, camera->Position.z), scale*gridLenght, waterHeight);
-	//waterPtr->draw(proj* (camera->GetViewMatrix()), lightPosition, lightColor, camera->Position);
+	waterPtr->setPosition(glm::vec2(camera->Position.x, camera->Position.z), scale*gridLenght, waterHeight);
+	waterPtr->draw(proj* (camera->GetViewMatrix()), lightPosition, lightColor, camera->Position);
 
 }
 

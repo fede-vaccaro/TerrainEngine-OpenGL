@@ -162,6 +162,7 @@
     <ClCompile Include="Water.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\cloud_post.frag" />
     <None Include="shaders\perlin3D.comp" />
     <None Include="shaders\perlinworley.comp" />
     <None Include="shaders\post_processing.frag" />

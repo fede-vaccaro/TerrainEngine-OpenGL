@@ -18,7 +18,7 @@ public:
 	
 	void updateTiles();
 
-	void drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor);
+	void drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, unsigned int fbo);
 	Model * planeModel, * waterModel;
 	unsigned int * textures, normalMap, dudvMap;
 	Tile * tile;

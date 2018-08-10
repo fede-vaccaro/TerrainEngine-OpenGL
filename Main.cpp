@@ -61,7 +61,7 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 1600;
 const unsigned int SCR_HEIGHT = 900;
 
-float dispFactor = 6.0;
+float dispFactor = 8.0;
 
 glm::vec3 startPosition(0.0f, 100.0, 0.0f);
 
@@ -207,8 +207,8 @@ int main()
 	skyboxShader.use();
 	skyboxShader.setInt("skybox", 0);
 
-	glm::vec3 fogColor(204, 224, 255);
-	fogColor /= 255.0;
+	glm::vec3 fogColor(0.5, 0.73, 0.8);
+	fogColor *= .8;
 	glm::vec3 lightColor(255, 255, 190);
 	lightColor /= 255.0;
 
@@ -292,6 +292,9 @@ int main()
 	std::cout << "============ OPENING POST PROCESSING SHADER ============" << std::endl;
 	Shader post("shaders/screen.vert", "shaders/post_processing.frag");
 
+	std::cout << "============ OPENING CLOUD POST PROCESSING SHADER ============" << std::endl;
+	Shader cloudPost("shaders/screen.vert", "shaders/cloud_post.frag");
+
 
 	// screenVAO
 	unsigned int screenVAO, screenVBO;
@@ -309,8 +312,9 @@ int main()
 	//post processing rbo
 	unsigned int fbo = createFrameBuffer();
 	//unsigned int texDepth = createDepthBufferAttachment(SCR_WIDTH, SCR_HEIGHT);
-	unsigned int rbo = createRenderBufferAttachment(SCR_WIDTH, SCR_HEIGHT);
+	//unsigned int rbo = createRenderBufferAttachment(SCR_WIDTH, SCR_HEIGHT);
 	unsigned int texFBO = createTextureAttachment(SCR_WIDTH, SCR_HEIGHT);
+	unsigned int depthTexFBO = createDepthTextureAttachment(SCR_WIDTH, SCR_HEIGHT);
 	unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
 
 	//cloud rbo
@@ -319,18 +323,23 @@ int main()
 	unsigned int cloudTEX = createTextureAttachment(SCR_WIDTH, SCR_HEIGHT);
 	unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
 
+	//cloud post rbo
+	unsigned int cloudPostFBO = createFrameBuffer();
+	unsigned int cloudPostRBO = createRenderBufferAttachment(SCR_WIDTH, SCR_HEIGHT);
+	unsigned int cloudPostTEX = createTextureAttachment(SCR_WIDTH, SCR_HEIGHT);
+	unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
 
 	//compute shaders
 	ComputeShader comp("shaders/perlinworley.comp");
 
 	//make texture
-	unsigned int perlinTex = Texture3D(64, 64, 64);
+	unsigned int perlinTex = Texture3D(128, 128, 128);
 
 	//compute
 	comp.use();
-	comp.setVec3("u_resolution", glm::vec3(64, 64, 64));
+	comp.setVec3("u_resolution", glm::vec3(128, 128, 128));
 	std::cout << "computing perlinworley!" << std::endl;
-	glDispatchCompute((GLuint)64, (GLuint)64, (GLuint)64);
+	glDispatchCompute((GLuint)128, (GLuint)128, (GLuint)128);
 	std::cout << "computed!!" << std::endl;
 
 
@@ -405,21 +414,22 @@ int main()
 		//x = cos(-angle)*dist;
 		//z = sin(-angle)*dist;
 		lightPosition = glm::vec3(x * 10, dispFactor*3.0, z * 10); //rotate light
-		lightPosition += camera.Position;
+		//lightPosition += camera.Position;
 		// input
 		processInput(window);
 
-		//tc.updateTiles(); TILE UPDATE DISABLED
+		tc.updateTiles(); 
 
 		
 
+
+
+		bindFrameBuffer(fbo, SCR_WIDTH, SCR_HEIGHT);
 		// render
 		glEnable(GL_MULTISAMPLE);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
-
-		bindFrameBuffer(fbo, SCR_WIDTH, SCR_HEIGHT);
 
 		glClearColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -486,7 +496,7 @@ int main()
 		float wps = 0.5;
 		//tc.setWaterHeight(wps*glfwGetTime());
 
-		tc.drawTiles(proj, lightPosition, lightColor, fogColor);
+		tc.drawTiles(proj, lightPosition, lightColor, fogColor, fbo);
 
 		//draw skyBox
 		glDepthFunc(GL_LEQUAL);
@@ -517,6 +527,7 @@ int main()
 		screenShader.setMat4("view", camera.GetViewMatrix());
 		screenShader.setVec3("cameraPosition", camera.Position);
 		screenShader.setFloat("FOV", camera.Zoom);
+		screenShader.setVec3("lightPosition", lightPosition);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_3D, perlinTex);
@@ -530,12 +541,31 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, weatherTex);
 		screenShader.setInt("weatherTex", 1);
 
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, depthTexFBO);
+		screenShader.setInt("depthMap", 3);
+
 		glBindVertexArray(screenVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
-
-		// USE POST FX SHADER
 		//unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
+
+		// USE POST SHADER
+		//unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
+		bindFrameBuffer(cloudPostFBO, SCR_WIDTH, SCR_HEIGHT);
+		cloudPost.use();
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, cloudTEX);
+		post.setInt("cloudTEX", 0);
+
+		post.setFloat("time", glfwGetTime());
+
+		glBindVertexArray(screenVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+		// USE POST SHADER
+		unbindCurrentFrameBuffer(SCR_WIDTH, SCR_HEIGHT);
 		post.use();
 
 		glActiveTexture(GL_TEXTURE0);
@@ -543,15 +573,8 @@ int main()
 		post.setInt("screenTexture", 0);
 
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, cloudTEX);
+		glBindTexture(GL_TEXTURE_2D, cloudPostTEX);
 		post.setInt("cloudTEX", 2);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_3D, perlinTex);
-		post.setInt("volTex", 1);
-
-		post.setFloat("time", glfwGetTime());
-
 
 		glBindVertexArray(screenVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);

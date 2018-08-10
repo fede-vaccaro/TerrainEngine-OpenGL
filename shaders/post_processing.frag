@@ -5,6 +5,7 @@ in vec2 TexCoords;
 
 uniform sampler2D screenTexture;
 uniform sampler2D cloudTEX;
+
 uniform sampler3D volTex;
 uniform float time;
 
@@ -58,9 +59,5 @@ void main()
 		vec4 bg = texture(screenTexture, TexCoords);
 
 		FragColor = mix(bg, cloud, cloud.a);
-
-		//FragColor = vec4( FragColor.g);
-		//FragColor = texture(volTex, vec3(TexCoords, time/10.0));
-		//FragColor = vec4(FragColor.r);
 	}
 }  

@@ -20,7 +20,7 @@ uniform sampler2D depthMap;
 
 out vec4 FragColor;
 
-const float distFactor = 0.08;
+const float distFactor = 0.03;
 
 float Random3D(in vec3 st)
 {
@@ -71,7 +71,7 @@ float perlin(float x, float y, float z){
     int numOctaves = 3;
 	float persistence = 0.5;
 	float total = 0.,
-		frequency = 0.9/3.0,
+		frequency = 0.9/2.0,
 		amplitude = .35;
 	for (int i = 0; i < numOctaves; ++i) {
 		frequency *= 2.;
