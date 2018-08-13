@@ -71,8 +71,8 @@ float perlin(float x, float y, float z){
     int numOctaves = 3;
 	float persistence = 0.5;
 	float total = 0.,
-		frequency = 0.05,
-		amplitude = .35;
+		frequency = 0.025,
+		amplitude = 2.0;
 	for (int i = 0; i < numOctaves; ++i) {
 		frequency *= 2.;
 		amplitude *= persistence;
@@ -148,7 +148,7 @@ float worley(vec3 st) {
 
 void main(){
 	float distFromPos = distance(position.xyz, cameraPosition); 
-	vec2 u_FogDist = vec2(900.0, 1800.0);
+	vec2 u_FogDist = vec2(2000.0, 4000.0);
 	float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
 
 	float grain = 50.0;
@@ -176,7 +176,7 @@ void main(){
 	float floorDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
 	float waterDistance = 2.0 * near * far / (far + near - (2.0 * gl_FragCoord.z - 1.0) * (far - near));
 	float waterDepth = floorDistance - waterDistance;
-	waterDepth = clamp(waterDepth/25.0, 0.0, 1.0);
+	waterDepth = clamp(waterDepth/50.0, 0.0, 1.0);
 
 	refractionTexCoords += totalDistortion;
 	refractionTexCoords = clamp(refractionTexCoords, 0.001, 0.999);
@@ -186,7 +186,7 @@ void main(){
 	vec3 toCameraVector =  position.xyz - cameraPosition;
 	float fresnelFactor = max(dot(normalize(-toCameraVector), vec3(0.0, 1.0, 0.0)), 0.0);
 	fresnelFactor = pow(fresnelFactor, 0.1);
-	vec4 refr_reflCol = mix(reflectionColor, refractionColor, fresnelFactor);
+	vec4 refr_reflCol = mix(reflectionColor, refractionColor, 1.0);
 
 	// calculate diffuse illumination
 	totalDistortion = normalize(totalDistortion);

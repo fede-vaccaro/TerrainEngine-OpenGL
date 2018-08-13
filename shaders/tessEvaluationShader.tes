@@ -92,7 +92,7 @@ float perlin(float x, float y){
     int numOctaves = octaves;
 	float persistence = 0.5;
 	float total = 0,
-		frequency = 0.05*freq,
+		frequency = 0.005*freq,
 		amplitude = gDispFactor;
 	for (int i = 0; i < numOctaves; ++i) {
 		frequency *= 2;

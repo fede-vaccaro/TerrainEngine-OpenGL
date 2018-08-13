@@ -61,9 +61,9 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 1600;
 const unsigned int SCR_HEIGHT = 900;
 
-float dispFactor = 9.0;
+float dispFactor = 12.0;
 
-glm::vec3 startPosition(0.0f, 100.0, 0.0f);
+glm::vec3 startPosition(0.0f, 700.0f, 0.0f);
 
 bool keyBools[10] = { false, false,false, false, false, false, false, false, false, false };
 bool updateShell = true;
@@ -207,11 +207,12 @@ int main()
 	skyboxShader.use();
 	skyboxShader.setInt("skybox", 0);
 
-	glm::vec3 fogColor(0.6, 0.71, 0.75);
+	glm::vec3 fogColor(0.6 + 0.15*0.5, 0.71 + 0.15*0.5, 0.75 + 0.15*0.5);
+	fogColor *= 1.05;
 	glm::vec3 lightColor(255, 255, 190);
 	lightColor /= 255.0;
 
-	float scale = 30.0f;
+	float scale = 100.0f;
 
 	TileController tc(scale, dispFactor, &camera, &tshader, &waterShader);
 
@@ -222,6 +223,7 @@ int main()
 	TextArea::setScreen(&scr);
 
 
+	float coverage = 0.18;
 
 	gui = new TextArea(10, 10, 250, 0); // l'altezza � adattata al contenuto
 	int octaves = tc.getOctaves();
@@ -238,6 +240,7 @@ int main()
 	if (gui) gui->addElement(std::string("Grass coverage factor:"), &gc);
 	if (gui) gui->addElement(std::string("Frequency: "), &f);
 	if (gui) gui->addElement(std::string("Tessellation Multiplier: "), &tm);
+	if (gui) gui->addElement(std::string("Clouds coverage: "), &coverage);
 	if (gui) gui->addElement(std::string("Delta magnitude: "), &deltaMagnitude);
 
 
@@ -248,6 +251,7 @@ int main()
 	getters.push_back([&tc] { return tc.getGrassCoverage(); });
 	getters.push_back([&tc] { return tc.getFreq(); });
 	getters.push_back([&tc] { return tc.getTessMultiplier(); });
+	getters.push_back([&coverage] { return coverage; });
 	getters.push_back(0);
 
 	setters.push_back(0);
@@ -257,6 +261,7 @@ int main()
 	setters.push_back([&tc](float value) { tc.setGrassCoverage(value); });
 	setters.push_back([&tc](float value) { tc.setFreq(value);          });
 	setters.push_back([&tc](float value) { tc.setTessMultiplier(value);  });
+	setters.push_back([&coverage](float value) { coverage = value; });
 	setters.push_back(0);
 
 	gui_el = (setters.size() == getters.size() ? setters.size() : -1);
@@ -527,6 +532,7 @@ int main()
 		screenShader.setVec3("cameraPosition", camera.Position);
 		screenShader.setFloat("FOV", camera.Zoom);
 		screenShader.setVec3("lightPosition", lightPosition);
+		screenShader.setFloat("coverage_multiplier", coverage);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_3D, perlinTex);
