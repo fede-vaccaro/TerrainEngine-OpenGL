@@ -61,124 +61,18 @@ vec3 planeDim_ = vec3(planeMax - planeMin);
 #define CUMULUS_GRADIENT vec4(0.00, 0.1625, 0.88, 0.98)
 
 #define EARTH_RADIUS (350000.)
-#define SPHERE_INNER_RADIUS (EARTH_RADIUS + 5000.0)
-#define SPHERE_OUTER_RADIUS (SPHERE_INNER_RADIUS + 8000.0)
+#define SPHERE_INNER_RADIUS (EARTH_RADIUS + 4000.0)
+#define SPHERE_OUTER_RADIUS (SPHERE_INNER_RADIUS + 10000.0)
 #define SPHERE_DELTA float(SPHERE_OUTER_RADIUS - SPHERE_INNER_RADIUS)
 
-#define CLOUDS_AMBIENT_COLOR_TOP (vec3(149., 167., 149.)*(1.5/255.))
-#define CLOUDS_AMBIENT_COLOR_BOTTOM (vec3(77., 75., 65.)*(1.25/255.))
+#define CLOUDS_AMBIENT_COLOR_TOP (vec3(149., 167., 149.)*(1./255.))
+#define CLOUDS_AMBIENT_COLOR_BOTTOM (vec3(65., 75., 77.)*(1.5/255.))
 #define CLOUDS_MIN_TRANSMITTANCE 1e-1
 
 #define SUN_DIR normalize(vec3(-.7,.4,.75))
 //#define SUN_DIR normalize(vec3(1,10,1));
 #define SUN_COLOR ambientlight
 vec3 sphereCenter = vec3(0.0, -EARTH_RADIUS, 0.0);
-
-float chunkLen;
-
-bool intersectSphere(vec3 o, vec3 d, out vec3 minT, out vec3 maxT)
-{
-	// Intersect inner sphere
-	vec3 sphereToOrigin = sphereCenter - o;
-	float b = dot(d, sphereToOrigin);
-	float c = dot(sphereToOrigin, sphereToOrigin);
-	float sqrtOpInner = b*b - (c - SPHERE_INNER_RADIUS*SPHERE_INNER_RADIUS);
-	// t_hc*t_hc - (L*L - r*r) 
-	// No solution (we are outside the sphere, looking away from it)
-	float maxSInner;
-	if(sqrtOpInner < 0.0)
-	{
-		return false;
-		//maxSInner = 0.0;
-	}
-	else
-	{
-		float deInner = sqrt(sqrtOpInner);
-		float solAInner = -b - deInner;
-		float solBInner = -b + deInner;
-
-		maxSInner = max(solAInner, solBInner);
-		maxSInner = maxSInner < 0.0? 0.0 : maxSInner;
-	}
-	// Intersect outer sphere
-	float sqrtOpOuter = b*b - (c - SPHERE_OUTER_RADIUS*SPHERE_OUTER_RADIUS);
-
-	// No solution - same as inner sphere
-	if(sqrtOpOuter < 0.0)
-	{
-		return false;
-	}
-	
-	float deOuter = sqrt(sqrtOpOuter);
-	float solAOuter = -b - deOuter;
-	float solBOuter = -b + deOuter;
-
-	float maxSOuter = max(solAOuter, solBOuter);
-	maxSOuter = maxSOuter < 0.0? 0.0 : maxSOuter;
-
-	// Compute entering and exiting ray points
-	float minSol = min(maxSInner, maxSOuter);
-	float maxSol = max(maxSInner, maxSOuter);
-
-	minT = o + d * minSol;
-	maxT = o + d * maxSol;
-
-	chunkLen = length(maxT - minT);
-
-	return minT.y > -0.0; // only above the horizon
-}
-
-bool sphereIntersection(vec3 o, vec3 d, out vec3 inPos, out vec3 outPos){
-	sphereCenter = vec3(10000.0, 0.0, 10000.0);
-	d = normalize(d);
-	vec3 L = sphereCenter - o;
-	float t_ca = dot(L, d);
-	if(t_ca < 0) return false;
-
-	float D2 = dot(L,L) - t_ca*t_ca;
-	if(D2 > SPHERE_INNER_RADIUS*SPHERE_INNER_RADIUS)
-	{
-		return false;
-	}
-	float t_hc = sqrt(SPHERE_INNER_RADIUS*SPHERE_INNER_RADIUS - D2);
-	float t_0 = t_ca - t_hc;
-	float t_1 = t_ca + t_hc;
-
-	inPos = o + d*t_0;
-	outPos = o + d*t_1;
-
-	return true;
-}
-
-
-bool intersectBox(vec3 o, vec3 d, out vec3 minT, out vec3 maxT)
-{
-
-	// compute intersection of ray with all six bbox planes
-	vec3 invR = 1.0 / d;
-	vec3 tbot = invR * (planeMin - o);
-	vec3 ttop = invR * (planeMax - o);
-	// re-order intersections to find smallest and largest on each axis
-	vec3 tmin = min (ttop, tbot);
-	vec3 tmax = max (ttop, tbot);
-	// find the largest tmin and the smallest tmax
-	vec2 t0 = max (tmin.xx, tmin.yz);
-	float tnear = max (t0.x, t0.y);
-	t0 = min (tmax.xx, tmax.yz);
-	float tfar = min (t0.x, t0.y);
-	
-	// check for hit
-	bool hit;
-	if ((tnear > tfar) || tfar < 0.0)
-		hit = false;
-	else
-		hit = true;
-
-	minT = tnear < 0.0? o : o + d * tnear; // if we are inside the bb, start point is cam pos
-	maxT = o + d * tfar;
-
-	return hit;
-}
 
 bool intersectCubeMap(vec3 o, vec3 d, out vec3 minT, out vec3 maxT)
 {		
@@ -322,7 +216,7 @@ float sampleCloudDensity(vec3 p){
 
 
 	//vec2 uv = (p.xz - planeMin.xz) / planeDim;
-	const float cloudSpeed = 45.0;
+	const float cloudSpeed = 75.0;
 
 	p += heightFraction * windDirection * CLOUD_TOP_OFFSET;
 	p += windDirection * iTime * cloudSpeed;
@@ -330,7 +224,7 @@ float sampleCloudDensity(vec3 p){
 	vec2 uv = p.xz/SPHERE_INNER_RADIUS + 0.5;
 
 	//uv *= 2.0;
-	vec2 uv_scaled = uv*48.0;
+	vec2 uv_scaled = uv*32.0;
 
 
 	if(heightFraction < 0.0 || heightFraction > 1.0){
@@ -346,6 +240,7 @@ float sampleCloudDensity(vec3 p){
 	
 	//heightFraction = clamp(heightFraction, -heightFraction - EPSILON, heightFraction + EPSILON);
 	float density = getDensityForCloud(heightFraction, weather_data.g);
+	//base_cloud = remap(base_cloud, 1.0 - density, 1.0, 0.0, 1.0);
 	base_cloud *= density/heightFraction;
 
 	float cloud_coverage = weather_data.r*coverage_multiplier;
@@ -403,7 +298,7 @@ float raymarchToLight(vec3 o, float stepSize, vec3 lightDir, float originalDensi
 	float density = 0.0;
 	float coneDensity = 0.0;
 	float invDepth = 1.0/ds;
-	float absorption = 0.00125/3.0;
+	float absorption = 0.00015;
 	float sigma_ds = -ds*absorption;
 	vec3 pos;
 
@@ -411,7 +306,7 @@ float raymarchToLight(vec3 o, float stepSize, vec3 lightDir, float originalDensi
 
 	for(int i = 0; i < 6; i++)
 	{
-		pos = startPos + coneRadius*noiseKernel[i]*float(i);
+		pos = startPos;// + coneRadius*noiseKernel[i]*float(i);
 
 		float heightFraction = getHeightFraction(pos);
 		if(heightFraction >= 0)
@@ -461,6 +356,7 @@ uniform float bayerFilter[16u] = float[]
 	15.0*BAYER_FACTOR, 7.0*BAYER_FACTOR, 13.0*BAYER_FACTOR, 5.0*BAYER_FACTOR
 );
 
+const float inv_sqrt_two = pow(2.0, -0.5);
 
 vec4 marchToCloud(vec3 startPos, vec3 endPos){
 	vec3 path = endPos - startPos;
@@ -470,7 +366,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos){
 
 	float volumeHeight = planeMax.y - planeMin.y;
 
-	int nSteps = 128;//int(mix(64.0, 128.0, clamp( len/SPHERE_DELTA ,0.0,1.0) ));
+	int nSteps = int(mix(64.0, 128.0, clamp( len/SPHERE_DELTA ,0.0,1.0) ));
 	
 	float ds = len/nSteps;
 	vec3 dir = path/len;
@@ -483,10 +379,10 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos){
 
 	float density = 0.0;
 
-	float lightDotEye = -dot(normalize(SUN_DIR), normalize(dir));
+	float lightDotEye = dot(normalize(SUN_DIR), normalize(dir));
 
 	float T = 1.0;
-	float absorption = 0.0025;
+	float absorption = 0.00250;
 	float sigma_ds = -ds*absorption;
 
 	for(int i = 0; i < nSteps; ++i)
@@ -495,14 +391,14 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos){
 
 		float density_sample = sampleCloudDensity(pos);
 
-		if(density_sample > 0.1)
+		if(density_sample > 0.)
 		{
 			float height = getHeightFraction(pos);
-			vec3 ambientLight = mix( CLOUDS_AMBIENT_COLOR_BOTTOM, CLOUDS_AMBIENT_COLOR_TOP, height )*1.25;
+			vec3 ambientLight = mix( CLOUDS_AMBIENT_COLOR_BOTTOM, CLOUDS_AMBIENT_COLOR_TOP, sqrt(height) )*1.0;
 			float light_density = raymarchToLight(pos, ds, SUN_DIR, density_sample, lightDotEye);
-			float scattering = mix(HG(lightDotEye, -0.2), HG(lightDotEye, 0.8), 1.0);
-			scattering = 0.5;
-			vec3 S = (ambientLight + SUN_COLOR * (scattering * light_density)) * density_sample;
+			float scattering = mix(HG(lightDotEye, -0.01), HG(lightDotEye, 0.05),lightDotEye);
+			//scattering = 0.6;
+			vec3 S = inv_sqrt_two*(ambientLight + SUN_COLOR * (scattering * light_density)) * density_sample;
 			float dTrans = exp(density_sample*sigma_ds);
 			vec3 Sint = (S - S * dTrans) * (1. / density_sample);
 			col.rgb += T * Sint;
@@ -539,7 +435,6 @@ void main()
 
 
 	vec3 startPos, endPos;
-	bool hit = intersectBox(cameraPosition, worldDir, startPos, endPos);
 	//bool hit = intersectSphere(cameraPosition, worldDir, startPos, endPos);
 	//bool hit = sphereIntersection(cameraPosition, worldDir, startPos, endPos);
 
@@ -550,7 +445,7 @@ void main()
 
 	vec4 bg = colorCubeMap(cubeMapEndPos, worldDir);
 
-	hit = raySphereintersection(cameraPosition, worldDir, SPHERE_INNER_RADIUS, startPos);
+	bool hit = raySphereintersection(cameraPosition, worldDir, SPHERE_INNER_RADIUS, startPos);
 	bool hit2 = raySphereintersection(cameraPosition, worldDir, SPHERE_OUTER_RADIUS, endPos);
 
 	if(hit)
@@ -579,12 +474,12 @@ void main()
 	//v.rgb = mix(bg.rgb, v.rgb, v.a);
 
 	// Apply atmospheric fog to far away clouds
-	vec3 ambientColor = vec3(0.6,0.71,0.75) + 0.25;
+	vec3 ambientColor = bg.rgb;//vec3(0.6,0.71,0.75) + 0.25;
 
 	// Use current position distance to center as action radius
 	float dist = length(startPos - cameraPosition);
 	float radius = (cameraPosition.y - sphereCenter.y) * 0.3;
-	float alpha = clamp( (dist / radius)*3.0, 0.0, 1.0);
+	float alpha = clamp( (dist / radius)*2.0, 0.0, 1.0);
 	v.rgb = mix(v.rgb, ambientColor, alpha*alpha);
 
 
