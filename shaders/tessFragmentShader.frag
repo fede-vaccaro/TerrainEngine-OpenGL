@@ -164,7 +164,7 @@ vec4 getTexture(vec3 normal){
 void main()
 {
 	// calculate fog color 
-	vec2 u_FogDist = vec2(800.0, 1400.0);
+	vec2 u_FogDist = vec2(500.0, 5000.0);
 	float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
 
 	bool normals_fog = true;

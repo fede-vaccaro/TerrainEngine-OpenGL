@@ -61,7 +61,7 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 1600;
 const unsigned int SCR_HEIGHT = 900;
 
-float dispFactor = 8.0;
+float dispFactor = 9.0;
 
 glm::vec3 startPosition(0.0f, 100.0, 0.0f);
 
@@ -207,12 +207,11 @@ int main()
 	skyboxShader.use();
 	skyboxShader.setInt("skybox", 0);
 
-	glm::vec3 fogColor(0.5, 0.73, 0.8);
-	fogColor *= .8;
+	glm::vec3 fogColor(0.6, 0.71, 0.75);
 	glm::vec3 lightColor(255, 255, 190);
 	lightColor /= 255.0;
 
-	float scale = 10.0f;
+	float scale = 30.0f;
 
 	TileController tc(scale, dispFactor, &camera, &tshader, &waterShader);
 
@@ -447,7 +446,7 @@ int main()
 
 		// Camera (View Matrix) setting
 		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 10.f, 2000.0f);
+		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 10.f, 10000.0f);
 
 
 		// set terrain matrices

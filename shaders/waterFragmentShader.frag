@@ -20,7 +20,7 @@ uniform sampler2D depthMap;
 
 out vec4 FragColor;
 
-const float distFactor = 0.03;
+const float distFactor = 0.5;
 
 float Random3D(in vec3 st)
 {
@@ -71,7 +71,7 @@ float perlin(float x, float y, float z){
     int numOctaves = 3;
 	float persistence = 0.5;
 	float total = 0.,
-		frequency = 0.9/2.0,
+		frequency = 0.05,
 		amplitude = .35;
 	for (int i = 0; i < numOctaves; ++i) {
 		frequency *= 2.;
@@ -100,9 +100,55 @@ vec3 computeNormals(vec3 WorldPos){
 	return norm;
 }
 
+vec3 random3( vec3 p ) {
+    return fract(sin(vec3(dot(p,vec3(127.1,311.7, 194.1729)),dot(p,vec3(269.5,183.3, 72.0192)), dot(p,vec3(183.3,72.0192,311.7))))*43758.5453);
+}
+
+float worley(vec3 st) {
+	float color = 0.0;
+
+    // Scale
+    st *= 0.5;
+
+    // Tile the space
+    vec3 i_st = floor(st);
+    vec3 f_st = fract(st);
+
+    float m_dist = 1.;  // minimun distance
+
+    for (int y= -1; y <= 1; y++) {
+        for (int x= -1; x <= 1; x++) {
+		for (int z = -1; z<=1 ; z++) {
+
+            // Neighbor place in the grid
+            vec3 neighbor = vec3(float(x),float(y), float(z));
+
+            // Random position from current + neighbor place in the grid
+            vec3 point = random3(i_st + neighbor);
+
+
+			// Vector between the pixel and the point
+            vec3 diff = neighbor + point - f_st;
+
+            // Distance to the point
+            float dist = pow(length(diff), 1.0);
+
+            // Keep the closer distance
+            m_dist = min(m_dist, dist);
+			}
+        }
+    }
+
+    // Draw the min distance (distance field)
+    color += m_dist;
+
+    return color;
+}
+
+
 void main(){
 	float distFromPos = distance(position.xyz, cameraPosition); 
-	vec2 u_FogDist = vec2(600.0, 1200.0);
+	vec2 u_FogDist = vec2(900.0, 1800.0);
 	float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
 
 	float grain = 50.0;
@@ -125,12 +171,13 @@ void main(){
 	vec2 refractionTexCoords = ndc;
 	
 	float near = 10.0;
-	float far = 2000.0;
+	float far = 10000.0;
 	float depth = texture(depthMap, refractionTexCoords).r;
 	float floorDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
 	float waterDistance = 2.0 * near * far / (far + near - (2.0 * gl_FragCoord.z - 1.0) * (far - near));
 	float waterDepth = floorDistance - waterDistance;
 	waterDepth = clamp(waterDepth/25.0, 0.0, 1.0);
+
 	refractionTexCoords += totalDistortion;
 	refractionTexCoords = clamp(refractionTexCoords, 0.001, 0.999);
 	vec4 refractionColor = texture(refractionTex, refractionTexCoords);
@@ -138,8 +185,8 @@ void main(){
 
 	vec3 toCameraVector =  position.xyz - cameraPosition;
 	float fresnelFactor = max(dot(normalize(-toCameraVector), vec3(0.0, 1.0, 0.0)), 0.0);
-	fresnelFactor = pow(fresnelFactor, 1);
-	vec4 refr_reflCol = mix(reflectionColor, refractionColor, 0.5);
+	fresnelFactor = pow(fresnelFactor, 0.1);
+	vec4 refr_reflCol = mix(reflectionColor, refractionColor, fresnelFactor);
 
 	// calculate diffuse illumination
 	totalDistortion = normalize(totalDistortion);
@@ -161,10 +208,13 @@ void main(){
 	vec3 specular = spec * u_LightColor * specularFactor;  
 
 
-	vec4 color = vec4(0, 154, 255, 255)/255.0;
+	vec4 color = vec4(0.2,0.71,0.85, 1.0);
 
 	vec4 fogColor = vec4(240, 240, 255, 255)/255;
 
 	FragColor =  mix(refr_reflCol + color/5.0 + vec4(diffuse,1.0) + vec4(specular, 1.0) , fogColor,(1 - fogFactor));
+	float worley_ = worley( vec3(position.xz, moveFactor*10.0)) + worley( vec3(position.xz*2.0, moveFactor*5.0))*0.5;
+	worley_ = mix(   worley_*clamp((1 - waterDepth), 0.0, 1.0), worley_*0.01, waterDepth);
+	FragColor.rgb += worley_;
 	FragColor.a = waterDepth;
 	}
