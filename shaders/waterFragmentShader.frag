@@ -72,7 +72,7 @@ float perlin(float x, float y, float z){
 	float persistence = 0.5;
 	float total = 0.,
 		frequency = 0.025,
-		amplitude = 2.0;
+		amplitude = 3.0;
 	for (int i = 0; i < numOctaves; ++i) {
 		frequency *= 2.;
 		amplitude *= persistence;
@@ -186,7 +186,7 @@ void main(){
 	vec3 toCameraVector =  position.xyz - cameraPosition;
 	float fresnelFactor = max(dot(normalize(-toCameraVector), vec3(0.0, 1.0, 0.0)), 0.0);
 	fresnelFactor = pow(fresnelFactor, 0.1);
-	vec4 refr_reflCol = mix(reflectionColor, refractionColor, 1.0);
+	vec4 refr_reflCol = mix(reflectionColor, refractionColor, 0.75);
 
 	// calculate diffuse illumination
 	totalDistortion = normalize(totalDistortion);
@@ -198,13 +198,14 @@ void main(){
 	norm = computeNormals(position.xyz);
 	vec3 lightDir = normalize(u_LightPosition - position.xyz);
 	float diffuseFactor = max(0.0, dot(lightDir, norm.rgb));
-	vec3 diffuse = diffuseFactor * vec3(1.0);
+	float diffuseConst = 0.5;
+	vec3 diffuse = diffuseFactor*diffuseConst*u_LightColor;
 
 	// calculate specular illumination 
-	float specularFactor = 1.0f;
+	float specularFactor = 0.8f;
 	vec3 viewDir = normalize(cameraPosition - position.xyz);
-	vec3 reflectDir = reflect(-lightDir,  normalize(mix(norm, vec3(0,1,0), 0.80)) );  
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 512.0 + 512.0);
+	vec3 reflectDir = reflect(-lightDir,  normalize(mix(norm, vec3(0,1,0), 0.2)) );  
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 512.);
 	vec3 specular = spec * u_LightColor * specularFactor;  
 
 
@@ -212,7 +213,7 @@ void main(){
 
 	vec4 fogColor = vec4(240, 240, 255, 255)/255;
 
-	FragColor =  mix(refr_reflCol + color/5.0 + vec4(diffuse,1.0) + vec4(specular, 1.0) , fogColor,(1 - fogFactor));
+	FragColor =  mix(refr_reflCol + vec4(diffuse + specular, 1.0) , fogColor,(1 - fogFactor));
 	float worley_ = worley( vec3(position.xz, moveFactor*10.0)) + worley( vec3(position.xz*2.0, moveFactor*5.0))*0.5;
 	worley_ = mix(   worley_*clamp((1 - waterDepth), 0.0, 1.0), worley_*0.01, waterDepth);
 	FragColor.rgb += worley_;

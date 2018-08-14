@@ -80,7 +80,7 @@ void main()
 
 	//cloudType = cloudType*0.5 + cloudType_*0.5;
 
-	float coverage = perlinNoise(uv, perlinScale*.75, perlinFrecuency, perlinAmplitude, 4);
+	float coverage = perlinNoise(uv, perlinScale, perlinFrecuency, perlinAmplitude, 4);
 	vec4 weather = vec4( clamp(coverage, 0, 1), cloudType, 0, 1);
 
 	imageStore (outWeatherTex, pixel, weather);

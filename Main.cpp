@@ -418,7 +418,8 @@ int main()
 		//x = cos(-angle)*dist;
 		//z = sin(-angle)*dist;
 		lightPosition = glm::vec3(x * 10, dispFactor*3.0, z * 10); //rotate light
-		//lightPosition += camera.Position;
+		lightPosition = glm::vec3(-.7, .2, .75)*dispFactor*1e8f;
+		lightPosition += camera.Position;
 		// input
 		processInput(window);
 

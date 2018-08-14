@@ -60,7 +60,7 @@ vec3 planeDim_ = vec3(planeMax - planeMin);
 #define STRATOCUMULUS_GRADIENT vec4(0.02, 0.2, 0.48, 0.625)
 #define CUMULUS_GRADIENT vec4(0.00, 0.1625, 0.88, 0.98)
 
-#define EARTH_RADIUS (350000.)
+#define EARTH_RADIUS (450000.)
 #define SPHERE_INNER_RADIUS (EARTH_RADIUS + 4000.0)
 #define SPHERE_OUTER_RADIUS (SPHERE_INNER_RADIUS + 10000.0)
 #define SPHERE_DELTA float(SPHERE_OUTER_RADIUS - SPHERE_INNER_RADIUS)
@@ -69,7 +69,7 @@ vec3 planeDim_ = vec3(planeMax - planeMin);
 #define CLOUDS_AMBIENT_COLOR_BOTTOM (vec3(65., 75., 77.)*(1.5/255.))
 #define CLOUDS_MIN_TRANSMITTANCE 1e-1
 
-#define SUN_DIR normalize(vec3(-.7,.4,.75))
+#define SUN_DIR normalize(vec3(-.7,.2,.75))
 //#define SUN_DIR normalize(vec3(1,10,1));
 #define SUN_COLOR ambientlight
 vec3 sphereCenter = vec3(0.0, -EARTH_RADIUS, 0.0);
@@ -224,7 +224,7 @@ float sampleCloudDensity(vec3 p){
 	vec2 uv = p.xz/SPHERE_INNER_RADIUS + 0.5;
 
 	//uv *= 2.0;
-	vec2 uv_scaled = uv*32.0;
+	vec2 uv_scaled = uv*40.0;
 
 
 	if(heightFraction < 0.0 || heightFraction > 1.0){
@@ -298,7 +298,7 @@ float raymarchToLight(vec3 o, float stepSize, vec3 lightDir, float originalDensi
 	float density = 0.0;
 	float coneDensity = 0.0;
 	float invDepth = 1.0/ds;
-	float absorption = 0.00015;
+	float absorption = 0.0001;
 	float sigma_ds = -ds*absorption;
 	vec3 pos;
 
@@ -382,7 +382,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos){
 	float lightDotEye = dot(normalize(SUN_DIR), normalize(dir));
 
 	float T = 1.0;
-	float absorption = 0.00250;
+	float absorption = 0.00350;
 	float sigma_ds = -ds*absorption;
 
 	for(int i = 0; i < nSteps; ++i)
@@ -396,9 +396,9 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos){
 			float height = getHeightFraction(pos);
 			vec3 ambientLight = mix( CLOUDS_AMBIENT_COLOR_BOTTOM, CLOUDS_AMBIENT_COLOR_TOP, sqrt(height) )*1.0;
 			float light_density = raymarchToLight(pos, ds, SUN_DIR, density_sample, lightDotEye);
-			float scattering = mix(HG(lightDotEye, -0.01), HG(lightDotEye, 0.05),lightDotEye);
+			float scattering = mix(HG(lightDotEye, -0.005), HG(lightDotEye, 0.04),lightDotEye);
 			//scattering = 0.6;
-			vec3 S = inv_sqrt_two*(ambientLight + SUN_COLOR * (scattering * light_density)) * density_sample;
+			vec3 S = 0.7*(ambientLight + SUN_COLOR * (scattering * light_density)) * density_sample;
 			float dTrans = exp(density_sample*sigma_ds);
 			vec3 Sint = (S - S * dTrans) * (1. / density_sample);
 			col.rgb += T * Sint;
@@ -463,8 +463,6 @@ void main()
 		//float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
 		//v.rgb = mix(v.rgb, bg.rgb, 1.0 - fogFactor);
 		//v.a *= fogFactor;
-
-
 
 	}
 
