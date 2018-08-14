@@ -452,7 +452,7 @@ int main()
 
 		// Camera (View Matrix) setting
 		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 10.f, 10000.0f);
+		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 10.f, 200000.0f);
 
 
 		// set terrain matrices

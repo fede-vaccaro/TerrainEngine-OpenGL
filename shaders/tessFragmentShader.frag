@@ -89,7 +89,7 @@ float perlin(float x, float y){
 		
 		total += InterpolatedNoise( int(mod(0 + i,10)), x * frequency, y * frequency) * amplitude;
 	}
-	return pow(total, 3.0);
+	return total*total*total;
 }
 
 vec3 computeNormals(vec3 WorldPos){
@@ -121,7 +121,7 @@ vec3 diffuse(vec3 normal){
 
 vec3 specular(vec3 normal){
 	vec3 lightDir = normalize(u_LightPosition - WorldPos);
-	float specularFactor = 0.009f;
+	float specularFactor = 0.001f;
 	vec3 viewDir = normalize(u_ViewPosition - WorldPos);
 	vec3 reflectDir = reflect(-lightDir, normal);  
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 35.0);
@@ -164,7 +164,7 @@ vec4 getTexture(vec3 normal){
 void main()
 {
 	// calculate fog color 
-	vec2 u_FogDist = vec2(500.0, 5000.0);
+	vec2 u_FogDist = vec2(500.0, 10000.0);
 	float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
 
 	bool normals_fog = true;
@@ -201,10 +201,12 @@ void main()
 	vec4 heightColor = getTexture(n);
 
 	// putting all together
-    vec4 color = heightColor*vec4((ambient + specular + diffuse)*vec3(1.0) , 1.0f);
+    vec4 color = heightColor*vec4((ambient + specular + diffuse)*vec3(1.0f) , 1.0f);
 	if(drawFog){
-		FragColor = mix(color, vec4(fogColor, 1.0f), 1 - fogFactor);
+		FragColor = mix(color, vec4(fogColor, 1.0f), 1.0f - fogFactor);
+		FragColor.a = WorldPos.y/waterHeight;
 	}else{
 		FragColor = color;
+		FragColor.a = WorldPos.y/waterHeight;
 	}
 };

@@ -100,12 +100,10 @@ float perlin(float x, float y){
 		
 		total += InterpolatedNoise( 0, x * frequency, y * frequency) * amplitude;
 	}
-	return pow(total, 3.0);
+	return total*total*total;
 }
 
-
-
-                                                                                                
+                                                                                      
 void main()                                                                                     
 {                                                                                               
     // Interpolate the attributes of the output vertex using the barycentric coordinates        

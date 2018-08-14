@@ -20,7 +20,7 @@ uniform sampler2D depthMap;
 
 out vec4 FragColor;
 
-const float distFactor = 0.5;
+const float distFactor = 0.25;
 
 float Random3D(in vec3 st)
 {
@@ -72,7 +72,7 @@ float perlin(float x, float y, float z){
 	float persistence = 0.5;
 	float total = 0.,
 		frequency = 0.025,
-		amplitude = 3.0;
+		amplitude = 6.0;
 	for (int i = 0; i < numOctaves; ++i) {
 		frequency *= 2.;
 		amplitude *= persistence;
@@ -145,11 +145,13 @@ float worley(vec3 st) {
     return color;
 }
 
+#define SATURATE(X) clamp(X, 0.0, 1.0)
+
 
 void main(){
 	float distFromPos = distance(position.xyz, cameraPosition); 
-	vec2 u_FogDist = vec2(2000.0, 4000.0);
-	float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
+	vec2 u_FogDist = vec2(2000.0, 8000.0);
+	float fogFactor = SATURATE((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x));
 
 	float grain = 50.0;
 	vec2 ndc = (clipSpaceCoords.xy/clipSpaceCoords.w)/2.0 + 0.5;
@@ -160,7 +162,11 @@ void main(){
 	float dhdu = (perlin((position.x + st), position.z, moveFactor*10.0) - perlin((position.x - st), position.z, moveFactor*10.0))/(2.0*st);
 	float dhdv = (perlin( position.x, (position.z + st), moveFactor*10.0) - perlin(position.x, (position.z - st), moveFactor*10.0))/(2.0*st);
 
-	totalDistortion = vec2(dhdu, dhdv)*distFactor;
+	float floorY = texture(refractionTex, ndc).a;
+	float waterDepth = 1.0 - floorY;
+	float waterDepthClamped = SATURATE(waterDepth*50.0);
+
+	totalDistortion = vec2(dhdu, dhdv)*distFactor*waterDepth;
 
 	vec2 reflectionTexCoords = vec2(ndc.x, -ndc.y);
 	reflectionTexCoords += totalDistortion;
@@ -170,13 +176,13 @@ void main(){
 
 	vec2 refractionTexCoords = ndc;
 	
-	float near = 10.0;
-	float far = 10000.0;
-	float depth = texture(depthMap, refractionTexCoords).r;
-	float floorDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
-	float waterDistance = 2.0 * near * far / (far + near - (2.0 * gl_FragCoord.z - 1.0) * (far - near));
-	float waterDepth = floorDistance - waterDistance;
-	waterDepth = clamp(waterDepth/50.0, 0.0, 1.0);
+	//float near = 10.0;
+	//float far = 10000.0;
+	//float depth = texture(depthMap, refractionTexCoords).r;
+	//float floorDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
+	//float waterDistance = 2.0 * near * far / (far + near - (2.0 * gl_FragCoord.z - 1.0) * (far - near));
+	//float waterDepth = floorDistance - waterDistance;
+
 
 	refractionTexCoords += totalDistortion;
 	refractionTexCoords = clamp(refractionTexCoords, 0.001, 0.999);
@@ -185,8 +191,8 @@ void main(){
 
 	vec3 toCameraVector =  position.xyz - cameraPosition;
 	float fresnelFactor = max(dot(normalize(-toCameraVector), vec3(0.0, 1.0, 0.0)), 0.0);
-	fresnelFactor = pow(fresnelFactor, 0.1);
-	vec4 refr_reflCol = mix(reflectionColor, refractionColor, 0.75);
+	fresnelFactor = pow(fresnelFactor, 0.5);
+	vec4 refr_reflCol = mix(reflectionColor, refractionColor, fresnelFactor);
 
 	// calculate diffuse illumination
 	totalDistortion = normalize(totalDistortion);
@@ -205,7 +211,7 @@ void main(){
 	float specularFactor = 0.8f;
 	vec3 viewDir = normalize(cameraPosition - position.xyz);
 	vec3 reflectDir = reflect(-lightDir,  normalize(mix(norm, vec3(0,1,0), 0.2)) );  
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 512.);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256.);
 	vec3 specular = spec * u_LightColor * specularFactor;  
 
 
@@ -214,8 +220,9 @@ void main(){
 	vec4 fogColor = vec4(240, 240, 255, 255)/255;
 
 	FragColor =  mix(refr_reflCol + vec4(diffuse + specular, 1.0) , fogColor,(1 - fogFactor));
-	float worley_ = worley( vec3(position.xz, moveFactor*10.0)) + worley( vec3(position.xz*2.0, moveFactor*5.0))*0.5;
-	worley_ = mix(   worley_*clamp((1 - waterDepth), 0.0, 1.0), worley_*0.01, waterDepth);
+	//float worley_ = worley( vec3(position.xz, moveFactor*10.0))*0.5 + worley( vec3(position.xz*2.0, moveFactor*5.0))*0.25;
+	float worley_ = perlin(position.x*4.0, position.z*4.0, moveFactor*10.0  )/5.0;
+	worley_ = mix(   worley_*pow((1.0 - waterDepth), 8.0), worley_*0.01, 0.0);
 	FragColor.rgb += worley_;
-	FragColor.a = waterDepth;
+	FragColor.a = waterDepthClamped;
 	}
