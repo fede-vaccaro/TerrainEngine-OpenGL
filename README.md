@@ -1,5 +1,5 @@
-## Tessellation Shader in OpenGL 4 and procedural Terrain ##
-*A little OpenGL application which renders a procedural terrain with the use of a Tessellation Shader*
+## Procedural Scene in OpenGL 4 ##
+*A little OpenGL application which renders an (almost) procedural scene, featuring a terrain with distance adaptive LOD, water surface simulation and volumetric clouds. *
 
 **depandancies needed:**
 * GLFW 
@@ -14,4 +14,4 @@ Put freetype.dll, assimp-vc140-mt.dll resources/ and shaders/ in .exe folder.
 
 A special thanks to [Prof. Stefano Berretti](https://www.micc.unifi.it/people/stefano-berretti/),  [Joey DeVries](https://learnopengl.com/), [Etay Meiri](http://ogldev.atspace.co.uk/www/tutorial30/tutorial30.html) and [ThinMatrix' YouTube Channel](https://www.youtube.com/watch?v=HusvGeEDU_U&list=PLRIWtICgwaX23jiqVByUs0bqhnalNTNZh) for their awesome OpenGL tutorials!
 
-Made in collaboration with @rickie95 
+It was initially made in collaboration with @rickie95 as a course project, but even after the delivery I decided to keep working on it implementing the volumetric clouds rendering, with the hope that I'll have the time (and the will!) to add other features!
