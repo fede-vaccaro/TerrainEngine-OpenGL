@@ -11,8 +11,8 @@ in vec2 TexCoords;
 uniform float FOV;
 uniform vec2 iResolution;
 uniform float iTime;
-uniform mat4 view;
-uniform mat4 proj;
+uniform mat4 inv_view;
+uniform mat4 inv_proj;
 uniform vec3 sunPosition = vec3(1000,1000,1000)*20.;
 uniform vec3 lightDir = normalize(vec3(1,0.5,0.5));
 uniform sampler3D cloud;
@@ -69,7 +69,7 @@ vec3 planeDim_ = vec3(planeMax - planeMin);
 #define CLOUDS_AMBIENT_COLOR_BOTTOM (vec3(65., 75., 77.)*(1.5/255.))
 #define CLOUDS_MIN_TRANSMITTANCE 1e-1
 
-#define SUN_DIR normalize(vec3(-.7,.2,.75))
+#define SUN_DIR normalize(vec3(-.7,.5,.75))
 //#define SUN_DIR normalize(vec3(1,10,1));
 #define SUN_COLOR ambientlight
 vec3 sphereCenter = vec3(0.0, -EARTH_RADIUS, 0.0);
@@ -396,7 +396,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos){
 			float height = getHeightFraction(pos);
 			vec3 ambientLight = mix( CLOUDS_AMBIENT_COLOR_BOTTOM, CLOUDS_AMBIENT_COLOR_TOP, sqrt(height) )*1.0;
 			float light_density = raymarchToLight(pos, ds, SUN_DIR, density_sample, lightDotEye);
-			float scattering = mix(HG(lightDotEye, -0.005), HG(lightDotEye, 0.04),lightDotEye);
+			float scattering = mix(HG(lightDotEye, -0.05), HG(lightDotEye, 0.04), lightDotEye/2.0 + 0.5);
 			//scattering = 0.6;
 			vec3 S = 0.7*(ambientLight + SUN_COLOR * (scattering * light_density)) * density_sample;
 			float dTrans = exp(density_sample*sigma_ds);
@@ -428,10 +428,14 @@ void main()
 	}
 
 	vec2 fragCoord = gl_FragCoord.xy;
-	vec2 fulluv = fragCoord - iResolution / 2.0;
-	float z =  iResolution.y / tan(radians(clamp(FOV, 1.0, 100.0)));
-	vec3 viewDir = normalize(vec3(fulluv, -z / 1.0));
-	vec3 worldDir = normalize( (inverse(view) * vec4(viewDir, 0)).xyz);
+	float x = 2.0 * gl_FragCoord.x / iResolution.x - 1.0;
+	float y = 2.0 * gl_FragCoord.y / iResolution.y - 1.0;
+	vec2 ray_nds = vec2(x, y);
+	vec4 ray_clip = vec4(ray_nds, -1.0, 1.0);
+	vec4 ray_view = inv_proj * ray_clip;
+	ray_view = vec4(ray_view.xy, -1.0, 0.0);
+	vec3 worldDir = (inv_view * ray_view).xyz;
+	worldDir = normalize(worldDir);
 
 
 	vec3 startPos, endPos;

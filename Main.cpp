@@ -418,7 +418,7 @@ int main()
 		//x = cos(-angle)*dist;
 		//z = sin(-angle)*dist;
 		lightPosition = glm::vec3(x * 10, dispFactor*3.0, z * 10); //rotate light
-		lightPosition = glm::vec3(-.7, .2, .75)*dispFactor*1e8f;
+		lightPosition = glm::vec3(-.7, .5, .75)*dispFactor*1e8f;
 		lightPosition += camera.Position;
 		// input
 		processInput(window);
@@ -528,8 +528,8 @@ int main()
 		screenShader.use();
 		screenShader.setVec2("iResolution", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
 		screenShader.setFloat("iTime", glfwGetTime());
-		screenShader.setMat4("proj", proj);
-		screenShader.setMat4("view", camera.GetViewMatrix());
+		screenShader.setMat4("inv_proj", glm::inverse(proj));
+		screenShader.setMat4("inv_view", glm::inverse(camera.GetViewMatrix()));
 		screenShader.setVec3("cameraPosition", camera.Position);
 		screenShader.setFloat("FOV", camera.Zoom);
 		screenShader.setVec3("lightPosition", lightPosition);

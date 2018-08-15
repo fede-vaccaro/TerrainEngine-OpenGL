@@ -78,6 +78,10 @@ float InterpolatedNoise(int ind, float x, float y) {
 
 float perlin(float x, float y){
 	
+	vec2 distances = vec2(500.0, 2000.0);
+	int distanceFactor = int(clamp( (distances.y - distFromPos)*3.0 / (distances.y - distances.x), 0.0, 3.0));
+	distanceFactor = 3 - distanceFactor;
+
     int numOctaves = octaves;
 	float persistence = 0.5;
 	float total = 0,
@@ -93,7 +97,7 @@ float perlin(float x, float y){
 }
 
 vec3 computeNormals(vec3 WorldPos){
-	float st = 0.35;
+	float st = 1.0;
 	float dhdu = (perlin((WorldPos.x + st), WorldPos.z) - perlin((WorldPos.x - st), WorldPos.z))/(2.0*st);
 	float dhdv = (perlin( WorldPos.x, (WorldPos.z + st)) - perlin(WorldPos.x, (WorldPos.z - st)))/(2.0*st);
 
@@ -115,17 +119,18 @@ vec3 ambient(){
 vec3 diffuse(vec3 normal){
 	vec3 lightDir = normalize(u_LightPosition - WorldPos);
 	float diffuseFactor = max(0.0, dot(lightDir, normal));
-	vec3 diffuse = diffuseFactor * u_LightColor;
+	const float diffuseConst = 0.85;
+	vec3 diffuse = diffuseFactor * u_LightColor * diffuseConst;
 	return diffuse;
 }
 
 vec3 specular(vec3 normal){
 	vec3 lightDir = normalize(u_LightPosition - WorldPos);
-	float specularFactor = 0.001f;
+	float specularFactor = 0.1f;
 	vec3 viewDir = normalize(u_ViewPosition - WorldPos);
 	vec3 reflectDir = reflect(-lightDir, normal);  
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 35.0);
-	vec3 specular = spec * u_LightColor; 
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+	vec3 specular = spec * u_LightColor*specularFactor; 
 	return specular;
 }
 

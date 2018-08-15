@@ -6,15 +6,6 @@ in vec2 TexCoords;
 uniform sampler2D screenTexture;
 uniform sampler2D cloudTEX;
 
-uniform sampler3D volTex;
-uniform float time;
-
-const float offset_x = 1. / 1280.0;  
-const float offset_y = 1. / 720.0;
-
-bool pp = false;
-
-
 void main()
 {
 	

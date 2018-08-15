@@ -191,8 +191,8 @@ void main(){
 
 	vec3 toCameraVector =  position.xyz - cameraPosition;
 	float fresnelFactor = max(dot(normalize(-toCameraVector), vec3(0.0, 1.0, 0.0)), 0.0);
-	fresnelFactor = pow(fresnelFactor, 0.5);
-	vec4 refr_reflCol = mix(reflectionColor, refractionColor, fresnelFactor);
+	fresnelFactor = pow(fresnelFactor, 1.0);
+	vec4 refr_reflCol = mix(reflectionColor, refractionColor, 0.75);
 
 	// calculate diffuse illumination
 	totalDistortion = normalize(totalDistortion);
@@ -208,7 +208,7 @@ void main(){
 	vec3 diffuse = diffuseFactor*diffuseConst*u_LightColor;
 
 	// calculate specular illumination 
-	float specularFactor = 0.8f;
+	float specularFactor = 1.5f;
 	vec3 viewDir = normalize(cameraPosition - position.xyz);
 	vec3 reflectDir = reflect(-lightDir,  normalize(mix(norm, vec3(0,1,0), 0.2)) );  
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256.);
@@ -217,7 +217,7 @@ void main(){
 
 	vec4 color = vec4(0.2,0.71,0.85, 1.0);
 
-	vec4 fogColor = vec4(240, 240, 255, 255)/255;
+	vec4 fogColor = vec4(0.4,0.6,0.75, 1.0);
 
 	FragColor =  mix(refr_reflCol + vec4(diffuse + specular, 1.0) , fogColor,(1 - fogFactor));
 	//float worley_ = worley( vec3(position.xz, moveFactor*10.0))*0.5 + worley( vec3(position.xz*2.0, moveFactor*5.0))*0.25;
