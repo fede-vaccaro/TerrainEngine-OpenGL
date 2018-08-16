@@ -1,5 +1,5 @@
 ## Procedural Scene in OpenGL 4 ##
-*A little OpenGL application which renders an (almost) procedural scene, featuring a terrain with distance adaptive LOD, water surface simulation and volumetric clouds. *
+*A little OpenGL application which renders an (almost) procedural scene, featuring a terrain with distance adaptive LOD, water surface simulation and volumetric clouds.*
 
 **depandancies needed:**
 * GLFW 
