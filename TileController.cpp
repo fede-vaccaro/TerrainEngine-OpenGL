@@ -51,7 +51,7 @@ void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	camera->invertPitch();
 	camera->Position.y -= 2 * (camera->Position.y - waterHeight);	
-	tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 1.0f, position);
+	//tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 1.0f, position);
 	
 	camera->invertPitch();
 	camera->Position.y += 2 * abs(camera->Position.y - waterHeight);

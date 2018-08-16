@@ -65,8 +65,8 @@ vec3 planeDim_ = vec3(planeMax - planeMin);
 #define SPHERE_OUTER_RADIUS (SPHERE_INNER_RADIUS + 10000.0)
 #define SPHERE_DELTA float(SPHERE_OUTER_RADIUS - SPHERE_INNER_RADIUS)
 
-#define CLOUDS_AMBIENT_COLOR_TOP (vec3(149., 167., 149.)*(1./255.))
-#define CLOUDS_AMBIENT_COLOR_BOTTOM (vec3(65., 75., 77.)*(1.5/255.))
+#define CLOUDS_AMBIENT_COLOR_TOP (vec3(149., 149., 170.)*(1./255.))
+#define CLOUDS_AMBIENT_COLOR_BOTTOM (vec3(65., 65., 77.)*(1.5/255.))
 #define CLOUDS_MIN_TRANSMITTANCE 1e-1
 
 #define SUN_DIR normalize(vec3(-.7,.5,.75))
@@ -333,7 +333,7 @@ float raymarchToLight(vec3 o, float stepSize, vec3 lightDir, float originalDensi
 	//		T *= Ti;
 	//}
 
-	return T;//*powder(originalDensity, 0.0);
+	return T*mix(1.0 - exp(-1.0*originalDensity)*0.50, 1.0, lightDotEye*0.5 + 0.5);//*powder(originalDensity, 0.0);
 }
 
 vec3 ambientlight = vec3(255, 255, 235)/255;
@@ -382,7 +382,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos){
 	float lightDotEye = dot(normalize(SUN_DIR), normalize(dir));
 
 	float T = 1.0;
-	float absorption = 0.00350;
+	float absorption = 0.00750;
 	float sigma_ds = -ds*absorption;
 
 	for(int i = 0; i < nSteps; ++i)
@@ -396,7 +396,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos){
 			float height = getHeightFraction(pos);
 			vec3 ambientLight = mix( CLOUDS_AMBIENT_COLOR_BOTTOM, CLOUDS_AMBIENT_COLOR_TOP, sqrt(height) )*1.0;
 			float light_density = raymarchToLight(pos, ds, SUN_DIR, density_sample, lightDotEye);
-			float scattering = mix(HG(lightDotEye, -0.05), HG(lightDotEye, 0.04), lightDotEye/2.0 + 0.5);
+			float scattering = mix(HG(lightDotEye, -0.2), HG(lightDotEye, 0.025), clamp(lightDotEye/2.0 + 0.65, 0.0, 1.0));
 			//scattering = 0.6;
 			vec3 S = 0.7*(ambientLight + SUN_COLOR * (scattering * light_density)) * density_sample;
 			float dTrans = exp(density_sample*sigma_ds);
@@ -481,8 +481,11 @@ void main()
 	// Use current position distance to center as action radius
 	float dist = length(startPos - cameraPosition);
 	float radius = (cameraPosition.y - sphereCenter.y) * 0.3;
-	float alpha = clamp( (dist / radius)*2.0, 0.0, 1.0);
-	v.rgb = mix(v.rgb, ambientColor, alpha*alpha);
+	float alpha = (dist / radius);
+	//v.rgb = mix(v.rgb, ambientColor, alpha*alpha);
+
+	float fogAmount =  (1.-exp( -dist*alpha*0.00009));
+    v.rgb = mix(v.rgb, bg.rgb*v.a, clamp(fogAmount,0.,1.));
 
 
 	float sun = clamp( dot(SUN_DIR,normalize(endPos - startPos)), 0.0, 1.0 );

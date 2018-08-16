@@ -192,7 +192,7 @@ void main(){
 	vec3 toCameraVector =  position.xyz - cameraPosition;
 	float fresnelFactor = max(dot(normalize(-toCameraVector), vec3(0.0, 1.0, 0.0)), 0.0);
 	fresnelFactor = pow(fresnelFactor, 1.0);
-	vec4 refr_reflCol = mix(reflectionColor, refractionColor, 0.75);
+	vec4 refr_reflCol = mix(reflectionColor, refractionColor, 1.0);
 
 	// calculate diffuse illumination
 	totalDistortion = normalize(totalDistortion);
@@ -219,10 +219,10 @@ void main(){
 
 	vec4 fogColor = vec4(0.4,0.6,0.75, 1.0);
 
-	FragColor =  mix(refr_reflCol + vec4(diffuse + specular, 1.0) , fogColor,(1 - fogFactor));
+	FragColor =  mix(mix(refr_reflCol, color*0.8, 0.2)*0.8 + vec4(diffuse + specular, 1.0) , fogColor,(1 - fogFactor));
 	//float worley_ = worley( vec3(position.xz, moveFactor*10.0))*0.5 + worley( vec3(position.xz*2.0, moveFactor*5.0))*0.25;
-	float worley_ = perlin(position.x*4.0, position.z*4.0, moveFactor*10.0  )/5.0;
-	worley_ = mix(   worley_*pow((1.0 - waterDepth), 8.0), worley_*0.01, 0.0);
-	FragColor.rgb += worley_;
+	float foam = perlin(position.x*4.0, position.z*4.0, moveFactor*10.0  )*0.25;
+	foam = mix(   foam*pow((1.0 - waterDepth), 8.0), foam*0.01, 0.0);
+	FragColor.rgb += foam;
 	FragColor.a = waterDepthClamped;
 	}

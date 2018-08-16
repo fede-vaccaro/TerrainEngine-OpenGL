@@ -63,7 +63,7 @@ const unsigned int SCR_HEIGHT = 900;
 
 float dispFactor = 12.0;
 
-glm::vec3 startPosition(0.0f, 700.0f, 0.0f);
+glm::vec3 startPosition(0.0f, 500.0f, 0.0f);
 
 bool keyBools[10] = { false, false,false, false, false, false, false, false, false, false };
 bool updateShell = true;
@@ -452,7 +452,7 @@ int main()
 
 		// Camera (View Matrix) setting
 		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 10.f, 200000.0f);
+		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 50.f,10000000.0f);
 
 
 		// set terrain matrices
