@@ -3,7 +3,7 @@
 class TessellationShader : public Shader {
 public:
 	TessellationShader(const char* vertexPath, const char* tessControlPath, const char* tessEvalPath, const char* fragmentPath) : Shader(vertexPath, fragmentPath) {
-		std::cout << "CREATING TESSELLATION SHADER" << std::endl;
+		//std::cout << "CREATING TESSELLATION SHADER" << std::endl;
 		std::string tessControlCode = loadShaderFromFile(tessControlPath);
 		std::string tessEvaluationCode = loadShaderFromFile(tessEvalPath);
 
@@ -18,12 +18,12 @@ public:
 		tControl = glCreateShader(GL_TESS_CONTROL_SHADER);
 		glShaderSource(tControl, 1, &tControlString, NULL);
 		glCompileShader(tControl);
-		checkCompileErrors(tControl, "TESSELLATION_CONTROL");
+		checkCompileErrors(tControl, "TESSELLATION_CONTROL", getShaderName(tessControlPath));
 		// Tessellation Evaluation Shader
 		tEval = glCreateShader(GL_TESS_EVALUATION_SHADER);
 		glShaderSource(tEval, 1, &tEvalString, NULL);
 		glCompileShader(tEval);
-		checkCompileErrors(tEval, "TESSELLATION_EVALUATION");
+		checkCompileErrors(tEval, "TESSELLATION_EVALUATION", getShaderName(tessEvalPath));
 		// Geometry Shader
 		//gShader = glCreateShader(GL_GEOMETRY_SHADER);
 		//glShaderSource(gShader, 1, &gShadCode, NULL);
@@ -35,11 +35,12 @@ public:
 		//glAttachShader(ID, gShader);
 		//std::cout << "Geometry shader is not attached!" << std::endl;
 		glLinkProgram(ID);
-		checkCompileErrors(ID, "PROGRAM");
+		checkCompileErrors(ID, "PROGRAM", "");
 		// delete the shaders as they're linked into our program now and no longer necessary
 		glDeleteShader(tControl);
 		glDeleteShader(tEval);
 		//glDeleteShader(gShader);
+		std::cout << getShaderName(tessControlPath) << " AND " << getShaderName(tessEvalPath) << " LOADED AND COMPILED!" << std::endl;
 	}
 
 };

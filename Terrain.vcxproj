@@ -137,13 +137,16 @@
     <ClInclude Include="Include\camera.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="perlin\CustomTypes.h" />
+    <ClInclude Include="ScreenQuad.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="Skybox.h" />
     <ClInclude Include="TessShader.h" />
     <ClInclude Include="TextArea.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="TileController.h" />
     <ClInclude Include="Water.h" />
+    <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="buffers.cpp" />
@@ -152,7 +155,9 @@
     <ClCompile Include="glError.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="ScreenQuad.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="stb_image_write.cpp" />
     <ClCompile Include="TextArea.cpp" />
@@ -160,6 +165,7 @@
     <ClCompile Include="Tile.cpp" />
     <ClCompile Include="TileController.cpp" />
     <ClCompile Include="Water.cpp" />
+    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\cloud_post.frag" />

@@ -9,7 +9,7 @@ void Object::loadData(float * Verts, int size)
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	std::cout << sizeof(float) *size << std::endl;
+	//std::cout << sizeof(float) *size << std::endl;
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * size, data_f, GL_STATIC_DRAW);
 	glBindVertexArray(VAO);
 	// location, attribute size, type, normalize, stride, offset
@@ -24,7 +24,7 @@ void Object::loadData(float * Verts, int size, int stride)
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	std::cout << sizeof(float) *size << std::endl;
+	//std::cout << sizeof(float) *size << std::endl;
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * size, data_f, GL_STATIC_DRAW);
 	glBindVertexArray(VAO);
 	// location, attribute size, type, normalize, stride, offset
@@ -38,7 +38,7 @@ void Object::loadData(float * Verts, int size, int stride, int offset)
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	std::cout << sizeof(float) *size << std::endl;
+	//std::cout << sizeof(float) *size << std::endl;
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * size, data_f, GL_STATIC_DRAW);
 	glBindVertexArray(VAO);
 	// location, attribute size, type, normalize, stride, offset

@@ -6,26 +6,16 @@ Water::Water(glm::vec2 position, Shader* shad, float scale, float height, unsign
 	glm::mat4 transMatrix = glm::translate(identity, glm::vec3(position.x, height, position.y));
 	this->modelMatrix = transMatrix * scaleMatrix;
 
-	reflectionFBO = createFrameBuffer();
-	reflectionTex = createTextureAttachment(FBW, FBH);
-	reflectionDepth = createDepthTextureAttachment(FBW, FBH);
-
-	unbindFBO();
-
-	refractionFBO = createFrameBuffer();
-	refractionTex = createTextureAttachment(FBW, FBH);
-	refractionDepth = createDepthTextureAttachment(FBW, FBH);
-
-	unbindFBO();
-
+	reflectionFBO = new FrameBufferObject(FBOw, FBOh);
+	refractionFBO = new FrameBufferObject(FBOw, FBOh);
 }
 
 void Water::bindReflectionFBO() {
-	bindFrameBuffer(reflectionFBO, FBW, FBH);
+	reflectionFBO->bind();
 }
 
 void Water::bindRefractionFBO() {
-	bindFrameBuffer(refractionFBO, FBW, FBH);
+	refractionFBO->bind();
 }
 void Water::draw(glm::mat4 gVP, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 viewPosition) {
 	// draw water plane
@@ -41,11 +31,11 @@ void Water::draw(glm::mat4 gVP, glm::vec3 lightPosition, glm::vec3 lightColor, g
 
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, reflectionTex);
+	glBindTexture(GL_TEXTURE_2D, reflectionFBO->tex);
 	shad->setInt("reflectionTex", 0);
 
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, refractionTex);
+	glBindTexture(GL_TEXTURE_2D, refractionFBO->tex);
 	shad->setInt("refractionTex", 1);
 
 	glActiveTexture(GL_TEXTURE2);
@@ -57,7 +47,7 @@ void Water::draw(glm::mat4 gVP, glm::vec3 lightPosition, glm::vec3 lightColor, g
 	shad->setInt("normalMap", 3);
 
 	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, refractionDepth);
+	glBindTexture(GL_TEXTURE_2D, refractionFBO->depthTex);
 	shad->setInt("depthMap", 4);
 
 	float waveSpeed = 0.25;
@@ -73,7 +63,7 @@ void Water::draw(glm::mat4 gVP, glm::vec3 lightPosition, glm::vec3 lightColor, g
 }
 
 void Water::unbindFBO() {
-	unbindCurrentFrameBuffer(SCR_WIDTH_, SCR_HEIGHT_);
+	unbindCurrentFrameBuffer(Window::SCR_WIDTH, Window::SCR_WIDTH);
 }
 
 

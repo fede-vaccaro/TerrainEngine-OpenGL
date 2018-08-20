@@ -43,7 +43,7 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 	waterPtr = new Water(glm::vec2(0.0,0.0), waterShader, scale*gridLenght, waterHeight, dudvMap, normalMap, waterModel);
 };
 
-void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, unsigned int fbo) {
+void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, FrameBufferObject& fbo) {
 	
 	// reflection
 	waterPtr->bindReflectionFBO();
@@ -64,8 +64,8 @@ void TileController::drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec
 	tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, -1.0f, position);
 	//waterPtr->unbindFBO(); 
 	//bind off screen drawing FBO
-	bindFrameBuffer(fbo, SCR_WIDTH_, SCR_HEIGHT_);
-
+	fbo.bind();
+		
 	// real draw
 	tile->drawTile(camera, proj, lightPosition, lightColor, fogColor, waterHeight, 0.0, position);
 

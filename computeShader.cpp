@@ -3,7 +3,7 @@
 
 	ComputeShader::ComputeShader(const char* computePath)
 	{
-		std::cout << "CREATING BASE SHADER" << std::endl;
+		//std::cout << "CREATING BASE SHADER" << std::endl;
 		std::string computeShadercode = loadShaderFromFile(computePath);
 
 		const char * computeShaderString = computeShadercode.c_str();
@@ -15,15 +15,15 @@
 		compute = glCreateShader(GL_COMPUTE_SHADER);
 		glShaderSource(compute, 1, &computeShaderString, NULL);
 		glCompileShader(compute);
-		checkCompileErrors(compute, "COMPUTE");
+		checkCompileErrors(compute, "COMPUTE", getShaderName(computePath));
 		// shader Program
 		ID = glCreateProgram();
 		glAttachShader(ID, compute);
 		glLinkProgram(ID);
-		checkCompileErrors(ID, "PROGRAM");
+		checkCompileErrors(ID, "PROGRAM", "");
 		// delete the shaders as they're linked into our program now and no longer necessary
 		glDeleteShader(compute);
-		std::cout << "Compute shader successfully compiled and linked into shader program!" << std::endl << std::endl;
+		std::cout << "COMPUTE SHADER " << getShaderName(computePath) << " SUCCESSFULLY COMPILED!" << std::endl;
 	}
 
 	ComputeShader::~ComputeShader() {
@@ -72,7 +72,7 @@
 		unsigned int mat = glGetUniformLocation(ID, name.c_str());
 		glUniformMatrix4fv(mat, 1, false, glm::value_ptr(matrix));
 	}
-	void ComputeShader::checkCompileErrors(unsigned int shader, std::string type)
+	void ComputeShader::checkCompileErrors(unsigned int shader, std::string type, std::string shaderName)
 	{
 		int success;
 		char infoLog[1024];
@@ -82,7 +82,7 @@
 			if (!success)
 			{
 				glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-				std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+				std::cout << "ERROR: SHADER" << shaderName << "COMPILATION ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 			}
 		}
 		else
@@ -94,12 +94,11 @@
 				std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 			}
 		}
-		
-		if (success) {
-			std::cout << type + " SHADER SUCCESSFULLY COMPILED AND/OR LINKED!" << std::endl;
-		}
-	}
 
+		//if (success) {
+		//	std::cout << type + " SHADER SUCCESSFULLY COMPILED AND/OR LINKED!" << std::endl;
+		//}
+	}
 	std::string ComputeShader::loadShaderFromFile(const char* shaderPath) {
 		std::string shaderCode;
 		std::ifstream shaderFile;
@@ -124,4 +123,13 @@
 
 	}
 
+	std::string ComputeShader::getShaderName(const char* path) {
+		std::string pathstr = std::string(path);
+		const size_t last_slash_idx = pathstr.find_last_of("/");
+		if (std::string::npos != last_slash_idx)
+		{
+			pathstr.erase(0, last_slash_idx + 1);
+		}
+		return pathstr;
+	}
 

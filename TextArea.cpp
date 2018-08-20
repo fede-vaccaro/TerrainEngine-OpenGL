@@ -37,7 +37,7 @@ TextArea::TextArea(int x, int y, int w, int h=0)
 
 	rows = new std::vector<guiElement>();
 
-	this->addElement("// TESSELLATED LANDSCAPE");
+	this->addElement("// TERRAIN ENGINE");
 
 	textColor = glm::vec3(0.6f, 0.6f, 0.6f);
 	textColorBinded = glm::vec3(1.0f, 1.0f, 1.0f);

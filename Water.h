@@ -5,6 +5,7 @@
 #include "shader.h"
 #include "buffers.h"
 #include <GLFW/glfw3.h>
+#include "Window.h"
 
 class Water
 {
@@ -35,10 +36,13 @@ public:
 		this->modelMatrix = transMatrix * scaleMatrix;
 	}
 
-private:
+	static const int FBOw = 1280;
+	static const int FBOh = 720;
 
-	unsigned int reflectionFBO, reflectionTex, reflectionDepth;
-	unsigned int refractionFBO, refractionTex, refractionDepth;
+private:
+	FrameBufferObject * reflectionFBO;
+	FrameBufferObject * refractionFBO;
+
 	unsigned int dudvMap, normalMap;
 	glm::mat4 modelMatrix;
 	Shader * shad;

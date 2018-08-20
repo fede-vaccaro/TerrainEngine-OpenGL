@@ -24,7 +24,9 @@ public:
 	void setVec4(const std::string &name, glm::vec4 vector) const;
 	void setMat4(const std::string &name, glm::mat4 matrix) const;
 protected:
-	void checkCompileErrors(unsigned int shader, std::string type);
+	void checkCompileErrors(unsigned int shader, std::string type, std::string shaderName);
 	std::string loadShaderFromFile(const char* shaderPath);
+	std::string getShaderName(const char* shaderPath);
+
 };
 

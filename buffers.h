@@ -1,15 +1,11 @@
 #pragma once
 #include <glad/glad.h>
-
-const int SCR_WIDTH_ = 1600;
-const int SCR_HEIGHT_ = 900;
-
-const int FBW = 1600;
-const int FBH = 900;
+#include "Window.h"
 
 void bindFrameBuffer(int frameBuffer, int width, int height);
 
 void unbindCurrentFrameBuffer(int scrWidth, int scrHeight);
+void unbindCurrentFrameBuffer();
 
 unsigned int createFrameBuffer();
 
@@ -20,3 +16,12 @@ unsigned int createDepthTextureAttachment(int width, int height);
 unsigned int createDepthBufferAttachment(int width, int height);
 
 unsigned int createRenderBufferAttachment(int width, int height);
+
+class FrameBufferObject {
+public:
+	FrameBufferObject(int W, int H);
+	unsigned int FBO, renderBuffer, tex, depthTex;
+	void bind();
+private:
+	int W, H;
+};

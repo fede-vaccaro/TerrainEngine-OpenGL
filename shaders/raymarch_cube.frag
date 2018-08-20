@@ -421,7 +421,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos){
 
 void main()
 {
-	if(texture(depthMap, TexCoords).r < 0.999)
+	if(texture(depthMap, TexCoords).r < 1.0)
 	{
 		fragColor = vec4(0.0);
 		return;
@@ -495,7 +495,7 @@ void main()
 
 
 	bg.rgb = bg.rgb*(1.0 - v.a) + v.rgb;
-
+	bg.a = 1.0;
 	//bg.rgb = mix(bg.rgb, v.rgb, v.a);
 
 	// sun glare    

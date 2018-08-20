@@ -1,9 +1,10 @@
 #include "shader.h"
 
 
+
 	Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	{
-		std::cout << "CREATING BASE SHADER" << std::endl;
+		//std::cout << "CREATING BASE SHADER" << std::endl;
 		std::string vShaderCode = loadShaderFromFile(vertexPath);
 		std::string fShaderCode = loadShaderFromFile(fragmentPath);
 
@@ -17,22 +18,22 @@
 		vertex = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(vertex, 1, &vShaderString, NULL);
 		glCompileShader(vertex);
-		checkCompileErrors(vertex, "VERTEX");
+		checkCompileErrors(vertex, "VERTEX", getShaderName(vertexPath));
 		// fragment Shader
 		fragment = glCreateShader(GL_FRAGMENT_SHADER);
 		glShaderSource(fragment, 1, &fShaderString, NULL);
 		glCompileShader(fragment);
-		checkCompileErrors(fragment, "FRAGMENT");
+		checkCompileErrors(fragment, "FRAGMENT", getShaderName(fragmentPath));
 		// shader Program
 		ID = glCreateProgram();
 		glAttachShader(ID, vertex);
 		glAttachShader(ID, fragment);
 		glLinkProgram(ID);
-		checkCompileErrors(ID, "PROGRAM");
+		checkCompileErrors(ID, "PROGRAM", "");
 		// delete the shaders as they're linked into our program now and no longer necessary
 		glDeleteShader(vertex);
 		glDeleteShader(fragment);
-		std::cout << "Fragment and Vertex Shader successfully compiled and linked into shader program!" << std::endl << std::endl;
+		std::cout << "SHADERS " << getShaderName(vertexPath) << " AND " << getShaderName(fragmentPath) << " LOADED AND COMPILED!" << std::endl;
 	}
 
 	Shader::~Shader() {
@@ -81,7 +82,21 @@
 		unsigned int mat = glGetUniformLocation(ID, name.c_str());
 		glUniformMatrix4fv(mat, 1, false, glm::value_ptr(matrix));
 	}
-	void Shader::checkCompileErrors(unsigned int shader, std::string type)
+
+	void Shader::setSampler2D(const std::string &name, unsigned int texture, int id) const
+	{
+		glActiveTexture(GL_TEXTURE0 + id);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		this->setInt(name, id);
+	}
+	void Shader::setSampler3D(const std::string &name, unsigned int texture, int id) const
+	{
+		glActiveTexture(GL_TEXTURE0 + id);
+		glBindTexture(GL_TEXTURE_3D, texture);
+		this->setInt(name, id);
+	}
+
+	void Shader::checkCompileErrors(unsigned int shader, std::string type, std::string shaderName)
 	{
 		int success;
 		char infoLog[1024];
@@ -91,7 +106,7 @@
 			if (!success)
 			{
 				glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-				std::cout << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+				std::cout << "ERROR: SHADER" << shaderName << "COMPILATION ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 			}
 		}
 		else
@@ -104,9 +119,9 @@
 			}
 		}
 		
-		if (success) {
-			std::cout << type + " SHADER SUCCESSFULLY COMPILED AND/OR LINKED!" << std::endl;
-		}
+		//if (success) {
+		//	std::cout << type + " SHADER SUCCESSFULLY COMPILED AND/OR LINKED!" << std::endl;
+		//}
 	}
 
 	std::string Shader::loadShaderFromFile(const char* shaderPath) {
@@ -127,10 +142,19 @@
 		}
 		catch (std::ifstream::failure e)
 		{
-			std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+			std::cout << "ERROR::SHADER "<< getShaderName(shaderPath) << " FILE_NOT_SUCCESFULLY_READ" << std::endl;
 		}
 		return shaderCode;
 
 	}
 
+	std::string Shader::getShaderName(const char* path) {
+		std::string pathstr = std::string(path);
+		const size_t last_slash_idx = pathstr.find_last_of("/");
+		if (std::string::npos != last_slash_idx)
+		{
+			pathstr.erase(0, last_slash_idx + 1);
+		}
+		return pathstr;
+	}
 

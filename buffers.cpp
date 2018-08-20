@@ -11,6 +11,11 @@ void unbindCurrentFrameBuffer(int scrWidth, int scrHeight) {//call to switch to 
 	glViewport(0, 0, scrWidth, scrHeight);
 }
 
+void unbindCurrentFrameBuffer() {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, Window::SCR_WIDTH, Window::SCR_HEIGHT);
+}
+
 unsigned int createFrameBuffer() {
 	unsigned int frameBuffer;
 	glGenFramebuffers(1, &frameBuffer);
@@ -44,7 +49,7 @@ unsigned int createDepthTextureAttachment(int width, int height) {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 	return texture;
 }
 
@@ -65,4 +70,19 @@ unsigned int createRenderBufferAttachment(int width, int height) {
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
 
 	return rbo;
+}
+
+
+
+FrameBufferObject::FrameBufferObject(int W_, int H_) {
+	this->W = W_;
+	this->H = H_;
+	this->FBO = createFrameBuffer();
+	//this->renderBuffer = createRenderBufferAttachment(W, H);
+	this->tex = createTextureAttachment(W, H);
+	this->depthTex = createDepthTextureAttachment(W, H);
+}
+
+void FrameBufferObject::bind() {
+	bindFrameBuffer(this->FBO, this->W, this->H);
 }
