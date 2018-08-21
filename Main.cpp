@@ -10,6 +10,7 @@
 #include "computeShader.h"
 #include "ScreenQuad.h"
 #include "texture.h"
+#include "VolumetricClouds.h"
 #include "TileController.h"
 #include "Tile.h"
 #include "Skybox.h"
@@ -101,9 +102,11 @@ int main()
 	glm::vec3 lightColor(255, 255, 190);
 	lightColor /= 255.0;
 
-	float scale = 100.0f,  dispFactor = 12.0;
+	float scale = 100.0f,  dispFactor = 16.0;
 	TileController tc(scale, dispFactor, &camera, &tshader, &waterShader);
 	Skybox skybox;
+	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT, &camera);
+
 
 	TextArea::setWindow(window.w);
 	screen scr;
@@ -161,26 +164,27 @@ int main()
 	textures[2] = TextureFromFile("rock4.jpg", "resources", false);
 	textures[3] = TextureFromFile("snow2.jpg", "resources", false);
 
-
+	/*
 	std::cout << "============ OPENING SCREEN SHADER ============" << std::endl;
 	ScreenQuad volumetricClouds("shaders/raymarch_cube.frag");
-
+	*/
 	std::cout << "============ OPENING POST PROCESSING SHADER ============" << std::endl;
 	ScreenQuad PostProcessing("shaders/post_processing.frag");
-
+	/*
 	std::cout << "============ OPENING CLOUD POST PROCESSING SHADER ============" << std::endl;
 	ScreenQuad cloudPostProcessing("shaders/cloud_post.frag");
-
+	*/
 
 	//main scene FBO
 	FrameBufferObject SceneFBO(Window::SCR_WIDTH, Window::SCR_HEIGHT);
-
+	/*
 	//clouds fbo
 	FrameBufferObject CloudsFBO(Window::SCR_WIDTH, Window::SCR_HEIGHT);
 
 	//cloud post rbo
 	FrameBufferObject CloudsPostProcessingFBO(Window::SCR_WIDTH, Window::SCR_HEIGHT);
-
+	*/
+	/*
 	//compute shaders
 	ComputeShader comp("shaders/perlinworley.comp");
 
@@ -225,7 +229,7 @@ int main()
 	std::cout << "weather computed!!" << std::endl;
 
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-	
+	*/
 	
 
 	while (window.continueLoop())
@@ -269,7 +273,7 @@ int main()
 
 		SceneFBO.bind();
 		// render
-		glEnable(GL_MULTISAMPLE);
+		//glEnable(GL_MULTISAMPLE);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -299,7 +303,8 @@ int main()
 		ScreenQuad::disableTests();
 
 		// volumetric clouds rendering
-		CloudsFBO.bind();
+		/*
+		cloudsFBO->bind();
 		Shader & cloudsShader = volumetricClouds.getShader();
 
 		cloudsShader.use();
@@ -316,9 +321,8 @@ int main()
 		cloudsShader.setSampler3D("worley32", worley32, 1);
 		cloudsShader.setSampler2D("weatherTex", weatherTex, 2);
 		cloudsShader.setSampler2D("depthMap", SceneFBO.depthTex, 3);
-
-		ScreenQuad::drawQuad();
-
+		*/
+		/*
 		// cloud post processing filtering
 		CloudsPostProcessingFBO.bind();
 		Shader& cloudsPPShader = cloudPostProcessing.getShader();
@@ -328,16 +332,18 @@ int main()
 		cloudsPPShader.setSampler2D("cloudTEX", CloudsFBO.tex, 0);
 		cloudsPPShader.setFloat("time", glfwGetTime());
 
-		ScreenQuad::drawQuad();
-		
+		//ScreenQuad::drawQuad();
+		*/
 		// scene post processing - blending between main scene texture and clouds texture
-		Shader& post = PostProcessing.getShader();
+
+		volumetricClouds.draw(view, proj, lightPosition, SceneFBO.depthTex);
 
 		unbindCurrentFrameBuffer();
+		Shader& post = PostProcessing.getShader();
 		post.use();
 
 		post.setSampler2D("screenTexture", SceneFBO.tex, 0);
-		post.setSampler2D("cloudTEX", CloudsPostProcessingFBO.tex, 1);
+		post.setSampler2D("cloudTEX", volumetricClouds.getCloudsTexture(), 1);
 
 		ScreenQuad::drawQuad();
 

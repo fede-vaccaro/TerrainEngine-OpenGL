@@ -63,6 +63,9 @@
     <ClInclude Include="ScreenQuad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="VolumetricClouds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stb_image_write.cpp">
@@ -114,6 +117,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ScreenQuad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VolumetricClouds.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -145,6 +145,7 @@
     <ClInclude Include="texture.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="TileController.h" />
+    <ClInclude Include="VolumetricClouds.h" />
     <ClInclude Include="Water.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
@@ -164,6 +165,7 @@
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="Tile.cpp" />
     <ClCompile Include="TileController.cpp" />
+    <ClCompile Include="VolumetricClouds.cpp" />
     <ClCompile Include="Water.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
