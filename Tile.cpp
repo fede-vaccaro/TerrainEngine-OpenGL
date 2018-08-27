@@ -18,7 +18,7 @@ Tile::Tile(glm::vec2 position, float scale, float dispFactor, TessellationShader
 
 	octaves = 10;
 	frequency = 0.03;
-	grassCoverage = 0.83;
+	grassCoverage = 0.77;
 	tessMultiplier = 2.0;
 
 	posBuffer = 0;
@@ -75,6 +75,8 @@ void Tile::drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, gl
 	glBindTexture(GL_TEXTURE_2D, textures[3]);
 	shad->setInt("snow", 4);
 
+
+
 	planeModel->Draw(*shad);
 	glDisable(GL_CLIP_DISTANCE0);
 
@@ -129,6 +131,9 @@ void Tile::drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, gl
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, textures[3]);
 	shad->setInt("snow", 4);
+
+	shad->setSampler2D("grass1", textures[6], 5);
+
 	int nIstances = pos.size();
 	planeModel->Draw(*shad, nIstances);
 

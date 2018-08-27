@@ -20,7 +20,7 @@ uniform bool normals;
 uniform float u_grassCoverage;
 uniform float waterHeight;
 
-uniform sampler2D sand, grass, rock, snow;
+uniform sampler2D sand, grass1, grass, rock, snow;
 
 out vec4 FragColor;
 
@@ -56,32 +56,39 @@ float Interpolate(float a, float b, float x) {  // cosine interpolation
 	return  a * (1 - f) + b * f;
 }
 
-float InterpolatedNoise(int ind, float x, float y) {
+float InterpolatedNoise(vec2 xy) {
+	float x = xy.x, y = xy.y;
 	int integer_X = int(floor(x));
 	float fractional_X = fract(x);
 	int integer_Y = int(floor(y));
 	float fractional_Y = fract(y);
 	vec2 randomInput = vec2(integer_X, integer_Y);
-	float v1 = Random2D(randomInput);
-	float v2 = Random2D(randomInput + vec2(1.0, 0.0));
-	float v3 = Random2D(randomInput + vec2(0.0, 1.0));
-	float v4 = Random2D(randomInput + vec2(1.0, 1.0));
+	float a = Random2D(randomInput);
+	float b = Random2D(randomInput + vec2(1.0, 0.0));
+	float c = Random2D(randomInput + vec2(0.0, 1.0));
+	float d = Random2D(randomInput + vec2(1.0, 1.0));
 	//float v1 = Random2D(randomInput);
 	//float v2 = Random2D(randomInput + vec2(1.0, 0.0));
 	//float v3 = Random2D(randomInput + vec2(0.0, 1.0));
 	//float v4 = Random2D(randomInput + vec2(1.0, 1.0));
 
-	float i1 = mix(v1, v2, smoothstep(0, 1, fractional_X));
-	float i2 = mix(v3, v4, smoothstep(0, 1, fractional_X));
-	return mix(i1, i2, smoothstep(0, 1, fractional_Y));
+	//float i1 = mix(v1, v2, smoothstep(0, 1, fractional_X));
+	//float i2 = mix(v3, v4, smoothstep(0, 1, fractional_X));
+	//return mix(i1, i2, smoothstep(0, 1, fractional_Y));
+	fractional_X = smoothstep(0.0, 1.0, fractional_X);
+	fractional_Y = smoothstep(0.0, 1.0, fractional_Y);
+	//return a + fractional_X*(b-a) + fractional_Y*c + fractional_X*fractional_Y*(d-c) - a*fractional_Y - fractional_X*fractional_Y*(b-a);
+	float k0 = a, 
+	k1 = b - a, 
+	k2 = c - a, 
+	k3 = d - c - b + a;
+
+	return k0 + k1*fractional_X + k2*fractional_Y + k3*fractional_X*fractional_Y;
+
 }
 
 float perlin(float x, float y){
 	
-	vec2 distances = vec2(500.0, 2000.0);
-	int distanceFactor = int(clamp( (distances.y - distFromPos)*3.0 / (distances.y - distances.x), 0.0, 3.0));
-	distanceFactor = 3 - distanceFactor;
-
     int numOctaves = octaves;
 	float persistence = 0.5;
 	float total = 0,
@@ -91,9 +98,100 @@ float perlin(float x, float y){
 		frequency *= 2;
 		amplitude *= persistence;
 		
-		total += InterpolatedNoise( int(mod(0 + i,10)), x * frequency, y * frequency) * amplitude;
+		total += InterpolatedNoise( vec2(x,y)*frequency) * amplitude;
 	}
 	return total*total*total;
+}
+
+
+
+float smoothstepd(float x){
+ 	return 6.0*x*(1.0 - x);   
+}
+vec2 smoothstepd( float a, float b, float x)
+{
+	if( x<a ) return vec2( 0.0, 0.0 );
+	if( x>b ) return vec2( 1.0, 0.0 );
+    float ir = 1.0/(b-a);
+    x = (x-a)*ir;
+    return vec2( x*x*(3.0-2.0*x), 6.0*x*(1.0-x)*ir );
+}
+
+
+
+vec2 InterpolatedNoiseD(vec2 xy) {
+	float x = xy.x, y = xy.y;
+ 	int integer_X = int(floor(x));
+	float fractional_X = fract(x);
+	int integer_Y = int(floor(y));
+	float fractional_Y = fract(y);
+    
+	vec2 randomInput = vec2(integer_X, integer_Y);
+	float a = Random2D(randomInput + vec2(0.0, 0.0));
+	float b = Random2D(randomInput + vec2(1.0, 0.0));
+	float c = Random2D(randomInput + vec2(0.0, 1.0));
+	float d = Random2D(randomInput + vec2(1.0, 1.0));
+    
+    //fractional_X = smoothstep(0.0, 1.0, fractional_X);
+    //fractional_Y = smoothstep(0.0, 1.0, fractional_Y);
+	float k0 = a, 
+	k1 = b - a, 
+	k2 = c - a, 
+	k3 = d - c - b + a;
+	
+	float dndx = (k1 + k3*fractional_Y)*smoothstepd(fractional_X);
+	float dndy = (k2 + k3*fractional_X)*smoothstepd(fractional_Y);
+
+	return vec2(dndx, dndy);
+}
+
+const mat2 m2 = mat2(1.0, 0.0, 0.0, 1.0);
+const mat2 m2i = mat2(1.0, 0.0, 0.0, 1.0);
+
+vec3 perlinD(float x, float y){
+
+    int numOctaves = 10;
+	float persistence = 0.5;
+	float total = 0.0;
+	vec2 total_derivatives = vec2(0.0);
+	float frequency = 0.005*1.0;
+	float amplitude = gDispFactor;
+    mat2 m = mat2(1.0, 0.0, 0.0, 1.0);
+    vec2 xy = vec2(x,y);
+	for (int i = 0; i < numOctaves; ++i) {
+		frequency *= 2.;
+		amplitude *= persistence;
+        m = 2.0*m2i*m;
+        //xy = xy*frequency;
+        
+		total += InterpolatedNoise(xy*frequency) * amplitude;
+		total_derivatives += amplitude*m*InterpolatedNoiseD(xy*frequency);
+	}
+	float noisepow2 = total*total;
+	vec2 gradient = total_derivatives;
+	return vec3(noisepow2*total, gradient*100.0);
+
+}
+
+vec3 fbmd_9( in vec2 x )
+{
+    x *= 0.005*freq;
+    float f = 2.0;
+    float s = 0.5;
+    float a = 0.0;
+    float b = gDispFactor;
+    vec2  d = vec2(0.0);
+    mat2  m = mat2(1.0,0.0,0.0,1.0);
+    for( int i=0; i<10; i++ )
+    {
+       
+        a += b*InterpolatedNoise(x);          // accumulate values		
+        d += b*m*InterpolatedNoiseD(x);      // accumulate derivatives
+        b *= s;
+        x = f*x;
+        m = f*m2i*m;
+    }
+	return vec3( a*a*a, 3.0*a*a*d );
 }
 
 vec3 computeNormals(vec3 WorldPos){
@@ -105,21 +203,32 @@ vec3 computeNormals(vec3 WorldPos){
 	vec3 Z = vec3(0.0, dhdv, 1.0);
 
 	vec3 n = normalize(cross(Z,X));
-	vec3 norm = mix(n, Normal, 0.5); 
-	norm = normalize(norm);
-	return norm;
+	//vec3 norm = mix(n, Normal, 0.5); 
+	//norm = normalize(norm);
+	return n;
 }
 
 vec3 ambient(){
-	float ambientStrength = 0.15; 
+	float ambientStrength = 0.25; 
     vec3 ambient = ambientStrength * u_LightColor; 
     return ambient;
+}
+
+vec3 computeNormals(vec2 gradient){
+	vec3 X = vec3(1.0, gradient.r, 0.0);
+	vec3 Z = vec3(0.0, gradient.g, 1.0);
+
+	vec3 n = normalize(cross(Z,X));
+
+	//n = normalize( vec3(-gradient.r, 1.0, -gradient.g));
+
+	return n;
 }
 
 vec3 diffuse(vec3 normal){
 	vec3 lightDir = normalize(u_LightPosition - WorldPos);
 	float diffuseFactor = max(0.0, dot(lightDir, normal));
-	const float diffuseConst = 0.85;
+	const float diffuseConst = 0.75;
 	vec3 diffuse = diffuseFactor * u_LightColor * diffuseConst;
 	return diffuse;
 }
@@ -134,27 +243,70 @@ vec3 specular(vec3 normal){
 	return specular;
 }
 
+float perlin(float x, float y, int oct){
+	
+	vec2 distances = vec2(500.0, 2000.0);
+	int distanceFactor = int(clamp( (distances.y - distFromPos)*3.0 / (distances.y - distances.x), 0.0, 3.0));
+	distanceFactor = 3 - distanceFactor;
+
+    int numOctaves = oct;
+	float persistence = 0.5;
+	float total = 0,
+		frequency = 0.05*freq,
+		amplitude = 1.0;
+	for (int i = 0; i < numOctaves; ++i) {
+		frequency *= 2;
+		amplitude *= persistence;
+		
+		total += InterpolatedNoise(vec2(x,y)*frequency) * amplitude;
+	}
+	return total*total*total;
+}
+
 vec4 getTexture(vec3 normal){
-	float trans = 10.;
+	float trans = 20.;
 
 	vec4 sand_t = vec4(244, 231, 127, 255)/255;//texture(sand, texCoord*5.0);
-	vec4 rock_t = vec4(142, 75, 44, 255)/255;//texture(rock, texCoord*15.0);
+	vec4 rock_t = vec4(85, 80, 75, 255)/255;//texture(rock, texCoord*15.0);
 	vec4 grass_t = vec4(92, 196, 66, 255)/255;//texture(grass, texCoord*5.0);
+
+
+
 	sand_t = texture(sand, texCoord*10.0);
-	rock_t = texture(rock, texCoord*35.0);
+	sand_t.rg *= 1.3;
+	rock_t = texture(rock, texCoord*7.0);
 	rock_t.r *= 1.1;
-	grass_t = texture(grass, texCoord*15.0);//*vec4(0.0, 1.5, 0.0, 1.0);
-		
+	grass_t = texture(grass, texCoord*12.0);//*vec4(0.0, 1.5, 0.0, 1.0);
+	vec4 grass_t1 = texture(grass1, texCoord*12.0);//*
+	float perlinBlendingCoeff = clamp(perlin(WorldPos.x, WorldPos.z, 2)*2.0 - 0.2, 0.0, 1.0);
+	grass_t = mix(grass_t*1.3, grass_t1*0.75, perlinBlendingCoeff);
+	grass_t.rgb *= 0.8;
+	//rock_t = mix(rock_t*0.7, rock_t*0.9, perlinBlendingCoeff);
+	//grass_t = vec4(grassBlendingCoeff);
+
+	float grassCoverage = u_grassCoverage;//pow(u_grassCoverage, 0.33);
+
+	float transMultiplier = 4.0;
+	float snowHeight = gDispFactor*gDispFactor +  1800.0  - perlinBlendingCoeff*600.0;
+	if( WorldPos.y > snowHeight - trans*transMultiplier && WorldPos.y < snowHeight + trans*transMultiplier ){
+		float gradient = clamp((WorldPos.y - (snowHeight - trans*transMultiplier))/(2.0*trans*transMultiplier), 0.0, 1.0);
+		grass_t.rgb = mix(grass_t.rgb, texture(snow, texCoord*5.0).rgb*1.35, gradient);
+		grassCoverage = mix(grassCoverage, grassCoverage - 0.07, gradient);
+	}else if(WorldPos.y > snowHeight + trans*transMultiplier){
+		grass_t.rgb =texture(snow, texCoord*5.0).rgb*1.35;
+		grassCoverage = grassCoverage - 0.07;
+
+	}
+
 	vec4 heightColor;
 	float cosV = abs(dot(normal, vec3(0.0, 1.0, 0.0)));
-	float grassCoverage = pow(u_grassCoverage, 0.33);
 	float tenPercentGrass = grassCoverage - grassCoverage*0.1;
 	float blendingCoeff = pow((cosV - tenPercentGrass) / (grassCoverage * 0.1), 4.0);
 
 	if(height <= waterHeight + trans){
 		heightColor = sand_t;
     }else if(height <= waterHeight + 2*trans){
-		heightColor = mix(sand_t, grass_t, (height - waterHeight - trans) / trans);
+		heightColor = mix(sand_t, grass_t, pow( (height - waterHeight - trans) / trans, 1.0));
     }else if(cosV > grassCoverage){
 		heightColor = grass_t;
     }else if(cosV > tenPercentGrass){
@@ -169,9 +321,9 @@ vec4 getTexture(vec3 normal){
 void main()
 {
 	// calculate fog color 
-	vec2 u_FogDist = vec2(500.0, 10000.0);
-	float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
-
+	vec2 u_FogDist = vec2(2500.0, 10000.0);
+	//float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
+	float fogFactor = clamp(exp(-1.5*distFromPos/(u_FogDist.y - u_FogDist.x) + 0.5), 0.0, 1.0);
 	bool normals_fog = true;
 	float eps = 0.1;
 	if(fogFactor >= 0.0 && fogFactor < eps){
@@ -180,8 +332,8 @@ void main()
 	
 	vec3 n; 
 	if(normals && normals_fog){
+		//n = computeNormals(fbmd_9(WorldPos.xz).gb);
 		n = computeNormals(WorldPos);
-
 		//smoothing
 		float st = 0.1;
 		vec3 n1 = computeNormals(WorldPos + vec3(-st, 0, st));
@@ -194,7 +346,7 @@ void main()
 		vec3 n8 = computeNormals(WorldPos + vec3(st, 0, -st));
 
 		//n = n + n1 + n2 + n3 + n4 + n5 + n6 + n7 + n8;
-		//n = normalize(n);
+		n = normalize(n);
 	}else{
 		n = vec3(0,1,0);
 	}
@@ -204,6 +356,9 @@ void main()
 	vec3 specular = specular(n);
 
 	vec4 heightColor = getTexture(n);
+	//heightColor = vec4(perlin(WorldPos.x, WorldPos.z, 4));
+
+
 
 	// putting all together
     vec4 color = heightColor*vec4((ambient + specular + diffuse)*vec3(1.0f) , 1.0f);
@@ -214,4 +369,6 @@ void main()
 		FragColor = color;
 		FragColor.a = WorldPos.y/waterHeight;
 	}
+
+	//FragColor.rgb = n*0.5 + 0.5;
 };

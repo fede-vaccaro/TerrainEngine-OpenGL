@@ -17,17 +17,18 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 	planeModel = new Model("resources/plane.obj", GL_PATCHES);
 	waterModel = new Model("resources/plane.obj", GL_TRIANGLES);
 
-	this->textures = new unsigned int[5];
+	this->textures = new unsigned int[6];
 	textures[0] = TextureFromFile("sand.jpg", "resources", false);
 	textures[1] = TextureFromFile("grass.jpg", "resources", false);
 	textures[2] = TextureFromFile("rock4.jpg", "resources", false);
-	textures[3] = TextureFromFile("snow.jpg", "resources", false);
+	textures[3] = TextureFromFile("snow2.jpg", "resources", false);
 	textures[5] = TextureFromFile("rock.jpg", "resources", false);
+	textures[6] = TextureFromFile("terrainTexture.jpg", "resources", false);
 	
 	dudvMap = TextureFromFile("waterDUDV.png", "resources", false);
 	normalMap = TextureFromFile("normalMap.png", "resources", false);
 
-	waterHeight = 100.0;
+	waterHeight = 128.0;
 
 	position.resize(gridLenght*gridLenght);
 	for (int i = 0; i < gridLenght; i++) {
@@ -99,6 +100,15 @@ void TileController::updateTiles() {
 	//if (tile->inTile(*camera, posNW)) whichTile = NW, howManyTiles++;
 	//if (tile->inTile(*camera, posSE)) whichTile = SE, howManyTiles++;
 	//if (tile->inTile(*camera, posSW)) whichTile = SW, howManyTiles++;
+
+	for (int i = 0; i < position.size(); i++) {
+		if (tile->inTile(*camera, position[i])) {
+			int row, col;
+			this->getColRow(i, col, row);
+			std::cout << "In position, col: " << col << ", row: " << row << std::endl;
+		}
+
+	}
 
 	//std::cout << camPosition.x << " " << camPosition.y << std::endl;
 

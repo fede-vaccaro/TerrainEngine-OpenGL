@@ -23,8 +23,8 @@ void main()
     //col = mix(col, HDR(col, exposure), 0.5);
 
 	// gamma and contrast
-    col.rgb = mix(col.rgb, pow(col.rgb, vec3(1./gamma)), 0.85);
-	col.rgb = (col.rgb - 0.3)*1.5;
+    //col.rgb = mix(col.rgb, pow(col.rgb, vec3(1./gamma)), 0.85);
+	//col.rgb = (col.rgb - 0.3)*1.5;
     //col.rgb = mix( col.rgb, col.bbb, 0. ); 
      
      // vignette

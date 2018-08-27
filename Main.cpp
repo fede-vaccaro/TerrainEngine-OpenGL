@@ -64,7 +64,7 @@ bool snow = false;
 bool updateShell = true;
 
 // camera
-glm::vec3 startPosition(0.0f, 500.0f, 0.0f);
+glm::vec3 startPosition(0.0f, 1500.0f, 0.0f);
 Camera camera(startPosition);
 
 int success;
@@ -97,9 +97,9 @@ int main()
 	Model plane_("resources/plane.obj", GL_PATCHES);
 
 
-	glm::vec3 fogColor(0.6 + 0.15*0.5, 0.71 + 0.15*0.5, 0.75 + 0.15*0.5);
-	fogColor *= 1.05;
-	glm::vec3 lightColor(255, 255, 190);
+	glm::vec3 fogColor(0.6 + 0.1, 0.71 + 0.1, 0.85 + 0.1);
+	fogColor *= 0.7;
+	glm::vec3 lightColor(255, 255, 230);
 	lightColor /= 255.0;
 
 	float scale = 100.0f,  dispFactor = 16.0;
@@ -156,7 +156,6 @@ int main()
 	setters.push_back(0);
 
 	gui_el = (setters.size() == getters.size() ? setters.size() : -1);
-	//tc.snowy(lightColor, true);
 
 	unsigned int * textures = new unsigned int[4];
 	textures[0] = TextureFromFile("sand.jpg", "resources", false);
@@ -164,72 +163,11 @@ int main()
 	textures[2] = TextureFromFile("rock4.jpg", "resources", false);
 	textures[3] = TextureFromFile("snow2.jpg", "resources", false);
 
-	/*
-	std::cout << "============ OPENING SCREEN SHADER ============" << std::endl;
-	ScreenQuad volumetricClouds("shaders/raymarch_cube.frag");
-	*/
+
 	std::cout << "============ OPENING POST PROCESSING SHADER ============" << std::endl;
 	ScreenQuad PostProcessing("shaders/post_processing.frag");
-	/*
-	std::cout << "============ OPENING CLOUD POST PROCESSING SHADER ============" << std::endl;
-	ScreenQuad cloudPostProcessing("shaders/cloud_post.frag");
-	*/
 
-	//main scene FBO
 	FrameBufferObject SceneFBO(Window::SCR_WIDTH, Window::SCR_HEIGHT);
-	/*
-	//clouds fbo
-	FrameBufferObject CloudsFBO(Window::SCR_WIDTH, Window::SCR_HEIGHT);
-
-	//cloud post rbo
-	FrameBufferObject CloudsPostProcessingFBO(Window::SCR_WIDTH, Window::SCR_HEIGHT);
-	*/
-	/*
-	//compute shaders
-	ComputeShader comp("shaders/perlinworley.comp");
-
-	//make texture
-	unsigned int perlinTex = Texture3D(128, 128, 128);
-
-	//compute
-	comp.use();
-	comp.setVec3("u_resolution", glm::vec3(128, 128, 128));
-	std::cout << "computing perlinworley!" << std::endl;
-	glActiveTexture(GL_TEXTURE0);
-	comp.setInt("outVolTex", 0);
-	glDispatchCompute((GLuint)64, (GLuint)64, (GLuint)64);
-	std::cout << "computed!!" << std::endl;
-
-
-
-	//compute shaders
-	ComputeShader worley_git("shaders/worley.comp");
-
-	//make texture
-	unsigned int worley32 = Texture3D(32, 32, 32);
-
-	//compute
-	comp.use();
-	comp.setVec3("u_resolution", glm::vec3(32, 32, 32));
-	std::cout << "computing worley 32!" << std::endl;
-	glDispatchCompute((GLuint)32, (GLuint)32, (GLuint)32);
-	std::cout << "computed!!" << std::endl;
-
-	////////////////////////
-	//compute shaders
-	ComputeShader weather("shaders/weather.comp");
-
-	//make texture
-	unsigned int weatherTex = Texture2D(1024, 1024);
-
-	//compute
-	weather.use();
-	std::cout << "computing weather!" << std::endl;
-	glDispatchCompute((GLuint)1024, (GLuint)1024, (GLuint)1);
-	std::cout << "weather computed!!" << std::endl;
-
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-	*/
 	
 
 	while (window.continueLoop())
@@ -302,38 +240,6 @@ int main()
 		//disable test for quad rendering
 		ScreenQuad::disableTests();
 
-		// volumetric clouds rendering
-		/*
-		cloudsFBO->bind();
-		Shader & cloudsShader = volumetricClouds.getShader();
-
-		cloudsShader.use();
-		cloudsShader.setVec2("iResolution", glm::vec2(Window::SCR_WIDTH, Window::SCR_HEIGHT));
-		cloudsShader.setFloat("iTime", glfwGetTime());
-		cloudsShader.setMat4("inv_proj", glm::inverse(proj));
-		cloudsShader.setMat4("inv_view", glm::inverse(camera.GetViewMatrix()));
-		cloudsShader.setVec3("cameraPosition", camera.Position);
-		cloudsShader.setFloat("FOV", camera.Zoom);
-		cloudsShader.setVec3("lightPosition", lightPosition);
-		cloudsShader.setFloat("coverage_multiplier", coverage);
-
-		cloudsShader.setSampler3D("cloud", perlinTex, 0);
-		cloudsShader.setSampler3D("worley32", worley32, 1);
-		cloudsShader.setSampler2D("weatherTex", weatherTex, 2);
-		cloudsShader.setSampler2D("depthMap", SceneFBO.depthTex, 3);
-		*/
-		/*
-		// cloud post processing filtering
-		CloudsPostProcessingFBO.bind();
-		Shader& cloudsPPShader = cloudPostProcessing.getShader();
-
-		cloudsPPShader.use();
-
-		cloudsPPShader.setSampler2D("cloudTEX", CloudsFBO.tex, 0);
-		cloudsPPShader.setFloat("time", glfwGetTime());
-
-		//ScreenQuad::drawQuad();
-		*/
 		// scene post processing - blending between main scene texture and clouds texture
 
 		volumetricClouds.draw(view, proj, lightPosition, SceneFBO.depthTex);
@@ -350,7 +256,7 @@ int main()
 		//GUI
 		glEnable(GL_DEPTH);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		if (gui) gui->draw();
+		//if (gui) gui->draw();
 		glDisable(GL_DEPTH);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

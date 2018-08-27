@@ -6,10 +6,10 @@ VolumetricClouds::VolumetricClouds(int SW, int SH, Camera * cam): SCR_WIDTH(SW),
 	volumetricCloudsShader = new ScreenQuad("shaders/raymarch_cube.frag");
 	ppShader = new ScreenQuad("shaders/cloud_post.frag");
 
-	cloudsFBO = new FrameBufferObject(SW, SH);
-	cloudsPostProcessingFBO = new FrameBufferObject(SW, SH);
+	cloudsFBO = new FrameBufferObject(SW, SH, 2);
+	cloudsPostProcessingFBO = new FrameBufferObject(SW, SH, 2);
 
-	this->coverage = 0.18;
+	this->coverage = 0.4;
 
 	/////////////////// TEXTURE GENERATION //////////////////
 
@@ -35,8 +35,8 @@ VolumetricClouds::VolumetricClouds(int SW, int SH, Camera * cam): SCR_WIDTH(SW),
 	this->worley32 = Texture3D(32, 32, 32);
 
 	//compute
-	comp.use();
-	comp.setVec3("u_resolution", glm::vec3(32, 32, 32));
+	worley_git.use();
+	worley_git.setVec3("u_resolution", glm::vec3(32, 32, 32));
 	std::cout << "computing worley 32!" << std::endl;
 	glDispatchCompute((GLuint)32, (GLuint)32, (GLuint)32);
 	std::cout << "computed!!" << std::endl;
@@ -59,6 +59,7 @@ VolumetricClouds::VolumetricClouds(int SW, int SH, Camera * cam): SCR_WIDTH(SW),
 
 
 void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosition, unsigned int depthMapTex) {
+
 	cloudsFBO->bind();
 	Shader & cloudsShader = volumetricCloudsShader->getShader();
 
@@ -77,18 +78,43 @@ void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosit
 	cloudsShader.setSampler2D("weatherTex", this->weatherTex, 2);
 	cloudsShader.setSampler2D("depthMap", depthMapTex, 3);
 
+
 	//actual draw
 	ScreenQuad::drawQuad();
-
+	
 	// cloud post processing filtering
 	cloudsPostProcessingFBO->bind();
 	Shader& cloudsPPShader = ppShader->getShader();
 
 	cloudsPPShader.use();
 
-	cloudsPPShader.setSampler2D("cloudTEX", cloudsFBO->tex, 0);
+	cloudsPPShader.setSampler2D("clouds", cloudsFBO->getColorAttachmentTex(0), 0);
+	cloudsPPShader.setSampler2D("emissions", cloudsFBO->getColorAttachmentTex(1), 1);
+	cloudsPPShader.setSampler2D("depthMap", depthMapTex, 2);
+	cloudsPPShader.setVec2("resolution", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
+
+	glm::mat4 lightModel;
+	lightModel = glm::translate(lightModel, lightPosition);
+	glm::vec4 pos = proj * view* lightModel * glm::vec4(0.0, 0.0, 0.0, 1.0);
+	pos = pos / pos.w;
+	pos = pos * 0.5f + 0.5f;
+
+	//std::cout << pos.x << ": X; " << pos.y << " Y;" << std::endl;
+	cloudsPPShader.setVec4("lightPos", pos);
+
+	bool isLightInFront = false;
+	float lightDotCameraFront = glm::dot(glm::normalize(lightPosition - camera->Position), glm::normalize(camera->Front));
+	//std::cout << "light dot camera front= " << lightDotCameraFront << std::endl;
+	if (lightDotCameraFront > 0.2) {
+		isLightInFront = true;
+	}
+
+	cloudsPPShader.setBool("isLightInFront", isLightInFront);
+	cloudsPPShader.setFloat("lightDotCameraFront", lightDotCameraFront);
+
 	cloudsPPShader.setFloat("time", glfwGetTime());
 	ScreenQuad::drawQuad();
+	
 }
 
 

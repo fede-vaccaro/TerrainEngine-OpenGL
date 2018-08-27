@@ -42,6 +42,25 @@ unsigned int createTextureAttachment(int width, int height) {
 	return texture;
 }
 
+unsigned int * createColorAttachments(int width, int height, unsigned int nColorAttachments) {
+	unsigned int * colorAttachments = new unsigned int[nColorAttachments];
+	glGenTextures(nColorAttachments, colorAttachments);
+
+	for (unsigned int i = 0; i < nColorAttachments; i++) {
+		glBindTexture(GL_TEXTURE_2D, colorAttachments[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, colorAttachments[i], 0);
+	}
+	return colorAttachments;
+}
+
 unsigned int createDepthTextureAttachment(int width, int height) {
 	unsigned int texture;
 	glGenTextures(1, &texture);
@@ -49,7 +68,8 @@ unsigned int createDepthTextureAttachment(int width, int height) {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture, 0);
 	return texture;
 }
 
@@ -81,7 +101,30 @@ FrameBufferObject::FrameBufferObject(int W_, int H_) {
 	//this->renderBuffer = createRenderBufferAttachment(W, H);
 	this->tex = createTextureAttachment(W, H);
 	this->depthTex = createDepthTextureAttachment(W, H);
+
+	colorAttachments = NULL;
+	nColorAttachments = 1;
 }
+
+FrameBufferObject::FrameBufferObject(int W_, int H_, const int nColorAttachments) {
+	this->W = W_;
+	this->H = H_;
+	this->FBO = createFrameBuffer();
+
+	this->tex = NULL;
+	this->depthTex = createDepthTextureAttachment(W, H);
+	this->colorAttachments = createColorAttachments(W, H, nColorAttachments);
+	this->nColorAttachments = nColorAttachments;
+
+	unsigned int * colorAttachmentsFlag = new unsigned int[nColorAttachments];
+	for (unsigned int i = 0; i < nColorAttachments; i++) {
+		colorAttachmentsFlag[i] = GL_COLOR_ATTACHMENT0 + i;
+	}
+	glDrawBuffers(nColorAttachments, colorAttachmentsFlag);
+	delete colorAttachmentsFlag;
+}
+
+
 
 void FrameBufferObject::bind() {
 	bindFrameBuffer(this->FBO, this->W, this->H);

@@ -119,6 +119,14 @@ private:
 	void addColumn(int direction);
 	void addRow(int direction);
 
+	void getColRow(int i, int& col, int& row) {
+		col = (i) % gridLenght;
+		
+		row = (i - col) / gridLenght;
+
+		//col--, row--;
+	}
+
 	void reset();
 
 

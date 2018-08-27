@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <camera.h>
+#include <algorithm>
 
 class VolumetricClouds
 {
@@ -16,7 +17,17 @@ public:
 	~VolumetricClouds();
 
 	unsigned int getCloudsTexture() {
-		return cloudsPostProcessingFBO->tex;
+		return cloudsPostProcessingFBO->getColorAttachmentTex(0);
+	}
+
+	float getCoverage() {
+		return coverage;
+	}
+
+	void setCoverage(float c) {
+		if (c >= 0.0 && c <= 1.0) {
+			coverage = c;
+		}
 	}
 
 private:
