@@ -8,6 +8,17 @@ uniform sampler2D cloudTEX;
 
 #define HDR(col, exps) 1.0 - exp(-col * exps)
 
+vec3 TonemapACES(vec3 x)
+{
+	const float A = 2.51f;
+	const float B = 0.03f;
+	const float C = 2.43f;
+	const float D = 0.59f;
+	const float E = 0.14f;
+	return (x * (A * x + B)) / (x * (C * x + D) + E);
+}
+
+
 void main()
 {
 	
@@ -23,7 +34,7 @@ void main()
     //col = mix(col, HDR(col, exposure), 0.5);
 
 	// gamma and contrast
-    //col.rgb = mix(col.rgb, pow(col.rgb, vec3(1./gamma)), 0.85);
+    //col.rgb = pow(col.rgb, vec3(1./gamma));
 	//col.rgb = (col.rgb - 0.3)*1.5;
     //col.rgb = mix( col.rgb, col.bbb, 0. ); 
      
@@ -31,6 +42,7 @@ void main()
      vec2 uv = gl_FragCoord.xy / vec2(1600.0, 900.0);
      //col.rgb = mix(col.rgb*col.rgb, col.rgb, pow( 16.0*uv.x*uv.y*(1.0-uv.x)*(1.0-uv.y), 0.05 ));
 	col.rgb *= pow( 16.0*uv.x*uv.y*(1.0-uv.x)*(1.0-uv.y), 0.11 );
-
+	//col.rgb = TonemapACES(col.rgb);
 	FragColor = col;
+
 }  

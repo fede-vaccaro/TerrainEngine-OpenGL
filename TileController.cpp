@@ -105,7 +105,7 @@ void TileController::updateTiles() {
 		if (tile->inTile(*camera, position[i])) {
 			int row, col;
 			this->getColRow(i, col, row);
-			std::cout << "In position, col: " << col << ", row: " << row << std::endl;
+			//std::cout << "In position, col: " << col << ", row: " << row << std::endl;
 		}
 
 	}

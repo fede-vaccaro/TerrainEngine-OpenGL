@@ -64,7 +64,7 @@ bool snow = false;
 bool updateShell = true;
 
 // camera
-glm::vec3 startPosition(0.0f, 1500.0f, 0.0f);
+glm::vec3 startPosition(0.0f, 500.0f, 0.0f);
 Camera camera(startPosition);
 
 int success;
@@ -201,7 +201,7 @@ int main()
 		t1 = glfwGetTime();
 
 		glm::vec3 lightPosition;
-		lightPosition = glm::vec3(-.7, .5, .75)*1e9f;
+		lightPosition = glm::vec3(-.0, .7, 1.0)*1e9f;
 		lightPosition += camera.Position;
 		// input
 		window.processInput(frameTime);
@@ -235,7 +235,7 @@ int main()
 		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 50.f,10000000.0f);
 
 		// draw terrain
-		tc.drawTiles(proj, lightPosition, lightColor, fogColor, SceneFBO);
+		//tc.drawTiles(proj, lightPosition, lightColor, fogColor, SceneFBO);
 
 		//disable test for quad rendering
 		ScreenQuad::disableTests();

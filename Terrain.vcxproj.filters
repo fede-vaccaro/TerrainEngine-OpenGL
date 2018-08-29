@@ -160,9 +160,6 @@
     <None Include="shaders\screen.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\raymarch_cube.frag">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="shaders\post_processing.frag">
       <Filter>Resource Files</Filter>
     </None>
@@ -181,13 +178,16 @@
     <None Include="shaders\perlinworley.comp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\volumetricclouds.frag">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="shaders\raymarch_cube_box.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\cloud_post.frag">
+    <None Include="shaders\copyFrame.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\volumetric_clouds.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\clouds_post.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

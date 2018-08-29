@@ -3,11 +3,13 @@
 
 
 VolumetricClouds::VolumetricClouds(int SW, int SH, Camera * cam): SCR_WIDTH(SW), SCR_HEIGHT(SH), camera(cam) {
-	volumetricCloudsShader = new ScreenQuad("shaders/raymarch_cube.frag");
-	ppShader = new ScreenQuad("shaders/cloud_post.frag");
+	volumetricCloudsShader = new ScreenQuad("shaders/volumetric_clouds.frag");
+	ppShader = new ScreenQuad("shaders/clouds_post.frag");
+	copyShader = new ScreenQuad("shaders/copyFrame.frag");
 
-	cloudsFBO = new FrameBufferObject(SW, SH, 2);
+	cloudsFBO = new FrameBufferObject(SW, SH, 4);
 	cloudsPostProcessingFBO = new FrameBufferObject(SW, SH, 2);
+	lastFrameCloudsFBO = new FrameBufferObject(SH, SH, 2);
 
 	this->coverage = 0.4;
 
@@ -56,9 +58,12 @@ VolumetricClouds::VolumetricClouds(int SW, int SH, Camera * cam): SCR_WIDTH(SW),
 
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
+#define TIMETO(CODE, TASK) 	t1 = glfwGetTime(); CODE; t2 = glfwGetTime(); std::cout << "Time to " + std::string(TASK) + " :" << (t2 - t1)*1e3 << "ms" << std::endl;
 
 
 void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosition, unsigned int depthMapTex) {
+
+	float t1, t2;
 
 	cloudsFBO->bind();
 	Shader & cloudsShader = volumetricCloudsShader->getShader();
@@ -73,15 +78,24 @@ void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosit
 	cloudsShader.setVec3("lightPosition", lightPosition);
 	cloudsShader.setFloat("coverage_multiplier", coverage);
 
+	cloudsShader.setMat4("invViewProj", glm::inverse(proj*view));
+	cloudsShader.setMat4("oldFrameVP", oldFrameVP);
+	cloudsShader.setMat4("gVP", proj * view);
+
 	cloudsShader.setSampler3D("cloud", this->perlinTex, 0);
 	cloudsShader.setSampler3D("worley32", this->worley32, 1);
 	cloudsShader.setSampler2D("weatherTex", this->weatherTex, 2);
 	cloudsShader.setSampler2D("depthMap", depthMapTex, 3);
+	cloudsShader.setSampler2D("lastFrameAlphaness", lastFrameCloudsFBO->getColorAttachmentTex(0), 4);
+	cloudsShader.setSampler2D("lastFrameColor", lastFrameCloudsFBO->getColorAttachmentTex(1), 5);
 
 
 	//actual draw
 	ScreenQuad::drawQuad();
-	
+	//copy to lastFrameFBO
+
+
+	// //
 	// cloud post processing filtering
 	cloudsPostProcessingFBO->bind();
 	Shader& cloudsPPShader = ppShader->getShader();
@@ -91,6 +105,8 @@ void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosit
 	cloudsPPShader.setSampler2D("clouds", cloudsFBO->getColorAttachmentTex(0), 0);
 	cloudsPPShader.setSampler2D("emissions", cloudsFBO->getColorAttachmentTex(1), 1);
 	cloudsPPShader.setSampler2D("depthMap", depthMapTex, 2);
+	cloudsPPShader.setSampler2D("lastFrame", lastFrameCloudsFBO->tex, 3);
+
 	cloudsPPShader.setVec2("resolution", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
 
 	glm::mat4 lightModel;
@@ -114,7 +130,17 @@ void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosit
 
 	cloudsPPShader.setFloat("time", glfwGetTime());
 	ScreenQuad::drawQuad();
-	
+
+	//Copy last frame
+	lastFrameCloudsFBO->bind();
+	Shader& copy = copyShader->getShader();
+	copy.use();
+	copy.setSampler2D("colorTex", cloudsFBO->getColorAttachmentTex(3), 0);
+	copy.setSampler2D("alphanessTex", cloudsFBO->getColorAttachmentTex(2), 1);
+	ScreenQuad::drawQuad();
+
+	//copy last VP matrix
+	oldFrameVP = proj * view;
 }
 
 

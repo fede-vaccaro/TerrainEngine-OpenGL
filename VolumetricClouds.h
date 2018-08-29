@@ -34,10 +34,12 @@ private:
 	int SCR_WIDTH, SCR_HEIGHT;
 	float coverage;
 	Camera * camera;
-	ScreenQuad * volumetricCloudsShader, * ppShader;
+	ScreenQuad * volumetricCloudsShader, * ppShader, * copyShader;
 
-	FrameBufferObject * cloudsFBO, *cloudsPostProcessingFBO;
+	FrameBufferObject * cloudsFBO, *cloudsPostProcessingFBO, * lastFrameCloudsFBO;
 
 	unsigned int perlinTex, worley32, weatherTex;
+
+	glm::mat4 oldFrameVP;
 };
 

@@ -170,11 +170,12 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\cloud_post.frag" />
+    <None Include="shaders\clouds_post.frag" />
+    <None Include="shaders\copyFrame.frag" />
     <None Include="shaders\perlin3D.comp" />
     <None Include="shaders\perlinworley.comp" />
     <None Include="shaders\post_processing.frag" />
-    <None Include="shaders\raymarch_cube.frag" />
+    <None Include="shaders\volumetric_clouds.frag" />
     <None Include="shaders\raymarch_cube_box.frag" />
     <None Include="shaders\screen.frag" />
     <None Include="shaders\screen.vert" />
@@ -186,7 +187,6 @@
     <None Include="shaders\tessVertexShader.vert" />
     <None Include="shaders\TextArea.frag" />
     <None Include="shaders\TextArea.vert" />
-    <None Include="shaders\volumetricclouds.frag" />
     <None Include="shaders\waterFragmentShader.frag" />
     <None Include="shaders\waterVertexShader.vert" />
     <None Include="shaders\weather.comp" />
