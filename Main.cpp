@@ -202,7 +202,7 @@ int main()
 		t1 = glfwGetTime();
 
 		glm::vec3 lightPosition;
-		lightPosition = glm::vec3(-.0, .7, 1.0)*1e9f;
+		lightPosition = glm::vec3(-.0, .4, 1.0)*1e9f;
 		lightPosition += camera.Position;
 		// input
 		window.processInput(frameTime);

@@ -221,7 +221,7 @@ float sampleCloudDensity(vec3 p, bool expensive){
 
 
 	//vec2 uv = (p.xz - planeMin.xz) / planeDim;
-	const float cloudSpeed = 150.0;
+	const float cloudSpeed = 100.0;
 
 	p += heightFraction * windDirection * CLOUD_TOP_OFFSET;
 	p += windDirection * iTime * cloudSpeed;
@@ -240,13 +240,13 @@ float sampleCloudDensity(vec3 p, bool expensive){
 
 	vec3 weather_data = texture(weatherTex, uv).rgb;
 
-	float lowFreqFBM = low_frequency_noise.g*0.625 + low_frequency_noise.b*0.25 + low_frequency_noise.a*0.125;
+	float lowFreqFBM = dot(low_frequency_noise.gba, vec3(0.625, 0.25, 0.125));//low_frequency_noise.g*0.625 + low_frequency_noise.b*0.25 + low_frequency_noise.a*0.125;
 	float base_cloud = remap(low_frequency_noise.r*1.5, -(1.0 - lowFreqFBM), 1., 0.0 , 1.0);
 	
 	//heightFraction = clamp(heightFraction, -heightFraction - EPSILON, heightFraction + EPSILON);
 	float density = getDensityForCloud(heightFraction, weather_data.g);
 	//base_cloud = remap(base_cloud, 1.0 - density, 1.0, 0.0, 1.0);
-	base_cloud *= density/heightFraction;
+	base_cloud *= (density/heightFraction);
 
 	float cloud_coverage = weather_data.r*coverage_multiplier;
 	float base_cloud_with_coverage = remap(base_cloud , cloud_coverage , 1.0 , 0.0 , 1.0);
@@ -258,7 +258,7 @@ float sampleCloudDensity(vec3 p, bool expensive){
 	if(expensive)
 	{
 		vec3 erodeCloudNoise = texture(worley32, vec3(uv_scaled*1.5, heightFraction)*0.1 ).rgb;
-		float highFreqFBM = (erodeCloudNoise.r * 0.625) + (erodeCloudNoise.g * 0.25) + (erodeCloudNoise.b * 0.125);
+		float highFreqFBM = dot(erodeCloudNoise.rgb, vec3(0.625, 0.25, 0.125));//(erodeCloudNoise.r * 0.625) + (erodeCloudNoise.g * 0.25) + (erodeCloudNoise.b * 0.125);
 		float highFreqNoiseModifier = mix(highFreqFBM, 1.0 - highFreqFBM, clamp(heightFraction * 10.0, 0.0, 1.0));
 
 		base_cloud_with_coverage = base_cloud_with_coverage - highFreqNoiseModifier * (1.0 - base_cloud_with_coverage);
@@ -390,7 +390,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
 	float lightDotEye = dot(normalize(SUN_DIR), normalize(dir));
 
 	float T = 1.0;
-	const float absorption = 0.00750;
+	const float absorption = 0.00950;
 	float sigma_ds = -ds*absorption;
 	bool expensive = true;
 	bool entered = false;
@@ -523,7 +523,7 @@ void main()
 		oldFrameAlphaness = texture(lastFrameAlphaness, prevFrameScreenPos).r;
 	}
 
-	if( oldFrameAlphaness > 0.0 && (writePixel() || isOut)) //temporal reprojection
+	if( (oldFrameAlphaness > 0.0 || frameIter == 0) && (writePixel() || isOut)) //temporal reprojection
 	{
 		v = marchToCloud(startPos,endPos, bg.rgb);
 		cloudColor = v;
