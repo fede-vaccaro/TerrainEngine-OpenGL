@@ -13,7 +13,7 @@ class VolumetricClouds
 {
 public:
 	VolumetricClouds(int SW, int SH, Camera * cam);
-	void draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosition, unsigned int depthMap);
+	void draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, unsigned int depthMap);
 	~VolumetricClouds();
 
 	unsigned int getCloudsTexture() {
@@ -35,7 +35,7 @@ private:
 	float coverage;
 	Camera * camera;
 	ScreenQuad * volumetricCloudsShader, * ppShader, * copyShader;
-
+	int frameIter = 0;
 	FrameBufferObject * cloudsFBO, *cloudsPostProcessingFBO, * lastFrameCloudsFBO;
 
 	unsigned int perlinTex, worley32, weatherTex;

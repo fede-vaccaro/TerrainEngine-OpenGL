@@ -8,7 +8,7 @@ float Window::lastX = SCR_WIDTH / 2.0f;
 float Window::lastY = SCR_HEIGHT / 2.0f;
 
 
-Window::Window(int& success, Camera * cam)
+Window::Window(int& success, Camera * cam, std::string name) : name(name)
 {
 	// glfw: initialize and configure
 	glfwInit();
@@ -18,7 +18,7 @@ Window::Window(int& success, Camera * cam)
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	// glfw window creation										 
-	this->w = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Tessellation Shader on terrain", NULL, NULL);
+	this->w = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, name.c_str(), NULL, NULL);
 	if (!this->w)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;

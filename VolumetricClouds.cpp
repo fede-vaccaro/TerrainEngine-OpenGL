@@ -11,7 +11,7 @@ VolumetricClouds::VolumetricClouds(int SW, int SH, Camera * cam): SCR_WIDTH(SW),
 	cloudsPostProcessingFBO = new FrameBufferObject(SW, SH, 2);
 	lastFrameCloudsFBO = new FrameBufferObject(SH, SH, 2);
 
-	this->coverage = 0.4;
+	this->coverage = 0.3;
 
 	/////////////////// TEXTURE GENERATION //////////////////
 
@@ -61,7 +61,7 @@ VolumetricClouds::VolumetricClouds(int SW, int SH, Camera * cam): SCR_WIDTH(SW),
 #define TIMETO(CODE, TASK) 	t1 = glfwGetTime(); CODE; t2 = glfwGetTime(); std::cout << "Time to " + std::string(TASK) + " :" << (t2 - t1)*1e3 << "ms" << std::endl;
 
 
-void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosition, unsigned int depthMapTex) {
+void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, unsigned int depthMapTex) {
 
 	float t1, t2;
 
@@ -76,7 +76,9 @@ void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosit
 	cloudsShader.setVec3("cameraPosition", camera->Position);
 	cloudsShader.setFloat("FOV", camera->Zoom);
 	cloudsShader.setVec3("lightPosition", lightPosition);
+	cloudsShader.setVec3("lightColor", lightColor);
 	cloudsShader.setFloat("coverage_multiplier", coverage);
+	cloudsShader.setInt("frameIter", frameIter);
 
 	cloudsShader.setMat4("invViewProj", glm::inverse(proj*view));
 	cloudsShader.setMat4("oldFrameVP", oldFrameVP);
@@ -141,6 +143,9 @@ void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosit
 
 	//copy last VP matrix
 	oldFrameVP = proj * view;
+
+	//increment frame counter mod 16, for temporal reprojection
+	frameIter = (frameIter + 1)%16;
 }
 
 

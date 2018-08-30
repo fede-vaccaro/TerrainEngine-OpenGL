@@ -85,12 +85,12 @@ void main()
     float decay = 0.98; 
     float density = 0.9; 
     float weight = 0.07; 
-	float exposure = 0.3;
+	float exposure = 0.45;
     
     // Light offset. 
     vec3 l = vec3(lightPos.xy, 0.5);
     
-	const int SAMPLES = 128;
+	const int SAMPLES = 64;
 	float illuminationDecay = 1.0;
 
 	vec2 tc = uv;

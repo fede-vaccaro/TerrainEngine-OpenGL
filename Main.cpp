@@ -172,6 +172,7 @@ int main()
 
 	while (window.continueLoop())
 	{
+		//glfwSwapInterval(0);
 
 		octaves = getters[1]();
 		df = getters[2]();
@@ -212,6 +213,8 @@ int main()
 		SceneFBO.bind();
 		// render
 		//glEnable(GL_MULTISAMPLE);
+		//glEnable(GL_FRAMEBUFFER_SRGB); //gamma correction
+
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
@@ -235,19 +238,20 @@ int main()
 		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 50.f,10000000.0f);
 
 		// draw terrain
-		//tc.drawTiles(proj, lightPosition, lightColor, fogColor, SceneFBO);
+		tc.drawTiles(proj, lightPosition, lightColor, fogColor, SceneFBO);
 
 		//disable test for quad rendering
 		ScreenQuad::disableTests();
 
 		// scene post processing - blending between main scene texture and clouds texture
 
-		volumetricClouds.draw(view, proj, lightPosition, SceneFBO.depthTex);
+		volumetricClouds.draw(view, proj, lightPosition, lightColor, SceneFBO.depthTex);
 
+		// blend volumetric clouds rendering with terrain and apply some post process
 		unbindCurrentFrameBuffer();
 		Shader& post = PostProcessing.getShader();
 		post.use();
-
+		post.setVec2("resolution", glm::vec2(Window::SCR_WIDTH, Window::SCR_HEIGHT));
 		post.setSampler2D("screenTexture", SceneFBO.tex, 0);
 		post.setSampler2D("cloudTEX", volumetricClouds.getCloudsTexture(), 1);
 

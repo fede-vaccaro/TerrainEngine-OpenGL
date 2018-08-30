@@ -28,7 +28,7 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 	dudvMap = TextureFromFile("waterDUDV.png", "resources", false);
 	normalMap = TextureFromFile("normalMap.png", "resources", false);
 
-	waterHeight = 128.0;
+	waterHeight = 128.0 + 50.0;
 
 	position.resize(gridLenght*gridLenght);
 	for (int i = 0; i < gridLenght; i++) {

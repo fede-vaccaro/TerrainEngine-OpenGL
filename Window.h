@@ -11,7 +11,7 @@ class Window
 {
 public:
 	//initializer
-	Window(int& success, Camera * cam);
+	Window(int& success, Camera * cam, std::string name = "TerrainEngine OpenGL");
 	~Window();
 	GLFWwindow * w;
 	
@@ -58,6 +58,8 @@ private:
 	static float lastY;
 
 	static Camera * camera;
+
+	std::string name;
 };
 
 

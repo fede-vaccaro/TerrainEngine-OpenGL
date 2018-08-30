@@ -6,6 +6,8 @@ in vec2 TexCoords;
 uniform sampler2D screenTexture;
 uniform sampler2D cloudTEX;
 
+uniform vec2 resolution;
+
 #define HDR(col, exps) 1.0 - exp(-col * exps)
 
 vec3 TonemapACES(vec3 x)
@@ -29,17 +31,17 @@ void main()
 	vec4 col = mix(bg, cloud, cloud.a);
 
 	const float gamma = 2.2;
-    const float exposure = 5.0;
+    const float exposure = 3.0;
     // Exposure tone mapping
-    //col = mix(col, HDR(col, exposure), 0.5);
+    //col = HDR(col, exposure);
 
 	// gamma and contrast
-    //col.rgb = pow(col.rgb, vec3(1./gamma));
+    //col.rgb = pow(col.rgb, vec3(1.0/gamma));
 	//col.rgb = (col.rgb - 0.3)*1.5;
     //col.rgb = mix( col.rgb, col.bbb, 0. ); 
      
      // vignette
-     vec2 uv = gl_FragCoord.xy / vec2(1600.0, 900.0);
+     vec2 uv = gl_FragCoord.xy / resolution;
      //col.rgb = mix(col.rgb*col.rgb, col.rgb, pow( 16.0*uv.x*uv.y*(1.0-uv.x)*(1.0-uv.y), 0.05 ));
 	col.rgb *= pow( 16.0*uv.x*uv.y*(1.0-uv.x)*(1.0-uv.y), 0.11 );
 	//col.rgb = TonemapACES(col.rgb);

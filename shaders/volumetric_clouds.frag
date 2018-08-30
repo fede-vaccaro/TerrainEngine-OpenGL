@@ -17,9 +17,7 @@ uniform mat4 inv_proj;
 uniform mat4 invViewProj;
 uniform mat4 oldFrameVP;
 
-uniform vec3 sunPosition = vec3(1000,1000,1000)*20.;
-uniform vec3 lightDir = normalize(vec3(1,0.5,0.5));
-uniform vec4 lightPos;
+uniform vec3 lightColor = vec3(1.0);
 uniform sampler3D cloud;
 uniform sampler3D worley32;
 uniform sampler2D weatherTex;
@@ -28,7 +26,7 @@ uniform sampler2D lastFrameAlphaness;
 uniform sampler2D lastFrameColor;
 uniform vec3 lightPosition;
 uniform float coverage_multiplier = 0.4;
-
+uniform int frameIter;
 
 uniform vec3 cameraPosition;
 
@@ -65,18 +63,18 @@ uniform vec3 noiseKernel[6u] = vec3[]
 #define CUMULUS_GRADIENT vec4(0.00, 0.1625, 0.88, 0.98)
 
 #define EARTH_RADIUS (700000.)
-#define SPHERE_INNER_RADIUS (EARTH_RADIUS + 15000.0)
+#define SPHERE_INNER_RADIUS (EARTH_RADIUS + 12000.0)
 #define SPHERE_OUTER_RADIUS (SPHERE_INNER_RADIUS + 18000.0)
 #define SPHERE_DELTA float(SPHERE_OUTER_RADIUS - SPHERE_INNER_RADIUS)
 
 #define CLOUDS_AMBIENT_COLOR_TOP (vec3(149., 149., 170.)*(1./255.))
-#define CLOUDS_AMBIENT_COLOR_BOTTOM (vec3(65., 65., 77.)*(1.8/255.))
+#define CLOUDS_AMBIENT_COLOR_BOTTOM (vec3(65., 65., 80.)*(1.5/255.))
 #define CLOUDS_MIN_TRANSMITTANCE 1e-1
 #define CLOUDS_TRANSMITTANCE_THRESHOLD 1.0 - CLOUDS_MIN_TRANSMITTANCE
 
 #define SUN_DIR normalize(vec3(-.0,.7,1.0))
 //#define SUN_DIR normalize(vec3(1,10,1));
-#define SUN_COLOR ambientlight
+#define SUN_COLOR lightColor
 vec3 sphereCenter = vec3(0.0, -EARTH_RADIUS, 0.0);
 
 bool intersectCubeMap(vec3 o, vec3 d, out vec3 minT, out vec3 maxT)
@@ -223,7 +221,7 @@ float sampleCloudDensity(vec3 p, bool expensive){
 
 
 	//vec2 uv = (p.xz - planeMin.xz) / planeDim;
-	const float cloudSpeed = 75.0;
+	const float cloudSpeed = 150.0;
 
 	p += heightFraction * windDirection * CLOUD_TOP_OFFSET;
 	p += windDirection * iTime * cloudSpeed;
@@ -307,7 +305,7 @@ float raymarchToLight(vec3 o, float stepSize, vec3 lightDir, float originalDensi
 	float density = 0.0;
 	float coneDensity = 0.0;
 	float invDepth = 1.0/ds;
-	const float absorption = 0.0001;
+	const float absorption = 0.00015;
 	float sigma_ds = -ds*absorption;
 	vec3 pos;
 
@@ -366,7 +364,6 @@ uniform float bayerFilter[16u] = float[]
 	15.0*BAYER_FACTOR, 7.0*BAYER_FACTOR, 13.0*BAYER_FACTOR, 5.0*BAYER_FACTOR
 );
 
-const float inv_sqrt_two = pow(2.0, -0.5);
 
 vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
 	vec3 path = endPos - startPos;
@@ -376,7 +373,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
 
 	//float volumeHeight = planeMax.y - planeMin.y;
 
-	int nSteps = int(mix(64.0, 128.0, clamp( len/SPHERE_DELTA - 1.0,0.0,1.0) ));
+	const int nSteps = 64;//int(mix(48.0, 96.0, clamp( len/SPHERE_DELTA - 1.0,0.0,1.0) ));
 	
 	float ds = len/nSteps;
 	vec3 dir = path/len;
@@ -384,7 +381,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
 	vec4 col = vec4(0.0);
 	int a = int(fract(length(startPos) + iTime)*100.0) % 4;
 	int b = int(fract(length(endPos) + iTime)*100.0) % 4;
-	startPos += dir * bayerFilter[a * 4 + b]*5.0;
+	startPos += dir * bayerFilter[a * 4 + b]*2.5;
 	//startPos += dir*abs(Random2D(vec3(a,b,a+b)))*len/SPHERE_DELTA*10.0;
 	vec3 pos = startPos;
 
@@ -402,17 +399,17 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
 
 	for(int i = 0; i < nSteps; ++i)
 	{	
-		if( pos.y >= cameraPosition.y - SPHERE_DELTA*1.5 ){
+		//if( pos.y >= cameraPosition.y - SPHERE_DELTA*1.5 ){
 
-		float density_sample = sampleCloudDensity(pos, T > 0.0);
+		float density_sample = sampleCloudDensity(pos, true);
 		if(density_sample > 0.)
 		{
 			float height = getHeightFraction(pos);
 			vec3 ambientLight = mix( CLOUDS_AMBIENT_COLOR_BOTTOM, CLOUDS_AMBIENT_COLOR_TOP, height )*1.0;
 			float light_density = raymarchToLight(pos, ds, SUN_DIR, density_sample, lightDotEye);
-			float scattering = 0.8*mix(HG(lightDotEye, -0.15), HG(lightDotEye, 0.05), clamp(lightDotEye/2.0 + 0.65, 0.0, 1.0));
+			float scattering = mix(HG(lightDotEye, -0.2), HG(lightDotEye, 0.1), clamp(lightDotEye/2.0 + 0.65, 0.0, 1.0));
 			//scattering = 0.6;
-			vec3 S = (bg*0.4 + SUN_COLOR * (scattering * light_density)) * density_sample;
+			vec3 S = (ambientLight *1.0 + 0.5 * SUN_COLOR * scattering * light_density) * density_sample;
 			float dTrans = exp(density_sample*sigma_ds);
 			vec3 Sint = (S - S * dTrans) * (1. / density_sample);
 			col.rgb += T * Sint;
@@ -423,9 +420,9 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
 		if( T <= CLOUDS_MIN_TRANSMITTANCE ) break;
 
 		pos += dir;
-		}
+		//}
 	}
-
+	//col.rgb += ambientlight*0.02;
 	col.a = 1.0 - T;
 	
 	//col = vec4( vec3(getHeightFraction(startPos)), 1.0);
@@ -442,13 +439,34 @@ vec2 computeScreenPos(vec2 ndc){
 	return (ndc*0.5 + 0.5);
 }
 
-float computeFogAmount(in vec3 startPos, in float factor = 0.00008){
+float computeFogAmount(in vec3 startPos, in float factor = 0.00006){
 	float dist = length(startPos - cameraPosition);
 	float radius = (cameraPosition.y - sphereCenter.y) * 0.3;
 	float alpha = (dist / radius);
 	//v.rgb = mix(v.rgb, ambientColor, alpha*alpha);
 
 	return (1.-exp( -dist*alpha*factor));
+}
+
+uniform int bayerMatrix9[9] = int[](
+    0, 7, 3,
+    6, 5, 2,
+    4, 1, 8
+);
+
+uniform int bayerMatrix16[16] = int[]
+(
+	0, 8, 2, 10,
+	12, 4, 14, 6,
+	3, 11, 1, 9,
+	15, 7, 13, 5
+);
+
+
+bool writePixel(){
+	int index = bayerMatrix16[frameIter];
+	ivec2 icoord = ivec2(gl_FragCoord.xy);
+    return ((icoord.x + 4*icoord.y) % 16 == index);
 }
 
 void main()
@@ -504,7 +522,8 @@ void main()
 	if(!isOut){
 		oldFrameAlphaness = texture(lastFrameAlphaness, prevFrameScreenPos).r;
 	}
-	if( oldFrameAlphaness > 0.0 )
+
+	if( oldFrameAlphaness > 0.0 && (writePixel() || isOut)) //temporal reprojection
 	{
 		v = marchToCloud(startPos,endPos, bg.rgb);
 		cloudColor = v;

@@ -209,7 +209,7 @@ vec3 computeNormals(vec3 WorldPos){
 }
 
 vec3 ambient(){
-	float ambientStrength = 0.25; 
+	float ambientStrength = 0.2; 
     vec3 ambient = ambientStrength * u_LightColor; 
     return ambient;
 }
