@@ -72,7 +72,7 @@ void main()
 {
     ivec2 pixel = ivec2(gl_GlobalInvocationID.xy);
 	
-	vec2 uv = vec2(float(pixel.x) / 1024.0, float(pixel.y) / 1024.0);
+	vec2 uv = vec2(float(pixel.x + 2.0) / 1024.0, float(pixel.y) / 1024.0);
 	vec2 suv = vec2(uv.x + 5.5, uv.y + 5.5);
 
 	float cloudType = clamp(perlinNoise(suv, perlinScale*3.0, 0.3, 0.7,10), 0.0, 1.0);
