@@ -407,7 +407,7 @@ float raymarchToLight(vec3 o, float stepSize, vec3 lightDir, float originalDensi
 	float density = 0.0;
 	float coneDensity = 0.0;
 	float invDepth = 1.0/ds;
-	const float absorption = 0.0006;
+	const float absorption = 0.0015;
 	float sigma_ds = -ds*absorption;
 	vec3 pos;
 
@@ -446,7 +446,7 @@ float raymarchToLight(vec3 o, float stepSize, vec3 lightDir, float originalDensi
 
 	float beerspowder = clamp( 2.5*   T*mix((1.0 - exp(-3.5*originalDensity)), 1.0, 0.25), 0.0, 1.0);
 
-	return beerspowder;//*powder(originalDensity, 0.0);
+	return T;//*powder(originalDensity, 0.0);
 }
 
 vec3 ambientlight = vec3(255, 255, 235)/255;
@@ -511,10 +511,10 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
 		{
 			float height = getHeightFraction(pos);
 			vec3 ambientLight = mix( CLOUDS_AMBIENT_COLOR_BOTTOM*1.25, CLOUDS_AMBIENT_COLOR_TOP, pow(height, 0.2) );
-			float light_density = raymarchToLight(pos, ds, SUN_DIR, density_sample, lightDotEye);
-			float scattering = mix(HG(lightDotEye, -0.25), HG(lightDotEye, 0.15), clamp(lightDotEye*0.5 + 0.65, 0.0, 1.0));
+			float light_density = raymarchToLight(pos, ds*0.1, SUN_DIR, density_sample, lightDotEye);
+			float scattering = mix(HG(lightDotEye, -0.2), HG(lightDotEye, 0.15), clamp(lightDotEye*0.5 + 0.65, 0.0, 1.0));
 			//scattering = 0.6;
-			vec3 S = ( mix(ambientLight, SUN_COLOR, smoothstep(0.0, 1.0, light_density))) * density_sample;
+			vec3 S = ( mix(ambientLight*0.8, scattering*SUN_COLOR, smoothstep(0.0, 1.0, light_density))) * density_sample;
 			float dTrans = exp(density_sample*sigma_ds);
 			vec3 Sint = (S - S * dTrans) * (1. / density_sample);
 			col.rgb += T * Sint;
@@ -624,8 +624,9 @@ void main()
 	if(!isOut){
 		oldFrameAlphaness = texture(lastFrameAlphaness, prevFrameScreenPos).r;
 	}
+	const bool enableOptimization = false;
 
-	if( (oldFrameAlphaness >= 0.0 || frameIter == 0) && (writePixel() || isOut)) // if the pixel must be drawn
+	if( !enableOptimization || (oldFrameAlphaness >= 0.0 || frameIter == 0) && (writePixel() || isOut)) // if the pixel must be drawn
 	{
 		v = marchToCloud(startPos,endPos, bg.rgb);
 		cloudColor = v;
