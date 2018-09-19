@@ -235,7 +235,7 @@ int main()
 
 		// Camera (View Matrix) setting
 		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 50.f,10000000.0f);
+		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 5.f,10000000.0f);
 
 		// draw terrain
 		tc.drawTiles(proj, lightPosition, lightColor, fogColor, SceneFBO);

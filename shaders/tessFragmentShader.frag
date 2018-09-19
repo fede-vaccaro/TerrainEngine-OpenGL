@@ -20,7 +20,7 @@ uniform bool normals;
 uniform float u_grassCoverage;
 uniform float waterHeight;
 
-uniform sampler2D sand, grass1, grass, rock, snow;
+uniform sampler2D sand, grass1, grass, rock, snow, rockNormal;
 
 out vec4 FragColor;
 
@@ -75,15 +75,18 @@ float InterpolatedNoise(vec2 xy) {
 	//float i1 = mix(v1, v2, smoothstep(0, 1, fractional_X));
 	//float i2 = mix(v3, v4, smoothstep(0, 1, fractional_X));
 	//return mix(i1, i2, smoothstep(0, 1, fractional_Y));
-	fractional_X = smoothstep(0.0, 1.0, fractional_X);
-	fractional_Y = smoothstep(0.0, 1.0, fractional_Y);
+	vec2 w = vec2(fractional_X, fractional_Y);
+	w = w*w*w*(10.0 + w*(-15.0 + 6.0*w));
+
+	//fractional_X = smoothstep(0.0, 1.0, fractional_X);
+	//fractional_Y = smoothstep(0.0, 1.0, fractional_Y);
 	//return a + fractional_X*(b-a) + fractional_Y*c + fractional_X*fractional_Y*(d-c) - a*fractional_Y - fractional_X*fractional_Y*(b-a);
 	float k0 = a, 
 	k1 = b - a, 
 	k2 = c - a, 
 	k3 = d - c - b + a;
 
-	return k0 + k1*fractional_X + k2*fractional_Y + k3*fractional_X*fractional_Y;
+	return k0 + k1*w.x + k2*w.y + k3*w.x*w.y;
 
 }
 
@@ -194,7 +197,7 @@ vec3 fbmd_9( in vec2 x )
 	return vec3( a*a*a, 3.0*a*a*d );
 }
 
-vec3 computeNormals(vec3 WorldPos){
+vec3 computeNormals(vec3 WorldPos, out mat3 TBN){
 	float st = 1.0;
 	float dhdu = (perlin((WorldPos.x + st), WorldPos.z) - perlin((WorldPos.x - st), WorldPos.z))/(2.0*st);
 	float dhdv = (perlin( WorldPos.x, (WorldPos.z + st)) - perlin(WorldPos.x, (WorldPos.z - st)))/(2.0*st);
@@ -203,6 +206,8 @@ vec3 computeNormals(vec3 WorldPos){
 	vec3 Z = vec3(0.0, dhdv, 1.0);
 
 	vec3 n = normalize(cross(Z,X));
+	TBN = mat3(normalize(X), normalize(Z), n);
+
 	//vec3 norm = mix(n, Normal, 0.5); 
 	//norm = normalize(norm);
 	return n;
@@ -235,7 +240,7 @@ vec3 diffuse(vec3 normal){
 
 vec3 specular(vec3 normal){
 	vec3 lightDir = normalize(u_LightPosition - WorldPos);
-	float specularFactor = 0.1f;
+	float specularFactor = 0.01f;
 	vec3 viewDir = normalize(u_ViewPosition - WorldPos);
 	vec3 reflectDir = reflect(-lightDir, normal);  
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
@@ -263,7 +268,7 @@ float perlin(float x, float y, int oct){
 	return total*total*total;
 }
 
-vec4 getTexture(vec3 normal){
+vec4 getTexture(inout vec3 normal, const mat3 TBN){
 	float trans = 20.;
 
 	vec4 sand_t = vec4(244, 231, 127, 255)/255;//texture(sand, texCoord*5.0);
@@ -274,13 +279,13 @@ vec4 getTexture(vec3 normal){
 
 	sand_t = texture(sand, texCoord*10.0);
 	sand_t.rg *= 1.3;
-	rock_t = texture(rock, texCoord*7.0);
-	rock_t.r *= 1.1;
+	rock_t = texture(rock, texCoord*vec2(1.0, 1.5).yx);
+	rock_t.rgb *= vec3(2.5, 2.0, 2.0);
 	grass_t = texture(grass, texCoord*12.0);//*vec4(0.0, 1.5, 0.0, 1.0);
 	vec4 grass_t1 = texture(grass1, texCoord*12.0);//*
 	float perlinBlendingCoeff = clamp(perlin(WorldPos.x, WorldPos.z, 2)*2.0 - 0.2, 0.0, 1.0);
 	grass_t = mix(grass_t*1.3, grass_t1*0.75, perlinBlendingCoeff);
-	grass_t.rgb *= 0.8;
+	grass_t.rgb *= 0.5;
 	//rock_t = mix(rock_t*0.7, rock_t*0.9, perlinBlendingCoeff);
 	//grass_t = vec4(grassBlendingCoeff);
 
@@ -301,7 +306,7 @@ vec4 getTexture(vec3 normal){
 	vec4 heightColor;
 	float cosV = abs(dot(normal, vec3(0.0, 1.0, 0.0)));
 	float tenPercentGrass = grassCoverage - grassCoverage*0.1;
-	float blendingCoeff = pow((cosV - tenPercentGrass) / (grassCoverage * 0.1), 4.0);
+	float blendingCoeff = pow((cosV - tenPercentGrass) / (grassCoverage * 0.1), 1.0);
 
 	if(height <= waterHeight + trans){
 		heightColor = sand_t;
@@ -311,8 +316,11 @@ vec4 getTexture(vec3 normal){
 		heightColor = grass_t;
     }else if(cosV > tenPercentGrass){
 		heightColor = mix(rock_t , grass_t , blendingCoeff);
+		normal = mix(TBN*(texture(rockNormal, texCoord*vec2(1.0, 1.5).yx).rgb*2.0 - 1.0), normal, blendingCoeff);
     }else{
 		heightColor = rock_t;
+		normal = TBN*(texture(rockNormal, texCoord*vec2(1.0, 1.5).yx).rgb*2.0 - 1.0);
+		
 	}
 
 	return heightColor;
@@ -330,12 +338,13 @@ void main()
 		normals_fog = false;
 	}
 	
-	vec3 n; 
+	vec3 n;
+	mat3 TBN;
 	if(normals && normals_fog){
 		//n = computeNormals(fbmd_9(WorldPos.xz).gb);
-		n = computeNormals(WorldPos);
+		n = computeNormals(WorldPos, TBN);
 		//smoothing
-		float st = 0.1;
+		/**float st = 0.1;
 		vec3 n1 = computeNormals(WorldPos + vec3(-st, 0, st));
 		vec3 n3 = computeNormals(WorldPos + vec3(0, 0, st));
 		vec3 n2 = computeNormals(WorldPos + vec3(st, 0, st));
@@ -344,24 +353,25 @@ void main()
 		vec3 n6 = computeNormals(WorldPos + vec3(0, 0, -st));
 		vec3 n7 = computeNormals(WorldPos + vec3(-st, 0, -st));
 		vec3 n8 = computeNormals(WorldPos + vec3(st, 0, -st));
-
+		**/
 		//n = n + n1 + n2 + n3 + n4 + n5 + n6 + n7 + n8;
 		n = normalize(n);
 	}else{
 		n = vec3(0,1,0);
 	}
 
+
+
+	vec4 heightColor = getTexture(n, TBN);
+	//heightColor = vec4(perlin(WorldPos.x, WorldPos.z, 4));
+	
 	vec3 ambient = ambient();
 	vec3 diffuse = diffuse(n);
 	vec3 specular = specular(n);
 
-	vec4 heightColor = getTexture(n);
-	//heightColor = vec4(perlin(WorldPos.x, WorldPos.z, 4));
-
-
 
 	// putting all together
-    vec4 color = heightColor*vec4((ambient + specular + diffuse)*vec3(1.0f) , 1.0f);
+    vec4 color = heightColor*vec4((ambient + specular*0 + diffuse)*vec3(1.0f) , 1.0f);
 	if(drawFog){
 		FragColor = mix(color, vec4(fogColor, 1.0f), 1.0f - fogFactor);
 		FragColor.a = WorldPos.y/waterHeight;

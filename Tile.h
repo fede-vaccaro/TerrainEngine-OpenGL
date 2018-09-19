@@ -13,8 +13,6 @@ class Tile
 public:
 	Tile(glm::vec2 position, float scale, float disp, TessellationShader * shad, Model * planeModel, unsigned int * textures);
 	virtual ~Tile();
-	void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up);
-	void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up, float tessLevel);
 	void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up, std::vector<glm::vec2> & pos);
 	void setPositionsUniforms(std::vector<glm::vec2> & pos);
 	void setPositionsArray(std::vector<glm::vec2> & pos);

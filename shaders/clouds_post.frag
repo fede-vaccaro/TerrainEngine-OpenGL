@@ -78,7 +78,7 @@ void main()
 	if(  lightDotCameraFront > 0.0 )
 	{
     // Screen coordinates.
-    vec2 uv = gl_FragCoord.xy / vec2(1600.0, 900.0);
+    vec2 uv = gl_FragCoord.xy / resolution;
 
     // Radial blur factors.
     //

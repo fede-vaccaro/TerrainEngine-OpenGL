@@ -20,10 +20,10 @@ TileController::TileController(float scale, float disp, Camera * camera, Tessell
 	this->textures = new unsigned int[6];
 	textures[0] = TextureFromFile("sand.jpg", "resources", false);
 	textures[1] = TextureFromFile("grass.jpg", "resources", false);
-	textures[2] = TextureFromFile("rock4.jpg", "resources", false);
+	textures[2] = TextureFromFile("rdiffuse.jpg", "resources", false);
 	textures[3] = TextureFromFile("snow2.jpg", "resources", false);
-	textures[5] = TextureFromFile("rock.jpg", "resources", false);
-	textures[6] = TextureFromFile("terrainTexture.jpg", "resources", false);
+	textures[4] = TextureFromFile("rnormal.jpg", "resources", false);
+	textures[5] = TextureFromFile("terrainTexture.jpg", "resources", false);
 	
 	dudvMap = TextureFromFile("waterDUDV.png", "resources", false);
 	normalMap = TextureFromFile("normalMap.png", "resources", false);

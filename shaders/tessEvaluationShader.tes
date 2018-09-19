@@ -72,18 +72,27 @@ float InterpolatedNoise(int ind, float x, float y) {
 	int integer_Y = int(floor(y));
 	float fractional_Y = fract(y);
 	vec2 randomInput = vec2(integer_X, integer_Y);
-	float v1 = Random2D(randomInput);
-	float v2 = Random2D(randomInput + vec2(1.0, 0.0));
-	float v3 = Random2D(randomInput + vec2(0.0, 1.0));
-	float v4 = Random2D(randomInput + vec2(1.0, 1.0));
+	float a = Random2D(randomInput);
+	float b = Random2D(randomInput + vec2(1.0, 0.0));
+	float c = Random2D(randomInput + vec2(0.0, 1.0));
+	float d = Random2D(randomInput + vec2(1.0, 1.0));
 	//float v1 = Random2D(randomInput);
 	//float v2 = Random2D(randomInput + vec2(1.0, 0.0));
 	//float v3 = Random2D(randomInput + vec2(0.0, 1.0));
 	//float v4 = Random2D(randomInput + vec2(1.0, 1.0));
 
-	float i1 = mix(v1, v2, smoothstep(0, 1, fractional_X));
-	float i2 = mix(v3, v4, smoothstep(0, 1, fractional_X));
-	return mix(i1, i2, smoothstep(0, 1, fractional_Y));
+	vec2 w = vec2(fractional_X, fractional_Y);
+	w = w*w*w*(10.0 + w*(-15.0 + 6.0*w));
+
+	//fractional_X = smoothstep(0.0, 1.0, fractional_X);
+	//fractional_Y = smoothstep(0.0, 1.0, fractional_Y);
+	//return a + fractional_X*(b-a) + fractional_Y*c + fractional_X*fractional_Y*(d-c) - a*fractional_Y - fractional_X*fractional_Y*(b-a);
+	float k0 = a, 
+	k1 = b - a, 
+	k2 = c - a, 
+	k3 = d - c - b + a;
+
+	return k0 + k1*w.x + k2*w.y + k3*w.x*w.y;
 }
 
 
