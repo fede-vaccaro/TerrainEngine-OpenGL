@@ -11,6 +11,8 @@
 Put freetype.dll, assimp-vc140-mt.dll resources/ and shaders/ in .exe folder.
 
 ![Demonstrative image](/resources/pic.jpg)
+![Another demonstrative image](/resources/pic2.jpg)
+
 
 [Here](https://www.youtube.com/watch?v=-9i_FZbO86c) you can see a really short video about. (08/16/18)
 

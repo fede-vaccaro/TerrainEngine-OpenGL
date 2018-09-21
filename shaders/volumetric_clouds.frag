@@ -63,12 +63,12 @@ uniform vec3 noiseKernel[6u] = vec3[]
 #define CUMULUS_GRADIENT vec4(0.00, 0.1625, 0.88, 0.98)
 
 #define EARTH_RADIUS (700000.)
-#define SPHERE_INNER_RADIUS (EARTH_RADIUS + 15000.0)
-#define SPHERE_OUTER_RADIUS (SPHERE_INNER_RADIUS + 22000.0)
+#define SPHERE_INNER_RADIUS (EARTH_RADIUS + 5000.0)
+#define SPHERE_OUTER_RADIUS (SPHERE_INNER_RADIUS + 17000.0)
 #define SPHERE_DELTA float(SPHERE_OUTER_RADIUS - SPHERE_INNER_RADIUS)
 
-#define CLOUDS_AMBIENT_COLOR_TOP (vec3(149., 149., 149.)*(1.5/255.))
-#define CLOUDS_AMBIENT_COLOR_BOTTOM (vec3(65., 65., 70.)*(1.5/255.))
+#define CLOUDS_AMBIENT_COLOR_TOP (vec3(169., 149., 149.)*(1.5/255.))
+#define CLOUDS_AMBIENT_COLOR_BOTTOM (vec3(65., 70., 80.)*(1.5/255.))
 #define CLOUDS_MIN_TRANSMITTANCE 1e-1
 #define CLOUDS_TRANSMITTANCE_THRESHOLD 1.0 - CLOUDS_MIN_TRANSMITTANCE
 
@@ -317,8 +317,8 @@ vec2 getUVProjection(vec3 p){
 
 #define CLOUD_TOP_OFFSET 750.0
 #define SATURATE(x) clamp(x, 0.0, 1.0)
-#define CLOUD_SCALE 50.0
-#define CLOUD_SPEED 500.0
+#define CLOUD_SCALE 40.0
+#define CLOUD_SPEED 300.0
 
 float sampleCloudDensity(vec3 p, bool expensive){
 
@@ -341,7 +341,7 @@ float sampleCloudDensity(vec3 p, bool expensive){
 	float lowFreqFBM = dot(low_frequency_noise.gba, vec3(0.625, 0.25, 0.125));
 	float base_cloud = remap(low_frequency_noise.r, -(1.0 - lowFreqFBM), 1., 0.0 , 1.0);
 	
-	float density = getDensityForCloud(heightFraction, weather_data.g);
+	float density = getDensityForCloud(heightFraction, 1.0);
 	base_cloud *= (density/heightFraction);
 
 	float cloud_coverage = weather_data.r*coverage_multiplier;
@@ -397,7 +397,7 @@ float raymarchToLight(vec3 o, float stepSize, vec3 lightDir, float originalDensi
 	float density = 0.0;
 	float coneDensity = 0.0;
 	float invDepth = 1.0/ds;
-	const float absorption = 0.002;
+	const float absorption = 0.0035;
 	float sigma_ds = -ds*absorption;
 	vec3 pos;
 
@@ -411,7 +411,7 @@ float raymarchToLight(vec3 o, float stepSize, vec3 lightDir, float originalDensi
 		if(heightFraction >= 0)
 		{
 			
-			float cloudDensity = sampleCloudDensity(pos, false);
+			float cloudDensity = sampleCloudDensity(pos, density > 0.3);
 			if(cloudDensity > 0.0)
 			{
 				float Ti = exp(cloudDensity*sigma_ds);
@@ -423,7 +423,8 @@ float raymarchToLight(vec3 o, float stepSize, vec3 lightDir, float originalDensi
 		coneRadius += CONE_STEP;
 	}
 
-	return 2.0*T*powder(2.0*threshold(originalDensity, 0.01));//*powder(originalDensity, 0.0);
+	//return 2.0*T*powder((originalDensity));//*powder(originalDensity, 0.0);
+	return T;
 }
 
 vec3 ambientlight = vec3(255, 255, 235)/255;
@@ -464,7 +465,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
 	int a = int(gl_FragCoord.x) % 4;
 	int b = int(gl_FragCoord.y) % 4;
 	startPos += dir * bayerFilter[a * 4 + b];
-	//startPos += dir*abs(Random2D(vec3(a,b,a+b)))*len/SPHERE_DELTA*10.0;
+	//startPos += dir*abs(Random2D(vec3(a,b,a+b)))*.5;
 	vec3 pos = startPos;
 
 	float density = 0.0;
@@ -472,7 +473,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
 	float lightDotEye = dot(normalize(SUN_DIR), normalize(dir));
 
 	float T = 1.0;
-	const float absorption = 0.011;
+	const float absorption = 0.01;
 	float sigma_ds = -ds*absorption;
 	bool expensive = true;
 	bool entered = false;
@@ -487,12 +488,14 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
 		if(density_sample > 0.)
 		{
 			float height = getHeightFraction(pos);
-			vec3 ambientLight = mix( CLOUDS_AMBIENT_COLOR_BOTTOM, CLOUDS_AMBIENT_COLOR_TOP, height );
-			float light_density = raymarchToLight(pos, ds*0.1, SUN_DIR, sampleCloudDensity(pos, false), lightDotEye);
-			float scattering = mix(HG(lightDotEye, -0.12), HG(lightDotEye, 0.12), clamp(lightDotEye*0.5 + 0.65, 0.0, 1.0));
+			vec3 ambientLight = mix( CLOUDS_AMBIENT_COLOR_BOTTOM, CLOUDS_AMBIENT_COLOR_TOP, 0. );
+			float light_density = raymarchToLight(pos, ds*0.1, SUN_DIR, density_sample, lightDotEye);
+			float scattering = mix(HG(lightDotEye, -0.08), HG(lightDotEye, 0.08), clamp(lightDotEye*0.5 + 0.5, 0.0, 1.0));
 			//scattering = 0.6;
 			scattering = max(scattering, 1.0);
-			vec3 S = ( mix(ambientLight, scattering*SUN_COLOR*vec3(1.0, 0.8,0.6), smoothstep(0.0, 1.0, light_density))) * density_sample;
+			float powderTerm =  (1.0*0.25 + 0.75*powder(density_sample));
+			powderTerm = 1.0;
+			vec3 S = 0.6*( mix( mix(ambientLight*1.8, bg, 0.2), scattering*SUN_COLOR, powderTerm*light_density)) * density_sample;
 			float dTrans = exp(density_sample*sigma_ds);
 			vec3 Sint = (S - S * dTrans) * (1. / density_sample);
 			col.rgb += T * Sint;
@@ -581,8 +584,8 @@ void main()
 	vec3 stub, cubeMapEndPos;
 	intersectCubeMap(vec3(0.0, 0.0, 0.0), worldDir, stub, cubeMapEndPos);
 	vec4 bg = colorCubeMap(cubeMapEndPos, worldDir);
-	vec3 red = vec3(1.0, 0.8, 0.6);
-	bg = mix(red.rgbr, bg, pow( max(cubeMapEndPos.y, .0), 0.2));
+	vec3 red = vec3(1.0, 0.8, 0.8);
+	//bg = mix( mix(red.rgbr, vec4(1.0), SUN_DIR.y), bg, pow( max(cubeMapEndPos.y, .0), 0.2));
 	//vec4 bg = vec4( TonemapACES(preetham(worldDir)), 1.0);
 
 	//compute raymarching starting and ending point 
@@ -604,7 +607,7 @@ void main()
 	if(!isOut){
 		oldFrameAlphaness = texture(lastFrameAlphaness, prevFrameScreenPos).r;
 	}
-	const bool enableOptimization = false;
+	const bool enableOptimization = true;
 
 	if( !enableOptimization || (oldFrameAlphaness >= 0.0 || frameIter == 0) && (writePixel() || isOut)) // if the pixel must be drawn
 	{
@@ -616,7 +619,7 @@ void main()
 		//v = vec4(1.0, 0.0, 0.0,v.a); // for debugging TR
 	}
 	float cloudAlphaness = threshold(v.a, 0.2);
-	v.rgb = v.rgb*1.3 - 0.1; // contrast-illumination tuning
+	v.rgb = v.rgb*1.8 - 0.1; // contrast-illumination tuning
 
 	// apply atmospheric fog to far away clouds
 	vec3 ambientColor = bg.rgb;
@@ -639,7 +642,7 @@ void main()
 
 	bloom = bg; // bloom is occlusion buffer for post proc crepuscolar rays
 	if(cloudAlphaness > 0.1){ //apply fog to bloom buffer
-		float fogAmount = computeFogAmount(startPos, 0.00002);
+		float fogAmount = computeFogAmount(startPos, 0.00003);
 
 		vec3 cloud = mix(vec3(0.0), bloom.rgb*cloudAlphaness, clamp(fogAmount,0.,1.));
 		bloom.rgb = bloom.rgb*(1.0 - cloudAlphaness) + cloud.rgb;

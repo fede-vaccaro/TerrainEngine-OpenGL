@@ -11,7 +11,7 @@ VolumetricClouds::VolumetricClouds(int SW, int SH, Camera * cam): SCR_WIDTH(SW),
 	cloudsPostProcessingFBO = new FrameBufferObject(SW, SH, 2);
 	lastFrameCloudsFBO = new FrameBufferObject(SH, SH, 2);
 
-	this->coverage = 0.3;
+	this->coverage = 0.45;
 
 	/////////////////// TEXTURE GENERATION //////////////////
 

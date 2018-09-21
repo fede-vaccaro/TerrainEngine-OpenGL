@@ -19,8 +19,8 @@ public:
 	void processInput(float frameTime); //input handler
 
 	// screen settings
-	static const unsigned int SCR_WIDTH = int(2560*0.9);
-	static const unsigned int SCR_HEIGHT = int(1440*0.9);
+	static const unsigned int SCR_WIDTH = 1920;
+	static const unsigned int SCR_HEIGHT = 1080;
 
 	void terminate() {
 		glfwTerminate();

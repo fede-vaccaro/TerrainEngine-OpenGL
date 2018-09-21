@@ -67,20 +67,10 @@ float InterpolatedNoise(vec2 xy) {
 	float b = Random2D(randomInput + vec2(1.0, 0.0));
 	float c = Random2D(randomInput + vec2(0.0, 1.0));
 	float d = Random2D(randomInput + vec2(1.0, 1.0));
-	//float v1 = Random2D(randomInput);
-	//float v2 = Random2D(randomInput + vec2(1.0, 0.0));
-	//float v3 = Random2D(randomInput + vec2(0.0, 1.0));
-	//float v4 = Random2D(randomInput + vec2(1.0, 1.0));
 
-	//float i1 = mix(v1, v2, smoothstep(0, 1, fractional_X));
-	//float i2 = mix(v3, v4, smoothstep(0, 1, fractional_X));
-	//return mix(i1, i2, smoothstep(0, 1, fractional_Y));
 	vec2 w = vec2(fractional_X, fractional_Y);
 	w = w*w*w*(10.0 + w*(-15.0 + 6.0*w));
 
-	//fractional_X = smoothstep(0.0, 1.0, fractional_X);
-	//fractional_Y = smoothstep(0.0, 1.0, fractional_Y);
-	//return a + fractional_X*(b-a) + fractional_Y*c + fractional_X*fractional_Y*(d-c) - a*fractional_Y - fractional_X*fractional_Y*(b-a);
 	float k0 = a, 
 	k1 = b - a, 
 	k2 = c - a, 
@@ -90,6 +80,7 @@ float InterpolatedNoise(vec2 xy) {
 
 }
 
+/**
 float perlin(float x, float y){
 	
     int numOctaves = octaves;
@@ -104,9 +95,30 @@ float perlin(float x, float y){
 		total += InterpolatedNoise( vec2(x,y)*frequency) * amplitude;
 	}
 	return total*total*total;
+} **/
+
+const mat2 m = mat2(0.8,-0.6,0.6,0.8);
+
+/**
+float perlin(float x, float y){
+    
+	vec2 st = vec2(x,y);
+    //st *= freq;
+    
+    //int numOctaves = 10;
+	float persistence = 0.5;
+	float total = 0.0,
+		frequency = 0.25,
+		amplitude = gDispFactor;
+	for (int i = 0; i < octaves; ++i) {
+		frequency *= 2.0;
+		amplitude *= persistence;
+        st = frequency*m*st;
+		total += InterpolatedNoise(st) * amplitude;
+	}
+	return total;
 }
-
-
+**/
 
 float smoothstepd(float x){
  	return 6.0*x*(1.0 - x);   
@@ -148,54 +160,28 @@ vec2 InterpolatedNoiseD(vec2 xy) {
 	return vec2(dndx, dndy);
 }
 
-const mat2 m2 = mat2(1.0, 0.0, 0.0, 1.0);
-const mat2 m2i = mat2(1.0, 0.0, 0.0, 1.0);
-
-vec3 perlinD(float x, float y){
-
-    int numOctaves = 10;
+float perlin(float x, float y){
+    
+    //st *= freq;
+    vec2 st = vec2(x,y);
+    //int numOctaves = 10;
 	float persistence = 0.5;
-	float total = 0.0;
-	vec2 total_derivatives = vec2(0.0);
-	float frequency = 0.005*1.0;
-	float amplitude = gDispFactor;
-    mat2 m = mat2(1.0, 0.0, 0.0, 1.0);
-    vec2 xy = vec2(x,y);
-	for (int i = 0; i < numOctaves; ++i) {
-		frequency *= 2.;
+	float total = 0.0,
+		frequency = 0.005*freq,
+		amplitude = gDispFactor;
+	for (int i = 0; i < octaves; ++i) {
+		frequency *= 2.0;
 		amplitude *= persistence;
-        m = 2.0*m2i*m;
-        //xy = xy*frequency;
-        
-		total += InterpolatedNoise(xy*frequency) * amplitude;
-		total_derivatives += amplitude*m*InterpolatedNoiseD(xy*frequency);
+
+        //st = frequency*m*st;
+
+		vec2 v = frequency*m*st;
+
+		total += InterpolatedNoise(v) * amplitude;
 	}
-	float noisepow2 = total*total;
-	vec2 gradient = total_derivatives;
-	return vec3(noisepow2*total, gradient*100.0);
-
+	return total*total*total;
 }
 
-vec3 fbmd_9( in vec2 x )
-{
-    x *= 0.005*freq;
-    float f = 2.0;
-    float s = 0.5;
-    float a = 0.0;
-    float b = gDispFactor;
-    vec2  d = vec2(0.0);
-    mat2  m = mat2(1.0,0.0,0.0,1.0);
-    for( int i=0; i<10; i++ )
-    {
-       
-        a += b*InterpolatedNoise(x);          // accumulate values		
-        d += b*m*InterpolatedNoiseD(x);      // accumulate derivatives
-        b *= s;
-        x = f*x;
-        m = f*m2i*m;
-    }
-	return vec3( a*a*a, 3.0*a*a*d );
-}
 
 vec3 computeNormals(vec3 WorldPos, out mat3 TBN){
 	float st = 1.0;
@@ -268,6 +254,8 @@ float perlin(float x, float y, int oct){
 	return total*total*total;
 }
 
+
+
 vec4 getTexture(inout vec3 normal, const mat3 TBN){
 	float trans = 20.;
 
@@ -279,7 +267,7 @@ vec4 getTexture(inout vec3 normal, const mat3 TBN){
 
 	sand_t = texture(sand, texCoord*10.0);
 	sand_t.rg *= 1.3;
-	rock_t = texture(rock, texCoord*vec2(1.0, 1.5).yx);
+	rock_t = texture(rock, texCoord*vec2(2.0, 2.5).yx);
 	rock_t.rgb *= vec3(2.5, 2.0, 2.0);
 	grass_t = texture(grass, texCoord*12.0);//*vec4(0.0, 1.5, 0.0, 1.0);
 	vec4 grass_t1 = texture(grass1, texCoord*12.0);//*
@@ -296,11 +284,10 @@ vec4 getTexture(inout vec3 normal, const mat3 TBN){
 	if( WorldPos.y > snowHeight - trans*transMultiplier && WorldPos.y < snowHeight + trans*transMultiplier ){
 		float gradient = clamp((WorldPos.y - (snowHeight - trans*transMultiplier))/(2.0*trans*transMultiplier), 0.0, 1.0);
 		grass_t.rgb = mix(grass_t.rgb, texture(snow, texCoord*5.0).rgb*1.35, gradient);
-		grassCoverage = mix(grassCoverage, grassCoverage - 0.07, gradient);
+		grassCoverage = mix(grassCoverage, grassCoverage - 0.12, gradient);
 	}else if(WorldPos.y > snowHeight + trans*transMultiplier){
 		grass_t.rgb =texture(snow, texCoord*5.0).rgb*1.35;
-		grassCoverage = grassCoverage - 0.07;
-
+		grassCoverage = grassCoverage - 0.12;
 	}
 
 	vec4 heightColor;
@@ -314,12 +301,13 @@ vec4 getTexture(inout vec3 normal, const mat3 TBN){
 		heightColor = mix(sand_t, grass_t, pow( (height - waterHeight - trans) / trans, 1.0));
     }else if(cosV > grassCoverage){
 		heightColor = grass_t;
+		mix(normal, vec3(0.0, 1.0, 0.0), 0.25);
     }else if(cosV > tenPercentGrass){
 		heightColor = mix(rock_t , grass_t , blendingCoeff);
-		normal = mix(TBN*(texture(rockNormal, texCoord*vec2(1.0, 1.5).yx).rgb*2.0 - 1.0), normal, blendingCoeff);
+		normal = mix(TBN*(texture(rockNormal, texCoord*vec2(2.0, 2.5).yx).rgb*2.0 - 1.0), normal, blendingCoeff);
     }else{
 		heightColor = rock_t;
-		normal = TBN*(texture(rockNormal, texCoord*vec2(1.0, 1.5).yx).rgb*2.0 - 1.0);
+		normal = TBN*(texture(rockNormal, texCoord*vec2(2.0, 2.5).yx).rgb*2.0 - 1.0);
 		
 	}
 
