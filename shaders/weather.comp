@@ -1,5 +1,9 @@
 #version 430
 
+// Code from https://github.com/NadirRoGue
+// Special thanks to Nadir Román Guerrero
+
+
 /*
 	Fills a 2D texture with a low octave perlin noise to be used
 	in the volumetric clouds as weather map

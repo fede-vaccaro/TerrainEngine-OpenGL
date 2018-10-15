@@ -13,6 +13,9 @@ layout (rgba8, binding = 0) uniform image3D outVolTex;
 // Code from Sebastien Hillarie 3d noise generator https://github.com/sebh/TileableVolumeNoise
 uniform float frequenceMul[6u] = float[]( 2.0,8.0,14.0,20.0,26.0,32.0 );
 
+//Code from https://github.com/NadirRoGue
+//Special thanks https://github.com/NadirRoGue
+
 float hash(int n)
 {
 	return fract(sin(float(n) + 1.951) * 43758.5453123);
