@@ -1,11 +1,12 @@
 ﻿#version 330 core
 
-//Special thanks https://github.com/NadirRoGue for inspiring me doing this work!
-//Thanks to WFP from gamedev.net and the rest of the community who partecipated at this topic https://www.gamedev.net/forums/topic/680832-horizonzero-dawn-cloud-system/?page=6
+// Special thanks https://github.com/NadirRoGue for inspiring me doing this work!
+// Thanks to WFP from gamedev.net and the rest of the community who partecipated at this topic https://www.gamedev.net/forums/topic/680832-horizonzero-dawn-cloud-system/?page=6
 // WFP web site http://roar11.com/
-//Thanks to reinder and his beautiful Himalayas https://www.shadertoy.com/view/MdGfzh 
+// Thanks to reinder and his beautiful Himalayas https://www.shadertoy.com/view/MdGfzh 
 // Reinder https://www.shadertoy.com/user/reinder 
-
+// Thanks to Rikard Olajos https://github.com/rikardolajos/clouds
+// Thanks to Clay John https://github.com/clayjohn/realtime_clouds
 
 
 in vec2 TexCoords;
