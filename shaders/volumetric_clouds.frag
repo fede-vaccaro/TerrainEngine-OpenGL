@@ -1,6 +1,6 @@
 ﻿#version 330 core
 
-// Special thanks https://github.com/NadirRoGue for inspiring me doing this work!
+// Special thanks to Nadir Román Guerrero https://github.com/NadirRoGue for inspiring me doing this work!
 // Thanks to WFP from gamedev.net and the rest of the community who partecipated at this topic https://www.gamedev.net/forums/topic/680832-horizonzero-dawn-cloud-system/?page=6
 // WFP web site http://roar11.com/
 // Thanks to reinder and his beautiful Himalayas https://www.shadertoy.com/view/MdGfzh 
