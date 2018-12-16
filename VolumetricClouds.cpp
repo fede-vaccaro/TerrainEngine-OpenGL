@@ -2,7 +2,7 @@
 
 
 
-VolumetricClouds::VolumetricClouds(int SW, int SH, Camera * cam): SCR_WIDTH(SW), SCR_HEIGHT(SH), camera(cam) {
+VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH) {
 	volumetricCloudsShader = new ScreenQuad("shaders/volumetric_clouds.frag");
 	ppShader = new ScreenQuad("shaders/clouds_post.frag");
 	copyShader = new ScreenQuad("shaders/copyFrame.frag");
@@ -61,33 +61,35 @@ VolumetricClouds::VolumetricClouds(int SW, int SH, Camera * cam): SCR_WIDTH(SW),
 #define TIMETO(CODE, TASK) 	t1 = glfwGetTime(); CODE; t2 = glfwGetTime(); std::cout << "Time to " + std::string(TASK) + " :" << (t2 - t1)*1e3 << "ms" << std::endl;
 
 
-void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, unsigned int depthMapTex) {
+void VolumetricClouds::draw() {
 
 	float t1, t2;
 
 	cloudsFBO->bind();
 	Shader & cloudsShader = volumetricCloudsShader->getShader();
+	sceneElements* s = drawableObject::scene;
 
 	cloudsShader.use();
 	cloudsShader.setVec2("iResolution", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
 	cloudsShader.setFloat("iTime", glfwGetTime());
-	cloudsShader.setMat4("inv_proj", glm::inverse(proj));
-	cloudsShader.setMat4("inv_view", glm::inverse(camera->GetViewMatrix()));
-	cloudsShader.setVec3("cameraPosition", camera->Position);
-	cloudsShader.setFloat("FOV", camera->Zoom);
-	cloudsShader.setVec3("lightDirection", glm::normalize(lightPosition - camera->Position));
-	cloudsShader.setVec3("lightColor", lightColor);
+	cloudsShader.setMat4("inv_proj", glm::inverse(s->projMatrix));
+	cloudsShader.setMat4("inv_view", glm::inverse(s->cam.GetViewMatrix()));
+	cloudsShader.setVec3("cameraPosition", s->cam.Position);
+	cloudsShader.setFloat("FOV", s->cam.Zoom);
+	cloudsShader.setVec3("lightDirection", glm::normalize(s->lightPos - s->cam.Position));
+	cloudsShader.setVec3("lightColor", s->lightColor);
 	cloudsShader.setFloat("coverage_multiplier", coverage);
 	cloudsShader.setInt("frameIter", frameIter);
+	glm::mat4 vp = s->projMatrix*s->cam.GetViewMatrix();
 
-	cloudsShader.setMat4("invViewProj", glm::inverse(proj*view));
+	cloudsShader.setMat4("invViewProj", glm::inverse(vp));
 	cloudsShader.setMat4("oldFrameVP", oldFrameVP);
-	cloudsShader.setMat4("gVP", proj * view);
+	cloudsShader.setMat4("gVP", vp);
 
 	cloudsShader.setSampler3D("cloud", this->perlinTex, 0);
 	cloudsShader.setSampler3D("worley32", this->worley32, 1);
 	cloudsShader.setSampler2D("weatherTex", this->weatherTex, 2);
-	cloudsShader.setSampler2D("depthMap", depthMapTex, 3);
+	cloudsShader.setSampler2D("depthMap", s->sceneFBO.depthTex, 3);
 	cloudsShader.setSampler2D("lastFrameAlphaness", lastFrameCloudsFBO->getColorAttachmentTex(0), 4);
 	cloudsShader.setSampler2D("lastFrameColor", lastFrameCloudsFBO->getColorAttachmentTex(1), 5);
 
@@ -106,14 +108,14 @@ void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosit
 
 	cloudsPPShader.setSampler2D("clouds", cloudsFBO->getColorAttachmentTex(0), 0);
 	cloudsPPShader.setSampler2D("emissions", cloudsFBO->getColorAttachmentTex(1), 1);
-	cloudsPPShader.setSampler2D("depthMap", depthMapTex, 2);
+	cloudsPPShader.setSampler2D("depthMap", s->sceneFBO.depthTex, 2);
 	cloudsPPShader.setSampler2D("lastFrame", lastFrameCloudsFBO->tex, 3);
 
 	cloudsPPShader.setVec2("resolution", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
 
 	glm::mat4 lightModel;
-	lightModel = glm::translate(lightModel, lightPosition);
-	glm::vec4 pos = proj * view* lightModel * glm::vec4(0.0, 0.0, 0.0, 1.0);
+	lightModel = glm::translate(lightModel, s->lightPos);
+	glm::vec4 pos = vp* lightModel * glm::vec4(0.0, 0.0, 0.0, 1.0);
 	pos = pos / pos.w;
 	pos = pos * 0.5f + 0.5f;
 
@@ -121,7 +123,7 @@ void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosit
 	cloudsPPShader.setVec4("lightPos", pos);
 
 	bool isLightInFront = false;
-	float lightDotCameraFront = glm::dot(glm::normalize(lightPosition - camera->Position), glm::normalize(camera->Front));
+	float lightDotCameraFront = glm::dot(glm::normalize(s->lightPos - s->cam.Position), glm::normalize(s->cam.Front));
 	//std::cout << "light dot camera front= " << lightDotCameraFront << std::endl;
 	if (lightDotCameraFront > 0.2) {
 		isLightInFront = true;
@@ -142,7 +144,7 @@ void VolumetricClouds::draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosit
 	ScreenQuad::drawQuad();
 
 	//copy last VP matrix
-	oldFrameVP = proj * view;
+	oldFrameVP = vp;
 
 	//increment frame counter mod 16, for temporal reprojection
 	frameIter = (frameIter + 1)%16;

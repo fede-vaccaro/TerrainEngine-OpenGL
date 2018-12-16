@@ -1,4 +1,4 @@
-﻿#version 330 core
+﻿#version 430 core
 
 // Special thanks to Nadir Román Guerrero https://github.com/NadirRoGue for inspiring me doing this work!
 // Thanks to WFP from gamedev.net and the rest of the community who partecipated at this topic https://www.gamedev.net/forums/topic/680832-horizonzero-dawn-cloud-system/?page=6

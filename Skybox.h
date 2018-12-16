@@ -2,16 +2,17 @@
 
 #include <glm/glm.hpp>
 #include "shader.h"
+#include "drawableObject.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 
-class Skybox
+class Skybox : public drawableObject
 {
 public:
 	Skybox();
 	~Skybox();
 
-	void draw(glm::mat4 view, glm::mat4 proj);
+	virtual void draw();
 
 private:
 	unsigned int skyboxVAO, skyboxVBO;

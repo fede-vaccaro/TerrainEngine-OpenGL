@@ -1,6 +1,6 @@
 #include "Skybox.h"
 
-
+#include "sceneElements.h"
 
 Skybox::Skybox()
 {
@@ -77,7 +77,11 @@ Skybox::Skybox()
 
 }
 
-void Skybox::draw(glm::mat4 view, glm::mat4 proj) {
+void Skybox::draw() {
+	sceneElements * s = drawableObject::scene;
+
+	glm::mat4 view = s->cam.GetViewMatrix();
+	glm::mat4 proj = s->projMatrix;
 	glDepthFunc(GL_LEQUAL);
 	shader->use();
 	glm::mat4 view2 = glm::mat4(glm::mat3(view)); // remove translation part from the view matrix

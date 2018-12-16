@@ -3,22 +3,23 @@
 #include <camera.h>
 #include <vector>
 #include <model.h>
+#include "drawableObject.h"
 
 enum tPosition {
 	C, N, S, E, W, SE, SW, NE, NW, totTiles
 };
 
-class TileController
+class TileController : public drawableObject
 {
 public:
 	glm::vec2 I, J;
 
-	TileController(float scale, float disp, Camera * camera, TessellationShader * shad, Shader * waterShader);
+	TileController(float scale, float disp, int gridLength = 51);
 	virtual ~TileController();
 	
 	void updateTiles();
 
-	void drawTiles(glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, FrameBufferObject& fbo);
+	virtual void draw();
 	Model * planeModel, * waterModel;
 	unsigned int * textures, normalMap, dudvMap;
 	Tile * tile;
@@ -33,7 +34,7 @@ public:
 
 	void setWaterHeight(float height) {
 		waterHeight = height;
-		waterPtr->setPosition( getPos(gridLenght/2, gridLenght/2) , scale*gridLenght, waterHeight);
+		waterPtr->setPosition( getPos(gridLength/2, gridLength/2) , scale*gridLength, waterHeight);
 	}
 
 	float getWaterHeight() const { return waterHeight; };
@@ -99,20 +100,19 @@ public:
 
 private:
 	bool snowy_ = true;
-	int gridLenght;
+	int gridLength;
 	Water * waterPtr;
-	Camera * camera;
 	float scale, disp, waterHeight;
 	TessellationShader * shad;
 	Shader * waterShader;
 	std::vector<glm::vec2> position;
 
 	void setPos(int row, int col, glm::vec2 pos) {
-		position[col + row * gridLenght] = pos;
+		position[col + row * gridLength] = pos;
 	}
 
 	glm::vec2 getPos(int row, int col) {
-		return position[col + row * gridLenght];
+		return position[col + row * gridLength];
 	}
 
 	void changeTiles(tPosition currentTile);
@@ -120,9 +120,9 @@ private:
 	void addRow(int direction);
 
 	void getColRow(int i, int& col, int& row) {
-		col = (i) % gridLenght;
+		col = (i) % gridLength;
 		
-		row = (i - col) / gridLenght;
+		row = (i - col) / gridLength;
 
 		//col--, row--;
 	}

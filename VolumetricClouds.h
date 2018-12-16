@@ -8,12 +8,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <camera.h>
 #include <algorithm>
+#include "drawableObject.h"
 
-class VolumetricClouds
+class VolumetricClouds : public drawableObject
 {
 public:
-	VolumetricClouds(int SW, int SH, Camera * cam);
-	void draw(glm::mat4 view, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, unsigned int depthMap);
+	VolumetricClouds(int SW, int SH);
+	virtual void draw();
 	~VolumetricClouds();
 
 	unsigned int getCloudsTexture() {
@@ -33,7 +34,6 @@ public:
 private:
 	int SCR_WIDTH, SCR_HEIGHT;
 	float coverage;
-	Camera * camera;
 	ScreenQuad * volumetricCloudsShader, * ppShader, * copyShader;
 	int frameIter = 0;
 	FrameBufferObject * cloudsFBO, *cloudsPostProcessingFBO, * lastFrameCloudsFBO;

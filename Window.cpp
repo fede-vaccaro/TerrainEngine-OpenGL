@@ -1,5 +1,8 @@
 #include "Window.h"
 
+unsigned int Window::SCR_WIDTH = 1600;
+unsigned int Window::SCR_HEIGHT = 900;
+
 Camera * Window::camera = 0;
 bool Window::keyBools[10] = { false, false,false, false, false, false, false, false, false, false };
 bool Window::wireframe = false;
@@ -8,14 +11,18 @@ float Window::lastX = SCR_WIDTH / 2.0f;
 float Window::lastY = SCR_HEIGHT / 2.0f;
 
 
-Window::Window(int& success, Camera * cam, std::string name) : name(name)
+Window::Window(int& success, unsigned int scrW, unsigned int scrH, std::string name) : name(name)
 {
+	success = 1;
 	// glfw: initialize and configure
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
+
+	Window::SCR_WIDTH = scrW;
+	Window::SCR_HEIGHT = scrH;
 
 	// glfw window creation										 
 	this->w = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, name.c_str(), NULL, NULL);
@@ -31,7 +38,7 @@ Window::Window(int& success, Camera * cam, std::string name) : name(name)
 	glfwSetCursorPosCallback(this->w, &Window::mouse_callback);
 	glfwSetScrollCallback(this->w, &Window::scroll_callback);
 
-	Window::camera = cam;
+	Window::camera = 0;
 	/*
 	for (int i = 0; i < 10; i++) {
 		Window::keyBools[i] = false;
@@ -41,7 +48,11 @@ Window::Window(int& success, Camera * cam, std::string name) : name(name)
 	Window::lastX = SCR_WIDTH / 2.0f;
 	Window::lastY = SCR_HEIGHT / 2.0f;
 	*/
-	success = 1;
+
+	success = inMain() && success;
+	if (success) {
+		std::cout << "GLFW window correctly initialized!" << std::endl;
+	}
 }
 
 int Window::inMain() {
@@ -54,8 +65,10 @@ int Window::inMain() {
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
-		return -1;
+		return 0;
 	}
+
+	return 1;
 }
 
 // glfw: whenever the mouse moves, this callback is called

@@ -26,6 +26,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/random.hpp>
 #include "glError.h"
+#include "sceneElements.h"
+#include "drawableObject.h"
 
 #include <map>
 #include <stdlib.h>
@@ -34,68 +36,22 @@
 #include <vector>
 #include <functional>
 
-void clear() {
-	COORD topLeft = { 0, 0 };
-	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_SCREEN_BUFFER_INFO screen;
-	DWORD written;
-
-	GetConsoleScreenBufferInfo(console, &screen);
-	FillConsoleOutputCharacterA(
-		console, ' ', screen.dwSize.X * screen.dwSize.Y, topLeft, &written
-	);
-	FillConsoleOutputAttribute(
-		console, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE,
-		screen.dwSize.X * screen.dwSize.Y, topLeft, &written
-	);
-	SetConsoleCursorPosition(console, topLeft);
-}
-
 const int MAX_FPS = 144;
 
-TextArea * gui = 0;
-int gui_i = 0;
-int gui_el;
-float deltaMagnitude = 1.0;
-bool snow = false;
-
-
-
-bool updateShell = true;
-
-// camera
-glm::vec3 startPosition(0.0f, 500.0f, 0.0f);
-Camera camera(startPosition);
-
-int success;
-Window window(success, &camera);
-
-
-
-
-
 float t1 = 0.0, t2 = 0.0, frameTime = 0.0; // time variables
-//bool wireframe = false;
-glm::mat4 identityMatrix;
-
-std::vector<std::function<float()>> getters;
-std::vector<std::function< void(float)> > setters;
 
 int main()
 {
+
+	// camera
+	glm::vec3 startPosition(0.0f, 500.0f, 0.0f);
+	Camera camera(startPosition);
+
+	int success;
+	Window window(success);
 	if (!success) return -1;
-	if (!window.inMain()) return -1;
 
-	Shader waterShader("shaders/waterVertexShader.vert", "shaders/waterFragmentShader.frag");
-	std::cout << "============= CREATING TSHADER ==============" << std::endl;
-	TessellationShader tshader("shaders/tessVertexShader.vert", "shaders/tessControlShader.tcs", "shaders/tessEvaluationShader.tes", "shaders/tessFragmentShader.frag");
-	std::cout << "============= TSHADER CREATED ==============" << std::endl;
-
-
-	//loading models
-	Model waterPlane("resources/plane.obj", GL_TRIANGLES);
-	Model plane_("resources/plane.obj", GL_PATCHES);
-
+	window.camera = &camera;
 
 	glm::vec3 fogColor(0.6 + 0.1, 0.71 + 0.1, 0.85 + 0.1);
 	fogColor *= 0.7;
@@ -103,107 +59,28 @@ int main()
 	lightColor /= 255.0;
 
 	float scale = 100.0f,  dispFactor = 16.0;
-	TileController tc(scale, dispFactor, &camera, &tshader, &waterShader);
+	TileController tc(scale, dispFactor, 51);
 	Skybox skybox;
-	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT, &camera);
+	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT);
 
-
-	TextArea::setWindow(window.w);
-	screen scr;
-	scr.WIDTH = Window::Window::SCR_WIDTH;
-	scr.HEIGHT = Window::Window::SCR_HEIGHT;
-	TextArea::setScreen(&scr);
-
-	float coverage = 0.18;
-
-	gui = new TextArea(10, 10, 250, 0); // l'altezza � adattata al contenuto
-	int octaves = tc.getOctaves();
-	float df = tc.getDispFactor();
-	float wh = tc.getWaterHeight();
-	float gc = tc.getGrassCoverage();
-	float f = tc.getFreq();
-	float tm = tc.getTessMultiplier();
-	bool snowy = false;
-
-	if (gui) gui->addElement(std::string("Octaves: "), &octaves);
-	if (gui) gui->addElement(std::string("Terrain Height: "), &df);
-	if (gui) gui->addElement(std::string("Water height: "), &wh);
-	if (gui) gui->addElement(std::string("Grass coverage factor:"), &gc);
-	if (gui) gui->addElement(std::string("Frequency: "), &f);
-	if (gui) gui->addElement(std::string("Tessellation Multiplier: "), &tm);
-	if (gui) gui->addElement(std::string("Clouds coverage: "), &coverage);
-	if (gui) gui->addElement(std::string("Delta magnitude: "), &deltaMagnitude);
-
-
-	getters.push_back(0);
-	getters.push_back([&tc] { return tc.getOctaves(); });
-	getters.push_back([&tc] { return tc.getDispFactor(); });
-	getters.push_back([&tc] { return tc.getWaterHeight(); });
-	getters.push_back([&tc] { return tc.getGrassCoverage(); });
-	getters.push_back([&tc] { return tc.getFreq(); });
-	getters.push_back([&tc] { return tc.getTessMultiplier(); });
-	getters.push_back([&coverage] { return coverage; });
-	getters.push_back(0);
-
-	setters.push_back(0);
-	setters.push_back([&tc](float value) { tc.setOctaves(value);       });
-	setters.push_back([&tc](float value) { tc.setDispFactor(value);    });
-	setters.push_back([&tc](float value) { tc.setWaterHeight(value);   });
-	setters.push_back([&tc](float value) { tc.setGrassCoverage(value); });
-	setters.push_back([&tc](float value) { tc.setFreq(value);          });
-	setters.push_back([&tc](float value) { tc.setTessMultiplier(value);  });
-	setters.push_back([&coverage](float value) { coverage = value; });
-	setters.push_back(0);
-
-	gui_el = (setters.size() == getters.size() ? setters.size() : -1);
-
-	unsigned int * textures = new unsigned int[4];
-	textures[0] = TextureFromFile("sand.jpg", "resources", false);
-	textures[1] = TextureFromFile("grass.jpg", "resources", false);
-	textures[2] = TextureFromFile("rock4.jpg", "resources", false);
-	textures[3] = TextureFromFile("snow2.jpg", "resources", false);
-
-
-	std::cout << "============ OPENING POST PROCESSING SHADER ============" << std::endl;
+	std::cout << "============ OPENING POST PROCESSING SHADER ============" << std::endl; // its purpose is to merge different framebuffer and add some postproc if needed
 	ScreenQuad PostProcessing("shaders/post_processing.frag");
 
 	FrameBufferObject SceneFBO(Window::SCR_WIDTH, Window::SCR_HEIGHT);
-	
+	glm::vec3 lightPosition;
+	glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 5.f, 10000000.0f);
+
+	//Every scene object need this information to be rendered
+	sceneElements scene(lightPosition, lightColor, fogColor, proj, camera, SceneFBO);
+
+	drawableObject::scene = &scene;
 
 	while (window.continueLoop())
 	{
-		//glfwSwapInterval(0);
-
-		octaves = getters[1]();
-		df = getters[2]();
-		wh = getters[3]();
-		gc = getters[4]();
-		f = getters[5]();
-		tm = getters[6]();
-		float dm = deltaMagnitude;
-
-		if (updateShell) {
-			//clear();
-			std::cout << (gui_i == 1 ? "->" : "  ") << "Octaves: " << octaves << std::endl;
-			std::cout << (gui_i == 2 ? "->" : "  ") << "Terrain Height : " << df << std::endl;
-			std::cout << (gui_i == 3 ? "->" : "  ") << "Water height: " << wh << std::endl;
-			std::cout << (gui_i == 4 ? "->" : "  ") << "Grass coverage factor:" << gc << std::endl;
-			std::cout << (gui_i == 5 ? "->" : "  ") << "Frequency: " << f << std::endl;
-			std::cout << (gui_i == 6 ? "->" : "  ") << "Tessellation Multiplier: " << tm << std::endl;
-			std::cout << (gui_i == 7 ? "->" : "  ") << "Delta magnitude: " << dm << std::endl;
-			updateShell = false;
-		}
-
-		if (snow) {
-			tc.snowy(lightColor);
-			snow = false;
-		}
 
 		t1 = glfwGetTime();
 
-		glm::vec3 lightPosition;
-		lightPosition = glm::vec3(-.5, .4, 1.0)*1e9f;
-		lightPosition += camera.Position;
+		scene.lightPos = glm::vec3(-.5, .4, 1.0)*1e9f + camera.Position;
 		// input
 		window.processInput(frameTime);
 
@@ -234,18 +111,20 @@ int main()
 		}
 
 		// Camera (View Matrix) setting
-		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 5.f,10000000.0f);
+		glm::mat4 view = scene.cam.GetViewMatrix();
+		scene.projMatrix = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 5.f,10000000.0f);
 
 		// draw terrain
-		tc.drawTiles(proj, lightPosition, lightColor, fogColor, SceneFBO);
+		//tc.drawTiles(proj, lightPosition, lightColor, fogColor, SceneFBO);
+		tc.draw();
 
 		//disable test for quad rendering
 		ScreenQuad::disableTests();
 
 		// scene post processing - blending between main scene texture and clouds texture
 
-		volumetricClouds.draw(view, proj, lightPosition, lightColor, SceneFBO.depthTex);
+		//volumetricClouds.draw(view, proj, lightPosition, lightColor, SceneFBO.depthTex);
+		volumetricClouds.draw();
 
 		// blend volumetric clouds rendering with terrain and apply some post process
 		unbindCurrentFrameBuffer();

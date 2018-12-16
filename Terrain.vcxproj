@@ -74,9 +74,13 @@
     <LibraryPath>$(ProjectDir)Libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LibraryPath>Libraries/;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)Libraries;$(LibraryPath)</LibraryPath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(ProjectDir)Include;C:\Users\Federico\Google Drive\Uni Magistrale\Computer Graphics &amp; 3D\Terrain\Terrain\Include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)Include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(ProjectDir)Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)Libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -84,6 +88,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -128,15 +133,18 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;freetype.lib;MSVCRT.LIB;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="buffers.h" />
     <ClInclude Include="computeShader.h" />
+    <ClInclude Include="drawableObject.h" />
     <ClInclude Include="glError.h" />
     <ClInclude Include="Include\camera.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="perlin\CustomTypes.h" />
+    <ClInclude Include="sceneElements.h" />
     <ClInclude Include="ScreenQuad.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="Skybox.h" />
@@ -152,6 +160,7 @@
   <ItemGroup>
     <ClCompile Include="buffers.cpp" />
     <ClCompile Include="computeShader.cpp" />
+    <ClCompile Include="drawableObject.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="glError.cpp" />
     <ClCompile Include="Main.cpp" />

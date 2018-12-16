@@ -66,6 +66,12 @@
     <ClInclude Include="VolumetricClouds.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sceneElements.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="drawableObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stb_image_write.cpp">
@@ -120,6 +126,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VolumetricClouds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="drawableObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
