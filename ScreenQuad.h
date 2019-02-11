@@ -1,8 +1,9 @@
 #pragma once
 #include "shader.h"
 #include <glad/glad.h>
+#include "drawableObject.h"
 
-class ScreenQuad
+class ScreenQuad : drawableObject
 {
 public:
 	ScreenQuad(const char * fragmentPath);
@@ -16,12 +17,16 @@ public:
 		return *shad;
 	}
 
+	virtual void draw();
 	static void drawQuad();
 
 	static void disableTests() {
 		glDisable(GL_CLIP_DISTANCE0);
 		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_CULL_FACE);
+	}
+
+	static void enableTests() {
+		glEnable(GL_DEPTH_TEST);
 	}
 
 

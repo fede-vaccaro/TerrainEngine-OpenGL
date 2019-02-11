@@ -1,5 +1,7 @@
 #version 410 core                                                                               
-                                                                                                
+                     
+// Thanks to Etay Meiri (http://ogldev.atspace.co.uk/www/tutorial30/tutorial30.html) for his tessellation shader tutorial!
+
 layout(triangles, equal_spacing, ccw) in;                                                       
                                                                                                 
 uniform mat4 gVP;                                                                               

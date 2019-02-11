@@ -27,7 +27,7 @@ void main()
 	//FragColor = vec4(0.5,0.1,0.8,1.0);
 	vec4 cloud = texture(cloudTEX, TexCoords);
 	vec4 bg = texture(screenTexture, TexCoords);
-	
+
 	vec4 col = mix(bg, cloud, cloud.a);
 
 	const float gamma = 2.2;

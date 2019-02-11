@@ -1,6 +1,17 @@
 #include "Water.h"
+#include "sceneElements.h"
 
-Water::Water(glm::vec2 position, Shader* shad, float scale, float height, unsigned int dudvMap, unsigned int normalMap, Model * waterPlane) : shad(shad), dudvMap(dudvMap), normalMap(normalMap), waterPlane(waterPlane) {
+Water::Water(glm::vec2 position, float scale, float height){
+
+	shad = new Shader("shaders/waterVertexShader.vert", "shaders/waterFragmentShader.frag");
+	std::cout << "============= CREATING TSHADER ==============" << std::endl;
+	waterPlane = new Model("resources/plane.obj", GL_TRIANGLES);
+
+	dudvMap = TextureFromFile("waterDUDV.png", "resources", false);
+	normalMap = TextureFromFile("normalMap.png", "resources", false);
+
+	//height = 128.0 + 50.0;
+
 	glm::mat4 identity;
 	glm::mat4 scaleMatrix = glm::scale(identity, glm::vec3(scale, scale, scale));
 	glm::mat4 transMatrix = glm::translate(identity, glm::vec3(position.x, height, position.y));
@@ -17,17 +28,19 @@ void Water::bindReflectionFBO() {
 void Water::bindRefractionFBO() {
 	refractionFBO->bind();
 }
-void Water::draw(glm::mat4 gVP, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 viewPosition) {
+void Water::draw() {
 	// draw water plane
 	shad->use();
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	shad->setMat4("modelMatrix", modelMatrix);
-	shad->setMat4("gVP", gVP);
+	sceneElements * se = drawableObject::scene;
 
-	shad->setVec3("u_LightColor", lightColor);
-	shad->setVec3("u_LightPosition", lightPosition);
+	shad->setMat4("modelMatrix", modelMatrix);
+	shad->setMat4("gVP", se->projMatrix*se->cam.GetViewMatrix());
+
+	shad->setVec3("u_LightColor", se->lightColor);
+	shad->setVec3("u_LightPosition", se->lightPos);
 
 
 	glActiveTexture(GL_TEXTURE0);
@@ -56,7 +69,7 @@ void Water::draw(glm::mat4 gVP, glm::vec3 lightPosition, glm::vec3 lightColor, g
 	float moveFactor = waveSpeed * time;
 	shad->setFloat("moveFactor", moveFactor);
 
-	shad->setVec3("cameraPosition", viewPosition);
+	shad->setVec3("cameraPosition", se->cam.Position);
 
 	waterPlane->Draw(*shad);
 	glDisable(GL_BLEND);

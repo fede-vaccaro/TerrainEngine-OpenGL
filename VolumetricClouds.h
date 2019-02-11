@@ -17,8 +17,12 @@ public:
 	virtual void draw();
 	~VolumetricClouds();
 
-	unsigned int getCloudsTexture() {
+	unsigned int getCloudsTexture() { 
 		return cloudsPostProcessingFBO->getColorAttachmentTex(0);
+	}
+
+	unsigned int getCloudsRawTexture(){
+		return cloudsFBO->getColorAttachmentTex(0);
 	}
 
 	float getCoverage() {

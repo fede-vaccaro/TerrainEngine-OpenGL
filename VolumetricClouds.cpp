@@ -93,13 +93,11 @@ void VolumetricClouds::draw() {
 	cloudsShader.setSampler2D("lastFrameAlphaness", lastFrameCloudsFBO->getColorAttachmentTex(0), 4);
 	cloudsShader.setSampler2D("lastFrameColor", lastFrameCloudsFBO->getColorAttachmentTex(1), 5);
 
-
 	//actual draw
-	ScreenQuad::drawQuad();
+	volumetricCloudsShader->draw();
 	//copy to lastFrameFBO
 
 
-	// //
 	// cloud post processing filtering
 	cloudsPostProcessingFBO->bind();
 	Shader& cloudsPPShader = ppShader->getShader();
@@ -115,7 +113,7 @@ void VolumetricClouds::draw() {
 
 	glm::mat4 lightModel;
 	lightModel = glm::translate(lightModel, s->lightPos);
-	glm::vec4 pos = vp* lightModel * glm::vec4(0.0, 0.0, 0.0, 1.0);
+	glm::vec4 pos = vp* lightModel * glm::vec4(0.0, 60.0, 0.0, 1.0);
 	pos = pos / pos.w;
 	pos = pos * 0.5f + 0.5f;
 
@@ -133,15 +131,14 @@ void VolumetricClouds::draw() {
 	cloudsPPShader.setFloat("lightDotCameraFront", lightDotCameraFront);
 
 	cloudsPPShader.setFloat("time", glfwGetTime());
-	ScreenQuad::drawQuad();
-
-	//Copy last frame
+	ppShader->draw();
+	//Copy last frame (blit doesn't worked to me)
 	lastFrameCloudsFBO->bind();
 	Shader& copy = copyShader->getShader();
 	copy.use();
 	copy.setSampler2D("colorTex", cloudsFBO->getColorAttachmentTex(3), 0);
 	copy.setSampler2D("alphanessTex", cloudsFBO->getColorAttachmentTex(2), 1);
-	ScreenQuad::drawQuad();
+	copyShader->draw();
 
 	//copy last VP matrix
 	oldFrameVP = vp;

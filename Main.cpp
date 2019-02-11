@@ -11,9 +11,9 @@
 #include "ScreenQuad.h"
 #include "texture.h"
 #include "VolumetricClouds.h"
-#include "TileController.h"
 #include "Tile.h"
 #include "Skybox.h"
+#include "Water.h"
 
 #include <camera.h>
 #include <stb_image.h>
@@ -44,7 +44,7 @@ int main()
 {
 
 	// camera
-	glm::vec3 startPosition(0.0f, 500.0f, 0.0f);
+	glm::vec3 startPosition(0.0f, 800.0f, 0.0f);
 	Camera camera(startPosition);
 
 	int success;
@@ -59,9 +59,15 @@ int main()
 	lightColor /= 255.0;
 
 	float scale = 100.0f,  dispFactor = 16.0;
-	TileController tc(scale, dispFactor, 51);
-	Skybox skybox;
+	//TileController tc(scale, dispFactor, 51);
+	int gl = 61;
+	Tile terrain(scale, dispFactor, gl);
+	Skybox skybox; //unused
 	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT);
+	VolumetricClouds reflectionVolumetricClouds(480, 600); //a different object is needed because it has a state-dependent draw method
+
+	float waterHeight = 128.0 + 50.0;
+	Water water(glm::vec2(0.0, 0.0), scale*gl, waterHeight);
 
 	std::cout << "============ OPENING POST PROCESSING SHADER ============" << std::endl; // its purpose is to merge different framebuffer and add some postproc if needed
 	ScreenQuad PostProcessing("shaders/post_processing.frag");
@@ -85,7 +91,7 @@ int main()
 		window.processInput(frameTime);
 
 		//update tiles position to make the world infinite
-		tc.updateTiles(); 
+		terrain.updateTiles();
 
 		SceneFBO.bind();
 		// render
@@ -114,16 +120,46 @@ int main()
 		glm::mat4 view = scene.cam.GetViewMatrix();
 		scene.projMatrix = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 5.f,10000000.0f);
 
+		/*
+		//draw to water reflection buffer object
+		water.bindReflectionFBO();
+		glClearColor(0.0, 0.4*0.8, 0.7*0.8, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		scene.cam.invertPitch();
+		scene.cam.Position.y -= 2 * (scene.cam.Position.y - waterHeight);
+		
+		terrain.up = 1.0;
+		terrain.draw();
+		ScreenQuad::disableTests();
+		reflectionVolumetricClouds.draw();
+
+		Shader& post = PostProcessing.getShader();
+		post.use();
+		post.setVec2("resolution", glm::vec2(480, 600));
+		FrameBufferObject const& reflFBO = water.getReflectionFBO();
+		post.setSampler2D("screenTexture", reflFBO.tex, 0);
+		post.setSampler2D("cloudTEX", reflectionVolumetricClouds.getCloudsRawTexture(), 1);
+		PostProcessing.draw();
+
+		ScreenQuad::enableTests();
+		scene.cam.invertPitch();
+		scene.cam.Position.y += 2 * abs(scene.cam.Position.y - waterHeight);
+		*/
+		//draw to water refraction buffer object
+		water.bindRefractionFBO();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		terrain.up = -1.0;
+		terrain.draw();
+
 		// draw terrain
-		//tc.drawTiles(proj, lightPosition, lightColor, fogColor, SceneFBO);
-		tc.draw();
+		scene.sceneFBO.bind();
+		terrain.draw();
+		water.draw();
 
 		//disable test for quad rendering
 		ScreenQuad::disableTests();
 
 		// scene post processing - blending between main scene texture and clouds texture
-
-		//volumetricClouds.draw(view, proj, lightPosition, lightColor, SceneFBO.depthTex);
 		volumetricClouds.draw();
 
 		// blend volumetric clouds rendering with terrain and apply some post process
@@ -133,14 +169,7 @@ int main()
 		post.setVec2("resolution", glm::vec2(Window::SCR_WIDTH, Window::SCR_HEIGHT));
 		post.setSampler2D("screenTexture", SceneFBO.tex, 0);
 		post.setSampler2D("cloudTEX", volumetricClouds.getCloudsTexture(), 1);
-
-		ScreenQuad::drawQuad();
-
-		//GUI
-		glEnable(GL_DEPTH);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//if (gui) gui->draw();
-		glDisable(GL_DEPTH);
+		PostProcessing.draw();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		window.swapBuffersAndPollEvents();

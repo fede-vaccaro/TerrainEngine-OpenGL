@@ -15,6 +15,9 @@ void ScreenQuad::drawQuad() {
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+void ScreenQuad::draw() {
+	ScreenQuad::drawQuad();
+}
 
 ScreenQuad::~ScreenQuad()
 {
@@ -24,11 +27,11 @@ void ScreenQuad::initializeQuad() {
 	if (!initialized) {
 		float vertices[] = {
 			-1.0f, -1.0f, 0.0, 0.0,
-			-1.0f,  1.0f, 0.0, 1.0,
-			1.0f, -1.0f, 1.0, 0.0,
 			1.0f, -1.0f, 1.0, 0.0,
 			-1.0f,  1.0f, 0.0, 1.0,
-			1.0f,  1.0f, 1.0, 1.0
+			1.0f,  1.0f, 1.0, 1.0,
+			-1.0f,  1.0f, 0.0, 1.0,
+			1.0f, -1.0f, 1.0, 0.0
 		};
 
 		glGenVertexArrays(1, &quadVAO);

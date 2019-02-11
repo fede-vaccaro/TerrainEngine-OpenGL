@@ -30,9 +30,6 @@
     <ClInclude Include="Tile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TileController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -63,13 +60,13 @@
     <ClInclude Include="ScreenQuad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VolumetricClouds.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="sceneElements.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="drawableObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VolumetricClouds.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -93,9 +90,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TileController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Object.cpp">
@@ -180,9 +174,6 @@
     </None>
     <None Include="shaders\worley.comp">
       <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\worley3d.comp">
-      <Filter>Source Files</Filter>
     </None>
     <None Include="shaders\perlinworley.comp">
       <Filter>Resource Files</Filter>

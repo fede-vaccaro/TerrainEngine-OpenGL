@@ -6,13 +6,14 @@
 #include "buffers.h"
 #include <GLFW/glfw3.h>
 #include "Window.h"
+#include "drawableObject.h"
 
-class Water
+class Water : public drawableObject
 {
 public:
-	Water(glm::vec2 position, Shader* shad, float scale, float height, unsigned int dudvMap, unsigned normalMap, Model * waterPlane);
+	Water(glm::vec2 position, float scale, float height);
 	virtual ~Water();
-	void draw(glm::mat4 gVP, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 viewPosition);
+	virtual void draw();
 	void bindRefractionFBO();
 	void bindReflectionFBO();
 	void unbindFBO();
@@ -36,8 +37,16 @@ public:
 		this->modelMatrix = transMatrix * scaleMatrix;
 	}
 
+	glm::mat4 getModelMatrix() {
+		return modelMatrix;
+	}
+
 	static const int FBOw = 1280;
 	static const int FBOh = 720;
+
+	FrameBufferObject const& getReflectionFBO() {
+		return *reflectionFBO;
+	}
 
 private:
 	FrameBufferObject * reflectionFBO;

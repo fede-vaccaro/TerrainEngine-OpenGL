@@ -4,7 +4,6 @@ layout (location = 0) out vec4 FragColor;
   
 in vec2 TexCoords;
 
-
 uniform sampler2D clouds;
 uniform sampler2D emissions;
 uniform sampler2D depthMap;

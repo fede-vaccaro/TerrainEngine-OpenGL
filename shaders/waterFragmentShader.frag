@@ -1,5 +1,8 @@
 #version 330 core                                                                               
 
+// Thanks to ThinMatrix for his water tutorial! https://www.youtube.com/watch?v=HusvGeEDU_U&list=PLRIWtICgwaX23jiqVByUs0bqhnalNTNZh
+
+
 in vec2 TexCoords;
 in vec3 Normal;
 in vec4 clipSpaceCoords;

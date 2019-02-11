@@ -65,7 +65,7 @@ uniform vec3 noiseKernel[6u] = vec3[]
 #define STRATOCUMULUS_GRADIENT vec4(0.02, 0.2, 0.48, 0.625)
 #define CUMULUS_GRADIENT vec4(0.00, 0.1625, 0.88, 0.98)
 
-#define EARTH_RADIUS (700000.)
+#define EARTH_RADIUS (600000.)
 #define SPHERE_INNER_RADIUS (EARTH_RADIUS + 5000.0)
 #define SPHERE_OUTER_RADIUS (SPHERE_INNER_RADIUS + 17000.0)
 #define SPHERE_DELTA float(SPHERE_OUTER_RADIUS - SPHERE_INNER_RADIUS)
@@ -76,7 +76,7 @@ uniform vec3 noiseKernel[6u] = vec3[]
 #define CLOUDS_TRANSMITTANCE_THRESHOLD 1.0 - CLOUDS_MIN_TRANSMITTANCE
 
 #define SUN_DIR lightDirection
-#define SUN_COLOR lightColor
+#define SUN_COLOR lightColor*vec3(1.1,1.1,0.95)
 vec3 sphereCenter = vec3(0.0, -EARTH_RADIUS, 0.0);
 
 //// ATMOSPHERIC SCATTERING
@@ -610,7 +610,7 @@ void main()
 	if(!isOut){
 		oldFrameAlphaness = texture(lastFrameAlphaness, prevFrameScreenPos).r;
 	}
-	const bool enableOptimization = true;
+	const bool enableOptimization = false;
 
 	if( !enableOptimization || (oldFrameAlphaness >= 0.0 || frameIter == 0) && (writePixel() || isOut)) // if the pixel must be drawn
 	{
