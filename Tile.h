@@ -35,6 +35,7 @@ public:
 	
 	bool inTile(Camera camera, glm::vec2 pos);
 	static const int tileW = 5.0;
+
 	Model * planeModel;
 	Water * waterPtr;
 
@@ -75,6 +76,11 @@ public:
 
 	static bool drawFog;
 private:
+
+	void initializePlaneVAO();
+	void drawVertices(int nInstances);
+	unsigned int planeVBO, planeVAO, planeEBO;
+
 	float dispFactor, scaleFactor, frequency, grassCoverage, tessMultiplier;
 	int octaves;
 	int gridLength;

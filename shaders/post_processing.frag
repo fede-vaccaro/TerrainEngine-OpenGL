@@ -5,6 +5,7 @@ in vec2 TexCoords;
 
 uniform sampler2D screenTexture;
 uniform sampler2D cloudTEX;
+uniform sampler2D depthTex;
 
 uniform vec2 resolution;
 
@@ -27,8 +28,8 @@ void main()
 	//FragColor = vec4(0.5,0.1,0.8,1.0);
 	vec4 cloud = texture(cloudTEX, TexCoords);
 	vec4 bg = texture(screenTexture, TexCoords);
-
-	vec4 col = mix(bg, cloud, cloud.a);
+	float mixVal = (texture(depthTex, TexCoords).r < 1.0 ? 0.0 : 1.0);
+	vec4 col = mix(bg, cloud, mixVal);
 
 	const float gamma = 2.2;
     const float exposure = 3.0;
@@ -43,8 +44,8 @@ void main()
      // vignette
      vec2 uv = gl_FragCoord.xy / resolution;
      //col.rgb = mix(col.rgb*col.rgb, col.rgb, pow( 16.0*uv.x*uv.y*(1.0-uv.x)*(1.0-uv.y), 0.05 ));
-	col.rgb *= pow( 16.0*uv.x*uv.y*(1.0-uv.x)*(1.0-uv.y), 0.11 );
-	//col.rgb = TonemapACES(col.rgb);
-	FragColor = col;
+	 col.rgb *= pow( 16.0*uv.x*uv.y*(1.0-uv.x)*(1.0-uv.y), 0.11 );
+	 //col.rgb = TonemapACES(col.rgb);
+	 FragColor = col;
 
 }  

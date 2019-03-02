@@ -49,6 +49,7 @@ public:
 	}
 
 private:
+	float scale, height;
 	FrameBufferObject * reflectionFBO;
 	FrameBufferObject * refractionFBO;
 

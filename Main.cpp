@@ -48,7 +48,7 @@ int main()
 	Camera camera(startPosition);
 
 	int success;
-	Window window(success);
+	Window window(success, 1920, 1080);
 	if (!success) return -1;
 
 	window.camera = &camera;
@@ -64,7 +64,8 @@ int main()
 	Tile terrain(scale, dispFactor, gl);
 	Skybox skybox; //unused
 	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT);
-	VolumetricClouds reflectionVolumetricClouds(480, 600); //a different object is needed because it has a state-dependent draw method
+	VolumetricClouds reflectionVolumetricClouds(1280, 720); //a different object is needed because it has a state-dependent draw method
+	reflectionVolumetricClouds.setReflection(true);
 
 	float waterHeight = 128.0 + 50.0;
 	Water water(glm::vec2(0.0, 0.0), scale*gl, waterHeight);
@@ -80,6 +81,8 @@ int main()
 	sceneElements scene(lightPosition, lightColor, fogColor, proj, camera, SceneFBO);
 
 	drawableObject::scene = &scene;
+
+	ScreenQuad fboVisualizer("shaders/visualizeFbo.frag");
 
 	while (window.continueLoop())
 	{
@@ -120,31 +123,38 @@ int main()
 		glm::mat4 view = scene.cam.GetViewMatrix();
 		scene.projMatrix = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 5.f,10000000.0f);
 
-		/*
+		
 		//draw to water reflection buffer object
 		water.bindReflectionFBO();
 		glClearColor(0.0, 0.4*0.8, 0.7*0.8, 1.0);
+		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		scene.cam.invertPitch();
 		scene.cam.Position.y -= 2 * (scene.cam.Position.y - waterHeight);
 		
 		terrain.up = 1.0;
 		terrain.draw();
+		FrameBufferObject const& reflFBO = water.getReflectionFBO();
+		
 		ScreenQuad::disableTests();
-		reflectionVolumetricClouds.draw();
 
+		reflectionVolumetricClouds.draw();
+		water.bindReflectionFBO(); //rebind refl buffer; reflVolumetricClouds unbound it
+
+		
 		Shader& post = PostProcessing.getShader();
 		post.use();
-		post.setVec2("resolution", glm::vec2(480, 600));
-		FrameBufferObject const& reflFBO = water.getReflectionFBO();
+		post.setVec2("resolution", glm::vec2(1280, 720));
 		post.setSampler2D("screenTexture", reflFBO.tex, 0);
+		post.setSampler2D("depthTex", reflFBO.depthTex, 2);
 		post.setSampler2D("cloudTEX", reflectionVolumetricClouds.getCloudsRawTexture(), 1);
 		PostProcessing.draw();
 
 		ScreenQuad::enableTests();
+		
 		scene.cam.invertPitch();
 		scene.cam.Position.y += 2 * abs(scene.cam.Position.y - waterHeight);
-		*/
+		
 		//draw to water refraction buffer object
 		water.bindRefractionFBO();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -163,13 +173,21 @@ int main()
 		volumetricClouds.draw();
 
 		// blend volumetric clouds rendering with terrain and apply some post process
-		unbindCurrentFrameBuffer();
-		Shader& post = PostProcessing.getShader();
+		unbindCurrentFrameBuffer(); // on-screen drawing
+		//Shader& post = PostProcessing.getShader();
 		post.use();
 		post.setVec2("resolution", glm::vec2(Window::SCR_WIDTH, Window::SCR_HEIGHT));
 		post.setSampler2D("screenTexture", SceneFBO.tex, 0);
 		post.setSampler2D("cloudTEX", volumetricClouds.getCloudsTexture(), 1);
+		post.setSampler2D("depthTex", SceneFBO.depthTex, 2);
 		PostProcessing.draw();
+
+		/*
+		Shader& fboVisualizerShader = fboVisualizer.getShader();
+		fboVisualizerShader.use();
+		fboVisualizerShader.setSampler2D("fboTex", reflFBO.tex, 0);
+		fboVisualizer.draw();
+		*/
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		window.swapBuffersAndPollEvents();

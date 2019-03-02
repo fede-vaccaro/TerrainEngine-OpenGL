@@ -1,7 +1,7 @@
 #include "Water.h"
 #include "sceneElements.h"
 
-Water::Water(glm::vec2 position, float scale, float height){
+Water::Water(glm::vec2 position, float scale, float height): scale(scale), height(height){
 
 	shad = new Shader("shaders/waterVertexShader.vert", "shaders/waterFragmentShader.frag");
 	std::cout << "============= CREATING TSHADER ==============" << std::endl;
@@ -35,6 +35,8 @@ void Water::draw() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	sceneElements * se = drawableObject::scene;
+
+	this->setPosition(glm::vec2(se->cam.Position[0], se->cam.Position[2]), scale, height);
 
 	shad->setMat4("modelMatrix", modelMatrix);
 	shad->setMat4("gVP", se->projMatrix*se->cam.GetViewMatrix());

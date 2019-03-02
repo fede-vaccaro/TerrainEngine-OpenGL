@@ -190,5 +190,8 @@
     <None Include="shaders\clouds_post.frag">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="shaders\visualizeFbo.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

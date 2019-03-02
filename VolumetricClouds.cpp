@@ -11,6 +11,7 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 	cloudsPostProcessingFBO = new FrameBufferObject(SW, SH, 2);
 	lastFrameCloudsFBO = new FrameBufferObject(SH, SH, 2);
 
+	reflection = false;
 	this->coverage = 0.45;
 
 	/////////////////// TEXTURE GENERATION //////////////////
@@ -97,41 +98,43 @@ void VolumetricClouds::draw() {
 	volumetricCloudsShader->draw();
 	//copy to lastFrameFBO
 
+	if (!reflection) {
+		// cloud post processing filtering
+		cloudsPostProcessingFBO->bind();
+		Shader& cloudsPPShader = ppShader->getShader();
 
-	// cloud post processing filtering
-	cloudsPostProcessingFBO->bind();
-	Shader& cloudsPPShader = ppShader->getShader();
+		cloudsPPShader.use();
 
-	cloudsPPShader.use();
+		cloudsPPShader.setSampler2D("clouds", cloudsFBO->getColorAttachmentTex(0), 0);
+		cloudsPPShader.setSampler2D("emissions", cloudsFBO->getColorAttachmentTex(1), 1);
+		cloudsPPShader.setSampler2D("depthMap", s->sceneFBO.depthTex, 2);
+		cloudsPPShader.setSampler2D("lastFrame", lastFrameCloudsFBO->tex, 3);
 
-	cloudsPPShader.setSampler2D("clouds", cloudsFBO->getColorAttachmentTex(0), 0);
-	cloudsPPShader.setSampler2D("emissions", cloudsFBO->getColorAttachmentTex(1), 1);
-	cloudsPPShader.setSampler2D("depthMap", s->sceneFBO.depthTex, 2);
-	cloudsPPShader.setSampler2D("lastFrame", lastFrameCloudsFBO->tex, 3);
+		cloudsPPShader.setVec2("resolution", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
 
-	cloudsPPShader.setVec2("resolution", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
+		glm::mat4 lightModel;
+		lightModel = glm::translate(lightModel, s->lightPos);
+		glm::vec4 pos = vp * lightModel * glm::vec4(0.0, 60.0, 0.0, 1.0);
+		pos = pos / pos.w;
+		pos = pos * 0.5f + 0.5f;
 
-	glm::mat4 lightModel;
-	lightModel = glm::translate(lightModel, s->lightPos);
-	glm::vec4 pos = vp* lightModel * glm::vec4(0.0, 60.0, 0.0, 1.0);
-	pos = pos / pos.w;
-	pos = pos * 0.5f + 0.5f;
+		//std::cout << pos.x << ": X; " << pos.y << " Y;" << std::endl;
+		cloudsPPShader.setVec4("lightPos", pos);
 
-	//std::cout << pos.x << ": X; " << pos.y << " Y;" << std::endl;
-	cloudsPPShader.setVec4("lightPos", pos);
+		bool isLightInFront = false;
+		float lightDotCameraFront = glm::dot(glm::normalize(s->lightPos - s->cam.Position), glm::normalize(s->cam.Front));
+		//std::cout << "light dot camera front= " << lightDotCameraFront << std::endl;
+		if (lightDotCameraFront > 0.2) {
+			isLightInFront = true;
+		}
 
-	bool isLightInFront = false;
-	float lightDotCameraFront = glm::dot(glm::normalize(s->lightPos - s->cam.Position), glm::normalize(s->cam.Front));
-	//std::cout << "light dot camera front= " << lightDotCameraFront << std::endl;
-	if (lightDotCameraFront > 0.2) {
-		isLightInFront = true;
+		cloudsPPShader.setBool("isLightInFront", isLightInFront);
+		cloudsPPShader.setFloat("lightDotCameraFront", lightDotCameraFront);
+
+		cloudsPPShader.setFloat("time", glfwGetTime());
+		ppShader->draw();
 	}
 
-	cloudsPPShader.setBool("isLightInFront", isLightInFront);
-	cloudsPPShader.setFloat("lightDotCameraFront", lightDotCameraFront);
-
-	cloudsPPShader.setFloat("time", glfwGetTime());
-	ppShader->draw();
 	//Copy last frame (blit doesn't worked to me)
 	lastFrameCloudsFBO->bind();
 	Shader& copy = copyShader->getShader();

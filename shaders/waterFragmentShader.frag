@@ -23,7 +23,7 @@ uniform sampler2D depthMap;
 
 out vec4 FragColor;
 
-const float distFactor = 0.25;
+const float distFactor = 0.05;
 
 float Random3D(in vec3 st)
 {
@@ -167,7 +167,7 @@ void main(){
 
 	float floorY = texture(refractionTex, ndc).a;
 	float waterDepth = 1.0 - floorY;
-	float waterDepthClamped = SATURATE(waterDepth*50.0);
+	float waterDepthClamped = SATURATE(waterDepth*5.0);
 
 	totalDistortion = vec2(dhdu, dhdv)*distFactor*waterDepth;
 
@@ -194,8 +194,8 @@ void main(){
 
 	vec3 toCameraVector =  position.xyz - cameraPosition;
 	float fresnelFactor = max(dot(normalize(-toCameraVector), vec3(0.0, 1.0, 0.0)), 0.0);
-	fresnelFactor = pow(fresnelFactor, 1.0);
-	vec4 refr_reflCol = mix(reflectionColor, refractionColor, 1.0);
+	fresnelFactor = pow(fresnelFactor, 3.0);
+	vec4 refr_reflCol = mix(reflectionColor, refractionColor, fresnelFactor);
 
 
 	// calculate diffuse illumination
@@ -223,11 +223,12 @@ void main(){
 	vec4 color = vec4(0.2,0.71,0.85, 1.0);
 
 	vec4 fogColor = vec4(0.4,0.6,0.75, 1.0);
-	refr_reflCol *= fogColor;
-	FragColor =  mix(mix(refr_reflCol, color*0.8, 0.2)*0.8 + vec4(diffuse + specular, 1.0) , fogColor,(1 - fogFactor));
+	//refr_reflCol *= fogColor;
+	FragColor =  mix(mix(refr_reflCol, color*0.8, 0.1)*0.8 + vec4(diffuse + specular, 1.0) , fogColor,(1 - fogFactor));
 	//float worley_ = worley( vec3(position.xz, moveFactor*10.0))*0.5 + worley( vec3(position.xz*2.0, moveFactor*5.0))*0.25;
 	float foam = perlin(position.x*4.0, position.z*4.0, moveFactor*10.0  )*0.25;
 	foam = mix(   foam*pow((1.0 - waterDepth), 8.0), foam*0.01, 0.0);
-	FragColor.rgb += foam;
+	FragColor.rgb *= 0.95;
+	//FragColor.rgb += foam;
 	FragColor.a = waterDepthClamped;
 	}

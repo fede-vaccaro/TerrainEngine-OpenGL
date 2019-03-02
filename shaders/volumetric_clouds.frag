@@ -587,13 +587,23 @@ void main()
 	vec3 stub, cubeMapEndPos;
 	intersectCubeMap(vec3(0.0, 0.0, 0.0), worldDir, stub, cubeMapEndPos);
 	vec4 bg = colorCubeMap(cubeMapEndPos, worldDir);
-	vec3 red = vec3(1.0, 0.8, 0.8);
-	//bg = mix( mix(red.rgbr, vec4(1.0), SUN_DIR.y), bg, pow( max(cubeMapEndPos.y, .0), 0.2));
+	vec3 red = vec3(1.0);
+	bg = mix( mix(red.rgbr, vec4(1.0), SUN_DIR.y), bg, pow( max(cubeMapEndPos.y+0.1, .0), 0.2));
 	//vec4 bg = vec4( TonemapACES(preetham(worldDir)), 1.0);
-
-	//compute raymarching starting and ending point 
-	raySphereintersection(cameraPosition, worldDir, SPHERE_INNER_RADIUS, startPos);
-	raySphereintersection(cameraPosition, worldDir, SPHERE_OUTER_RADIUS, endPos);
+	int case_ = 0;
+	//compute raymarching starting and ending point
+	if(cameraPosition.y < SPHERE_INNER_RADIUS - EARTH_RADIUS){
+		raySphereintersection(cameraPosition, worldDir, SPHERE_INNER_RADIUS, startPos);
+		raySphereintersection(cameraPosition, worldDir, SPHERE_OUTER_RADIUS, endPos);
+	}else if(cameraPosition.y > SPHERE_INNER_RADIUS - EARTH_RADIUS && cameraPosition.y < SPHERE_OUTER_RADIUS - EARTH_RADIUS){
+		startPos = cameraPosition;
+		raySphereintersection(cameraPosition, worldDir, SPHERE_OUTER_RADIUS, endPos);
+		case_ = 1;
+	}else{
+		raySphereintersection(cameraPosition, worldDir, SPHERE_OUTER_RADIUS, startPos);
+		raySphereintersection(cameraPosition, worldDir, SPHERE_INNER_RADIUS, endPos);
+		case_ = 2;
+	}
 
 	//compute fog amount and early exit if over a certain value
 	float fogAmount = computeFogAmount(startPos, 0.00002);
@@ -610,7 +620,7 @@ void main()
 	if(!isOut){
 		oldFrameAlphaness = texture(lastFrameAlphaness, prevFrameScreenPos).r;
 	}
-	const bool enableOptimization = false;
+	const bool enableOptimization = true;
 
 	if( !enableOptimization || (oldFrameAlphaness >= 0.0 || frameIter == 0) && (writePixel() || isOut)) // if the pixel must be drawn
 	{
@@ -619,7 +629,7 @@ void main()
 	}else{
 		v = texture(lastFrameColor, prevFrameScreenPos); // else do temporal reprojection
 		cloudColor = v;
-		//v = vec4(1.0, 0.0, 0.0,v.a); // for debugging TR
+
 	}
 	float cloudAlphaness = threshold(v.a, 0.2);
 	v.rgb = v.rgb*1.8 - 0.1; // contrast-illumination tuning
@@ -636,6 +646,14 @@ void main()
 	v.rgb += s*v.a;
 
 	// blend clouds and background
+	/*
+	if(case_ == 0)
+		v = vec4(1.0, 0.0, 0.0,v.a); // for debugging TR
+	else if(case_ == 1)
+		v = vec4(0.0, 1.0, 0.0, v.a);
+	else if(case_ == 2)
+		v = vec4(0.0, 0.0, 1.0, v.a);
+	*/
 	bg.rgb = bg.rgb*(1.0 - v.a) + v.rgb;
 	bg.a = 1.0;
 
