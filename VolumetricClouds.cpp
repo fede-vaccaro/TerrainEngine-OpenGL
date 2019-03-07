@@ -17,7 +17,9 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 	/////////////////// TEXTURE GENERATION //////////////////
 
 	//compute shaders
-	ComputeShader comp("shaders/perlinworley.comp");
+	Shader comp("perlinWorley");
+	comp.attachShader("shaders/perlinworley.comp");
+	comp.linkPrograms();
 
 	//make texture
 	this->perlinTex = Texture3D(128, 128, 128);
@@ -32,7 +34,9 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 	std::cout << "computed!!" << std::endl;
 
 	//compute shaders
-	ComputeShader worley_git("shaders/worley.comp");
+	Shader worley_git("worleyComp");
+	worley_git.attachShader("shaders/worley.comp");
+	worley_git.linkPrograms();
 
 	//make texture
 	this->worley32 = Texture3D(32, 32, 32);
@@ -46,7 +50,9 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 
 	////////////////////////
 	//compute shaders
-	ComputeShader weather("shaders/weather.comp");
+	Shader weather("weatherMap");
+	weather.attachShader("shaders/weather.comp");
+	weather.linkPrograms();
 
 	//make texture
 	this->weatherTex = Texture2D(1024, 1024);

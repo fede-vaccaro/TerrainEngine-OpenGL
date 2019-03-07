@@ -19,6 +19,9 @@ unsigned int createDepthBufferAttachment(int width, int height);
 
 unsigned int createRenderBufferAttachment(int width, int height);
 
+void initializePlaneVAO(const int res, const int width, GLuint * planeVAO, GLuint * planeVBO, GLuint * planeEBO);
+
+
 class FrameBufferObject {
 public:
 	FrameBufferObject(int W, int H);

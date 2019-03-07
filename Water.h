@@ -1,7 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_access.hpp>
-#include <model.h>
+//#include <model.h>
 #include "shader.h"
 #include "buffers.h"
 #include <GLFW/glfw3.h>
@@ -49,6 +49,9 @@ public:
 	}
 
 private:
+	void drawVertices();
+
+	unsigned int planeVAO, planeVBO, planeEBO;
 	float scale, height;
 	FrameBufferObject * reflectionFBO;
 	FrameBufferObject * refractionFBO;
@@ -56,6 +59,6 @@ private:
 	unsigned int dudvMap, normalMap;
 	glm::mat4 modelMatrix;
 	Shader * shad;
-	Model * waterPlane;
+	//Model * waterPlane;
 };
 

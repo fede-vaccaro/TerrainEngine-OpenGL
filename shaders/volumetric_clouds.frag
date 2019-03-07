@@ -8,7 +8,6 @@
 // Thanks to Rikard Olajos https://github.com/rikardolajos/clouds
 // Thanks to Clay John https://github.com/clayjohn/realtime_clouds
 
-
 in vec2 TexCoords;
 
 uniform float FOV;
@@ -606,7 +605,7 @@ void main()
 	}
 
 	//compute fog amount and early exit if over a certain value
-	float fogAmount = computeFogAmount(startPos, 0.00002);
+	float fogAmount = computeFogAmount(startPos, 0.00006);
 
 	if(fogAmount > 0.965){
 		fragColor = bg;
@@ -620,7 +619,7 @@ void main()
 	if(!isOut){
 		oldFrameAlphaness = texture(lastFrameAlphaness, prevFrameScreenPos).r;
 	}
-	const bool enableOptimization = true;
+	const bool enableOptimization = false;
 
 	if( !enableOptimization || (oldFrameAlphaness >= 0.0 || frameIter == 0) && (writePixel() || isOut)) // if the pixel must be drawn
 	{
@@ -629,7 +628,6 @@ void main()
 	}else{
 		v = texture(lastFrameColor, prevFrameScreenPos); // else do temporal reprojection
 		cloudColor = v;
-
 	}
 	float cloudAlphaness = threshold(v.a, 0.2);
 	v.rgb = v.rgb*1.8 - 0.1; // contrast-illumination tuning

@@ -1,7 +1,7 @@
 #include "shader.h"
 
 
-
+/*
 	Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	{
 		//std::cout << "CREATING BASE SHADER" << std::endl;
@@ -35,6 +35,54 @@
 		glDeleteShader(fragment);
 		std::cout << "SHADERS " << getShaderName(vertexPath) << " AND " << getShaderName(fragmentPath) << " LOADED AND COMPILED!" << std::endl;
 	}
+	*/
+	Shader::Shader(std::string name) : name(name)
+	{
+		linked = false;
+		isCompute = false;
+		ID = glCreateProgram();
+	}
+
+	Shader::Shader(std::string name, const char * computeShaderPath)
+	{
+		linked = false;
+		isCompute = false;
+		ID = glCreateProgram();
+
+		this->attachShader(BaseShader(computeShaderPath));
+		this->linkPrograms();
+	}
+
+
+	void Shader::attachShader(BaseShader s)
+	{
+		if (!isCompute) {
+			glAttachShader(ID, s.getShad());
+			if (s.getName() == "COMPUTE")
+				isCompute = true;
+			this->shaders.push_back(s.getShad());
+		}
+		else {
+			std::cout << "ERROR: TRYING TO LINK A NON COMPUTE SHADER TO COMPUTE PROGRAM" << std::endl;
+		}
+	}
+
+	void Shader::linkPrograms()
+	{
+		glLinkProgram(ID);
+		
+		if (checkCompileErrors(ID, "PROGRAM", "")) {
+			linked = true;
+			std::cout << "PROGRAM " << name << " CORRECTLY LINKED" << std::endl;
+			while (!shaders.empty()) {
+				glDeleteShader(shaders.back());
+				shaders.pop_back();
+			}
+		}
+		else {
+			std::cout << "ERROR WHILE LINKING TO " << name << " PROGRAM" << std::endl;
+		}
+	}
 
 	Shader::~Shader() {
 
@@ -42,7 +90,11 @@
 
 	void Shader::use()
 	{
-		glUseProgram(ID);
+		if(linked)
+			glUseProgram(ID);
+		else {
+			std::cout << "PROGRAMS NOT LINKED!" << std::endl;
+		}
 	}
 	// utility uniform functions
 	// ------------------------------------------------------------------------
@@ -95,7 +147,7 @@
 		glBindTexture(GL_TEXTURE_3D, texture);
 		this->setInt(name, id);
 	}
-
+	/*
 	void Shader::checkCompileErrors(unsigned int shader, std::string type, std::string shaderName)
 	{
 		int success;
@@ -123,7 +175,8 @@
 		//	std::cout << type + " SHADER SUCCESSFULLY COMPILED AND/OR LINKED!" << std::endl;
 		//}
 	}
-
+	*/
+	/*
 	std::string Shader::loadShaderFromFile(const char* shaderPath) {
 		std::string shaderCode;
 		std::ifstream shaderFile;
@@ -157,4 +210,4 @@
 		}
 		return pathstr;
 	}
-
+	*/

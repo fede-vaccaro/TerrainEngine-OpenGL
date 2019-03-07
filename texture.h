@@ -13,3 +13,4 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
 unsigned int loadCubemap(vector<std::string> faces);
 unsigned int Texture2D(int w, int h);
 unsigned int Texture3D(int w, int h, int d);
+void bindTexture2D(unsigned int tex);

@@ -1,8 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
-#include <model.h>
+//#include <model.h>
 #include "texture.h"
-#include "TessShader.h"
+//#include "TessShader.h"
 #include "Water.h"
 #include <camera.h>
 #include "glError.h"
@@ -36,7 +36,7 @@ public:
 	bool inTile(Camera camera, glm::vec2 pos);
 	static const int tileW = 5.0;
 
-	Model * planeModel;
+	//Model * planeModel;
 	Water * waterPtr;
 
 	void setOctaves(int oct) {
@@ -76,8 +76,8 @@ public:
 
 	static bool drawFog;
 private:
-
-	void initializePlaneVAO();
+	int res;
+	//void initializePlaneVAO();
 	void drawVertices(int nInstances);
 	unsigned int planeVBO, planeVAO, planeEBO;
 
@@ -88,7 +88,7 @@ private:
 
 	unsigned int * textures, posBuffer;
 
-	TessellationShader * shad;
+	Shader * shad;
 	glm::mat4 modelMatrix;
 
 	std::vector<glm::vec2> positionVec;

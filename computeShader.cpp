@@ -61,6 +61,20 @@
 		glUniform3fv(location, 1, glm::value_ptr(vector));
 	}
 
+	void ComputeShader::setSampler2D(const std::string &name, unsigned int texture, int id) const
+	{
+		glActiveTexture(GL_TEXTURE0 + id);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		this->setInt(name, id);
+	}
+
+	void ComputeShader::setSampler3D(const std::string &name, unsigned int texture, int id) const
+	{
+		glActiveTexture(GL_TEXTURE0 + id);
+		glBindTexture(GL_TEXTURE_3D, texture);
+		this->setInt(name, id);
+	}
+
 	void ComputeShader::setVec4(const std::string &name, glm::vec4 vector) const
 	{
 		unsigned int location = glGetUniformLocation(ID, name.c_str());

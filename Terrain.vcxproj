@@ -82,6 +82,10 @@
     <IncludePath>$(ProjectDir)Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)Libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(ProjectDir)Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)Library;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -100,7 +104,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -123,22 +131,23 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc140-mt.lib;freetype.lib;MSVCRT.LIB;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;freetype.lib;MSVCRT.LIB;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BaseShader.h" />
     <ClInclude Include="buffers.h" />
-    <ClInclude Include="computeShader.h" />
     <ClInclude Include="drawableObject.h" />
     <ClInclude Include="glError.h" />
     <ClInclude Include="Include\camera.h" />
@@ -148,8 +157,6 @@
     <ClInclude Include="ScreenQuad.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="Skybox.h" />
-    <ClInclude Include="TessShader.h" />
-    <ClInclude Include="TextArea.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="VolumetricClouds.h" />
@@ -157,8 +164,8 @@
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BaseShader.cpp" />
     <ClCompile Include="buffers.cpp" />
-    <ClCompile Include="computeShader.cpp" />
     <ClCompile Include="drawableObject.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="glError.cpp" />
@@ -169,7 +176,6 @@
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="stb_image_write.cpp" />
-    <ClCompile Include="TextArea.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="Tile.cpp" />
     <ClCompile Include="VolumetricClouds.cpp" />
@@ -182,6 +188,9 @@
     <None Include="shaders\perlin3D.comp" />
     <None Include="shaders\perlinworley.comp" />
     <None Include="shaders\post_processing.frag" />
+    <None Include="shaders\testComputeShaderA.comp" />
+    <None Include="shaders\testComputeShaderB.comp" />
+    <None Include="shaders\testComputeShaderC.comp" />
     <None Include="shaders\visualizeFbo.frag" />
     <None Include="shaders\volumetric_clouds.frag" />
     <None Include="shaders\raymarch_cube_box.frag" />

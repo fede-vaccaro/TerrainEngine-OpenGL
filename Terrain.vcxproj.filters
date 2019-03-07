@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TessShader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -36,16 +33,10 @@
     <ClInclude Include="Water.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TextArea.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="glError.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="computeShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\camera.h">
@@ -67,6 +58,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VolumetricClouds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -98,16 +92,10 @@
     <ClCompile Include="Water.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TextArea.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="glError.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="computeShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Window.cpp">
@@ -123,6 +111,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="drawableObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -191,6 +182,15 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\visualizeFbo.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\testComputeShaderB.comp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\testComputeShaderC.comp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\testComputeShaderA.comp">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

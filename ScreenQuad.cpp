@@ -7,7 +7,12 @@ bool ScreenQuad::initialized = false;
 ScreenQuad::ScreenQuad(const char * fragmentPath)
 {
 	initializeQuad();
-	shad = new Shader("shaders/screen.vert", fragmentPath);
+	//shad = new Shader("shaders/screen.vert", fragmentPath);
+	shad = new Shader("ScreenQuad_" + getShaderName(fragmentPath));
+
+	shad->attachShader(BaseShader("shaders/screen.vert"));
+	shad->attachShader(BaseShader(fragmentPath));
+	shad->linkPrograms();
 }
 
 void ScreenQuad::drawQuad() {
