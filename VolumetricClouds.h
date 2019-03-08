@@ -41,10 +41,12 @@ public:
 private:
 	int SCR_WIDTH, SCR_HEIGHT;
 	float coverage;
-	ScreenQuad * volumetricCloudsShader, * ppShader, * copyShader;
+	Shader * volumetricCloudsShader;
+	ScreenQuad * ppShader, * copyShader;
 	int frameIter = 0;
 	bool reflection;
-	FrameBufferObject * cloudsFBO, *cloudsPostProcessingFBO, * lastFrameCloudsFBO;
+	TextureSet * cloudsFBO;
+	FrameBufferObject *cloudsPostProcessingFBO, * lastFrameCloudsFBO;
 
 	unsigned int perlinTex, worley32, weatherTex;
 

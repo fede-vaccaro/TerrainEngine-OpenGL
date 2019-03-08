@@ -1,5 +1,5 @@
 #include "buffers.h"
-
+#include "texture.h"
 void bindFrameBuffer(int frameBuffer, int width, int height) {
 	glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
@@ -235,4 +235,26 @@ void initializePlaneVAO(const int res, const int width, GLuint * planeVAO, GLuin
 	glBindVertexArray(0);
 
 	delete[] vertices;
+}
+
+TextureSet::TextureSet(int W, int H, int num)
+{
+	if (W > 0 && H > 0 && num > 0) {
+		nTextures = num;
+		texture = new unsigned int[num];
+		for (int i = 0; i < num; ++i) {
+			texture[i] = Texture2D(W, H);
+		}
+	}
+}
+
+void TextureSet::bindTexture(int i, int unit)
+{
+	bindTexture2D(texture[i], unit);
+}
+
+void TextureSet::bind()
+{
+	for (int i = 0; i < nTextures; ++i)
+		bindTexture2D(texture[i], i);
 }

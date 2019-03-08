@@ -11,7 +11,7 @@ uniform sampler2D lastFrame;
 
 uniform float time;
 uniform vec4 lightPos;
-uniform vec2 resolution = vec2(1600.0, 900.0);
+uniform vec2 resolution = vec2(1920.0, 1080.0);
 
 uniform bool isLightInFront = true;
 uniform float lightDotCameraFront;
@@ -97,8 +97,7 @@ void main()
 	dTuv *= density/float(SAMPLES);
     
     vec3 colRays = texture(emissions, uv.xy).rgb*0.4;
-    for(float i=0.; i < SAMPLES; i++){
-
+    for(int i=0; i < SAMPLES; i++){
         uv -= dTuv;
         colRays += texture(emissions, uv).rgb *illuminationDecay* weight;
         illuminationDecay *= decay;

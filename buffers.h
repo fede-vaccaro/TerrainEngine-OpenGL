@@ -41,3 +41,26 @@ private:
 	int nColorAttachments;
 	unsigned int * colorAttachments;
 };
+
+class TextureSet { //for drawing compute shader
+public:
+	TextureSet(int W, int H, int num);
+	void bindTexture(int i, int unit);
+	unsigned int getColorAttachmentTex(int i) {
+		if (i < 0 || i > nTextures) {
+			std::cout << "COLOR ATTACHMENT OUT OF RANGE" << std::endl;
+			return 0;
+		}
+		return texture[i];
+	}
+
+	int getNTextures() const {
+		return nTextures;
+	}
+
+	void bind();
+	
+private:
+	int nTextures;
+	unsigned int * texture;
+};

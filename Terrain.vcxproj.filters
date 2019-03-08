@@ -86,9 +86,6 @@
     <ClCompile Include="texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Water.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -104,9 +101,6 @@
     <ClCompile Include="Skybox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ScreenQuad.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="VolumetricClouds.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -114,6 +108,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BaseShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScreenQuad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -142,12 +139,6 @@
     <None Include="shaders\skyboxVert.vert">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\TextArea.vert">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\TextArea.frag">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="shaders\screen.vert">
       <Filter>Resource Files</Filter>
     </None>
@@ -155,9 +146,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\post_processing.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\perlin3D.comp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\weather.comp">
@@ -191,6 +179,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\testComputeShaderA.comp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\volumetric_clouds.comp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\clouds_post.comp">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

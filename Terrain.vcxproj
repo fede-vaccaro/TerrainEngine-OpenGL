@@ -84,7 +84,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)Library;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)Libraries;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -138,11 +138,12 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;freetype.lib;MSVCRT.LIB;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -170,7 +171,6 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="glError.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Object.cpp" />
     <ClCompile Include="ScreenQuad.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="Skybox.cpp" />
@@ -183,15 +183,16 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\clouds_post.comp" />
     <None Include="shaders\clouds_post.frag" />
     <None Include="shaders\copyFrame.frag" />
-    <None Include="shaders\perlin3D.comp" />
     <None Include="shaders\perlinworley.comp" />
     <None Include="shaders\post_processing.frag" />
     <None Include="shaders\testComputeShaderA.comp" />
     <None Include="shaders\testComputeShaderB.comp" />
     <None Include="shaders\testComputeShaderC.comp" />
     <None Include="shaders\visualizeFbo.frag" />
+    <None Include="shaders\volumetric_clouds.comp" />
     <None Include="shaders\volumetric_clouds.frag" />
     <None Include="shaders\raymarch_cube_box.frag" />
     <None Include="shaders\screen.frag" />
@@ -202,8 +203,6 @@
     <None Include="shaders\tessEvaluationShader.tes" />
     <None Include="shaders\tessFragmentShader.frag" />
     <None Include="shaders\tessVertexShader.vert" />
-    <None Include="shaders\TextArea.frag" />
-    <None Include="shaders\TextArea.vert" />
     <None Include="shaders\waterFragmentShader.frag" />
     <None Include="shaders\waterVertexShader.vert" />
     <None Include="shaders\weather.comp" />

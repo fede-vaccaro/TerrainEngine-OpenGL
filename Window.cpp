@@ -13,6 +13,9 @@ float Window::lastY = SCR_HEIGHT / 2.0f;
 
 Window::Window(int& success, unsigned int scrW, unsigned int scrH, std::string name) : name(name)
 {
+
+	Window::SCR_WIDTH = scrW;
+	Window::SCR_HEIGHT = scrH;
 	success = 1;
 	// glfw: initialize and configure
 	glfwInit();
@@ -20,9 +23,10 @@ Window::Window(int& success, unsigned int scrW, unsigned int scrH, std::string n
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
+	//glfwWindowHint(GLFW_DOUBLEBUFFER, GL_FALSE);
 
-	Window::SCR_WIDTH = scrW;
-	Window::SCR_HEIGHT = scrH;
+
+
 
 	// glfw window creation										 
 	this->w = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, name.c_str(), NULL, NULL);

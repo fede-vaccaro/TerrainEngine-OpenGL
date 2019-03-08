@@ -46,7 +46,7 @@ Tile::Tile(float scale, float dispFactor, int gl) : dispFactor(dispFactor), scal
 
 	this->I = glm::vec2(1, 0)*s;
 	this->J = glm::vec2(0, 1)*s;
-	res = 4;
+	res = 6;
 	initializePlaneVAO(res, tileW, &planeVAO, &planeVBO, &planeEBO);
 	//planeModel = new Model("resources/plane.obj", GL_PATCHES);
 	//waterModel = new Model("resources/plane.obj", GL_TRIANGLES);
@@ -76,7 +76,6 @@ Tile::Tile(float scale, float dispFactor, int gl) : dispFactor(dispFactor), scal
 	setPositionsArray(positionVec);
 
 }
-const int res = 5;
 
 
 void Tile::draw(){

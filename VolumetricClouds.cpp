@@ -1,13 +1,15 @@
 #include "VolumetricClouds.h"
 
-
+#define INT_CEIL(n,d) (int)ceil((float)n/d)
 
 VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH) {
-	volumetricCloudsShader = new ScreenQuad("shaders/volumetric_clouds.frag");
+	//volumetricCloudsShader = new ScreenQuad("shaders/volumetric_clouds.frag");
+	volumetricCloudsShader = new Shader("volumetricCloudsShader","shaders/volumetric_clouds.comp");
 	ppShader = new ScreenQuad("shaders/clouds_post.frag");
 	copyShader = new ScreenQuad("shaders/copyFrame.frag");
 
-	cloudsFBO = new FrameBufferObject(SW, SH, 4);
+	//cloudsFBO = new FrameBufferObject(SW, SH, 4);
+	cloudsFBO = new TextureSet(SW, SH, 4);
 	cloudsPostProcessingFBO = new FrameBufferObject(SW, SH, 2);
 	lastFrameCloudsFBO = new FrameBufferObject(SH, SH, 2);
 
@@ -30,8 +32,10 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 	std::cout << "computing perlinworley!" << std::endl;
 	glActiveTexture(GL_TEXTURE0);
 	comp.setInt("outVolTex", 0);
-	glDispatchCompute((GLuint)128, (GLuint)128, (GLuint)128);
+	glDispatchCompute(INT_CEIL(128,4), INT_CEIL(128, 4), INT_CEIL(128, 4));
 	std::cout << "computed!!" << std::endl;
+	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	glGenerateMipmap(GL_TEXTURE_3D);
 
 	//compute shaders
 	Shader worley_git("worleyComp");
@@ -45,8 +49,9 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 	worley_git.use();
 	worley_git.setVec3("u_resolution", glm::vec3(32, 32, 32));
 	std::cout << "computing worley 32!" << std::endl;
-	glDispatchCompute((GLuint)32, (GLuint)32, (GLuint)32);
+	glDispatchCompute(INT_CEIL(32, 4), INT_CEIL(32, 4), INT_CEIL(32, 4));
 	std::cout << "computed!!" << std::endl;
+	glGenerateMipmap(GL_TEXTURE_3D);
 
 	////////////////////////
 	//compute shaders
@@ -60,7 +65,7 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 	//compute
 	weather.use();
 	std::cout << "computing weather!" << std::endl;
-	glDispatchCompute((GLuint)1024, (GLuint)1024, (GLuint)1);
+	glDispatchCompute(INT_CEIL(1024, 8), INT_CEIL(1024, 8),1);
 	std::cout << "weather computed!!" << std::endl;
 
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -72,8 +77,13 @@ void VolumetricClouds::draw() {
 
 	float t1, t2;
 
-	cloudsFBO->bind();
-	Shader & cloudsShader = volumetricCloudsShader->getShader();
+	//cloudsFBO->bind();
+	for (int i = 0; i < cloudsFBO->getNTextures(); ++i) {
+		bindTexture2D(cloudsFBO->getColorAttachmentTex(i), i);
+	}
+
+	//Shader & cloudsShader = volumetricCloudsShader->getShader();
+	Shader & cloudsShader = *volumetricCloudsShader;
 	sceneElements* s = drawableObject::scene;
 
 	cloudsShader.use();
@@ -101,7 +111,11 @@ void VolumetricClouds::draw() {
 	cloudsShader.setSampler2D("lastFrameColor", lastFrameCloudsFBO->getColorAttachmentTex(1), 5);
 
 	//actual draw
-	volumetricCloudsShader->draw();
+	//volumetricCloudsShader->draw();
+	glDispatchCompute(INT_CEIL(SCR_WIDTH, 16), INT_CEIL(SCR_HEIGHT, 16), 1);
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+	
 	//copy to lastFrameFBO
 
 	if (!reflection) {

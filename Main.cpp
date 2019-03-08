@@ -60,7 +60,7 @@ int main()
 
 	float scale = 100.0f,  dispFactor = 16.0;
 	//TileController tc(scale, dispFactor, 51);
-	int gl = 61;
+	int gl = 120;
 	Tile terrain(scale, dispFactor, gl);
 	Skybox skybox; //unused
 	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT);
@@ -83,15 +83,6 @@ int main()
 	drawableObject::scene = &scene;
 
 	ScreenQuad fboVisualizer("shaders/visualizeFbo.frag");
-
-	Shader testA("shaders/testComputeShaderA.comp", "shaders/testComputeShaderA.comp");
-	Shader testB("shaders/testComputeShaderB.comp", "shaders/testComputeShaderB.comp");
-	Shader testC("shaders/testComputeShaderC.comp", "shaders/testComputeShaderC.comp");
-	unsigned int texCompA, texCompB, texCompC;
-	texCompA = Texture2D(1920, 1080);
-	texCompB = Texture2D(1920, 1080);
-	texCompC = Texture2D(1920, 1080);
-
 
 	while (window.continueLoop())
 	{
@@ -191,37 +182,11 @@ int main()
 		post.setSampler2D("depthTex", SceneFBO.depthTex, 2);
 		PostProcessing.draw();
 
-		////////////
-		//Compute Shader test
-		testA.use();
-		bindTexture2D(texCompA);
-		int workGroup_x = 16;
-		int workGroup_y = 16;
-
-		int blockDim_x = ceil((float)1920 / workGroup_x);
-		int blockDim_y = ceil((float)1080 / workGroup_y);
-		testA.setFloat("iTime", glfwGetTime());
-		//glDispatchCompute( blockDim_x, blockDim_y, 1);
-		//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-		testB.use();
-		bindTexture2D(texCompB);
-		testB.setFloat("iTime", glfwGetTime());
-		//glDispatchCompute(blockDim_x, blockDim_y, 1);
-		//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-		testC.use();
-		bindTexture2D(texCompC);
-		testC.setSampler2D("imgA", texCompA, 0);
-		testC.setSampler2D("imgB", texCompB, 1);
-		//glDispatchCompute(blockDim_x, blockDim_y, 1);
-		//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
 		///////////////
 		// Texture visualizer
 		Shader& fboVisualizerShader = fboVisualizer.getShader();
 		fboVisualizerShader.use();
-		fboVisualizerShader.setSampler2D("fboTex", texCompC, 0);
+		fboVisualizerShader.setSampler2D("fboTex", 0, 0);
 		//fboVisualizer.draw();
 		
 
