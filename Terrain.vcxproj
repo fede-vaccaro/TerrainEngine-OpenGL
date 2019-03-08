@@ -153,8 +153,6 @@
     <ClInclude Include="glError.h" />
     <ClInclude Include="Include\camera.h" />
     <ClInclude Include="Object.h" />
-    <ClInclude Include="perlin\CustomTypes.h" />
-    <ClInclude Include="sceneElements.h" />
     <ClInclude Include="ScreenQuad.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="Skybox.h" />

@@ -21,9 +21,6 @@
     <ClInclude Include="buffers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="perlin\CustomTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Tile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -49,9 +46,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ScreenQuad.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sceneElements.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="drawableObject.h">

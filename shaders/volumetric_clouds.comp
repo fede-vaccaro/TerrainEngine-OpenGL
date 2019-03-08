@@ -152,11 +152,36 @@ bool raySphereintersection(vec3 ro, vec3 rd, float radius, out vec3 startPos){
 	return true;
 }
 
+bool raySphereintersection2(vec3 ro, vec3 rd, float radius, out vec3 startPos){
+	
+	float t;
+
+	sphereCenter.xz = cameraPosition.xz;
+
+	float radius2 = radius*radius;
+
+	vec3 L = ro - sphereCenter;
+	float a = dot(rd, rd);
+	float b = 2.0 * dot(rd, L);
+	float c = dot(L,L) - radius2;
+
+	float discr = b*b - 4.0 * a * c;
+	if(discr < 0.0) return false;
+	t = max(0.0, (-b + sqrt(discr))/2);
+	if(t == 0.0){
+		return false;
+	}
+	startPos = ro + rd*t;
+
+	return true;
+}
+
 vec4 colorCubeMap(vec3 endPos, vec3 d)
 {
     // background sky     
-	float sun = clamp( dot(SUN_DIR,d), 0.0, 1.0 );
 	vec3 col = vec3(0.6,0.71,0.85) - endPos.y*0.2*vec3(1.0,0.5,1.0) + 0.15*0.5;
+	//vec3 col = mix(vec3(0.6,0.71,0.9)*1.2, vec3(0.5,0.60,0.75)*1.2, pow(endPos.y + 0.5,0.5));
+	float sun = clamp( dot(SUN_DIR,d), 0.0, 1.0 );
 	col += 0.8*vec3(1.0,.6,0.1)*pow( sun, 256.0 );
 
 	return vec4(col, 1.0);
@@ -473,28 +498,32 @@ void main()
 	//vec4 bg = vec4( TonemapACES(preetham(worldDir)), 1.0);
 	int case_ = 0;
 	//compute raymarching starting and ending point
+	vec3 fogRay;
 	if(cameraPosition.y < SPHERE_INNER_RADIUS - EARTH_RADIUS){
 		raySphereintersection(cameraPosition, worldDir, SPHERE_INNER_RADIUS, startPos);
 		raySphereintersection(cameraPosition, worldDir, SPHERE_OUTER_RADIUS, endPos);
+		fogRay = startPos;
 	}else if(cameraPosition.y > SPHERE_INNER_RADIUS - EARTH_RADIUS && cameraPosition.y < SPHERE_OUTER_RADIUS - EARTH_RADIUS){
 		startPos = cameraPosition;
 		raySphereintersection(cameraPosition, worldDir, SPHERE_OUTER_RADIUS, endPos);
+		bool hit = raySphereintersection(cameraPosition, worldDir, SPHERE_INNER_RADIUS, fogRay);
+		if(!hit)
+			fogRay = startPos;
 		case_ = 1;
 	}else{
-		raySphereintersection(cameraPosition, worldDir, SPHERE_OUTER_RADIUS, startPos);
-		raySphereintersection(cameraPosition, worldDir, SPHERE_INNER_RADIUS, endPos);
+		raySphereintersection2(cameraPosition, worldDir, SPHERE_OUTER_RADIUS, startPos);
+		raySphereintersection2(cameraPosition, worldDir, SPHERE_INNER_RADIUS, endPos);
+		raySphereintersection(cameraPosition, worldDir, SPHERE_OUTER_RADIUS, fogRay);
 		case_ = 2;
 	}
 
 	//compute fog amount and early exit if over a certain value
-	float fogAmount = computeFogAmount(startPos, 0.00006);
+	float fogAmount = computeFogAmount(fogRay, 0.00006);
 
 	fragColor_v = bg;
 	bloom_v = bg;
 
 	if(fogAmount > 0.965){
-		//fragColor = bg;
-		//bloom = bg;
 		fragColor_v = bg;
 		bloom_v = bg;
 		imageStore(fragColor, fragCoord, fragColor_v);

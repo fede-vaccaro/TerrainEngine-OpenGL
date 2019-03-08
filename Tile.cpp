@@ -24,8 +24,8 @@ Tile::Tile(float scale, float dispFactor, int gl) : dispFactor(dispFactor), scal
 	modelMatrix = positionMatrix * scaleMatrix;
 
 	octaves = 10;
-	frequency = 0.03;
-	grassCoverage = 0.77;
+	frequency = 0.025;
+	grassCoverage = 0.73;
 	tessMultiplier = 2.0;
 
 	posBuffer = 0;

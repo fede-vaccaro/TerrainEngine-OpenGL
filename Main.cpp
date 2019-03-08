@@ -128,6 +128,8 @@ int main()
 		water.bindReflectionFBO();
 		glClearColor(0.0, 0.4*0.8, 0.7*0.8, 1.0);
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		scene.cam.invertPitch();
 		scene.cam.Position.y -= 2 * (scene.cam.Position.y - waterHeight);
