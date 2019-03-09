@@ -11,17 +11,18 @@ uniform sampler2D lastFrame;
 
 uniform float time;
 uniform vec4 lightPos;
-uniform vec2 resolution = vec2(1920.0, 1080.0);
+uniform vec2 resolution;// = vec2(1920.0, 1080.0);
+uniform vec2 cloudRenderResolution;
 
 uniform bool isLightInFront = true;
 uniform float lightDotCameraFront;
 
-#define  offset_x  1. / resolution.x  
-#define  offset_y  1. / resolution.y
+#define  offset_x  1. / cloudRenderResolution.x  
+#define  offset_y  1. / cloudRenderResolution.y
 
 bool pp = false;
 
-vec4 gaussianBlur(sampler2D tex){
+vec4 gaussianBlur(sampler2D tex, vec2 uv){
  vec2 offsets[9] = vec2[](
         vec2(-offset_x,  offset_y), // top-left
         vec2( 0.0f,    offset_y), // top-center
@@ -44,7 +45,7 @@ vec4 gaussianBlur(sampler2D tex){
 
     for(int i = 0; i < 9; i++)
     {	
-		vec4 pixel = texture(tex, TexCoords.st + offsets[i]);
+		vec4 pixel = texture(tex, uv.st + offsets[i]);
         sampleTex[i] = pixel;
     }
     vec4 col = vec4(0.0);
@@ -67,7 +68,7 @@ void main()
 	//return;
 	//}
 	else{
-		FragColor = gaussianBlur(clouds);
+		FragColor = gaussianBlur(clouds, TexCoords);
 	}
 
 
@@ -96,9 +97,11 @@ void main()
 	vec2 dTuv = tc - lightPos.xy;
 	dTuv *= density/float(SAMPLES);
     
-    vec3 colRays = texture(emissions, uv.xy).rgb*0.4;
+    //vec3 colRays = texture(emissions, uv.xy).rgb*0.4;
+    vec3 colRays = gaussianBlur(emissions, uv).rgb*0.4;
     for(int i=0; i < SAMPLES; i++){
         uv -= dTuv;
+        //colRays += texture(emissions, uv).rgb *illuminationDecay* weight;
         colRays += texture(emissions, uv).rgb *illuminationDecay* weight;
         illuminationDecay *= decay;
     }

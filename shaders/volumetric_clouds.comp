@@ -594,4 +594,5 @@ void main()
 	imageStore(fragColor, fragCoord, fragColor_v);
 	imageStore(bloom, fragCoord, bloom_v);
 	imageStore(alphaness, fragCoord, alphaness_v);
+	imageStore(cloudColor, fragCoord, cloudColor_v);
 }

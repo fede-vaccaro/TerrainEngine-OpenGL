@@ -9,6 +9,7 @@ in float height;
 
 uniform vec3 u_LightColor;
 uniform vec3 u_LightPosition;
+uniform vec3 gEyeWorldPos;
 uniform vec3 u_ViewPosition;
 uniform vec3 fogColor;
 uniform vec2 offset;
@@ -314,16 +315,32 @@ vec4 getTexture(inout vec3 normal, const mat3 TBN){
 	return heightColor;
 }
 
+const float c = 18.;
+const float b = 3.e-6;
+
+float applyFog( in vec3  rgb,      // original color of the pixel
+               in float dist, // camera to point distance
+               in vec3  cameraPos,   // camera position
+               in vec3  rayDir )  // camera to point vector
+{
+    float fogAmount = c * exp(-cameraPos.y*b) * (1.0-exp( -dist*rayDir.y*b ))/rayDir.y;
+    vec3  fogColor  = vec3(0.5,0.6,0.7);
+    return clamp(fogAmount,0.0,1.0);//mix( rgb, fogColor, fogAmount );
+    //return fogAmount;//mix( rgb, fogColor, fogAmount );
+}
+
+
 void main()
 {
 	// calculate fog color 
 	vec2 u_FogDist = vec2(2500.0, 10000.0);
 	//float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
-	float fogFactor = clamp(exp(-1.5*distFromPos/(u_FogDist.y - u_FogDist.x) + 0.5), 0.0, 1.0);
+	//float fogFactor = clamp(exp(-1.5*distFromPos/(u_FogDist.y - u_FogDist.x) + 0.5), 0.0, 1.0);
 	bool normals_fog = true;
+	float fogFactor = applyFog(vec3(0.0), distance(gEyeWorldPos, WorldPos), gEyeWorldPos, normalize(WorldPos - gEyeWorldPos));
 	float eps = 0.1;
-	if(fogFactor >= 0.0 && fogFactor < eps){
-		normals_fog = false;
+	if(fogFactor >= 0.0 && fogFactor > 1. - eps){
+		//normals_fog = false;
 	}
 	
 	vec3 n;
@@ -361,7 +378,7 @@ void main()
 	// putting all together
     vec4 color = heightColor*vec4((ambient + specular*0 + diffuse)*vec3(1.0f) , 1.0f);
 	if(drawFog){
-		FragColor = mix(color, vec4(fogColor, 1.0f), 1.0f - fogFactor);
+		FragColor = mix(color, vec4(mix(fogColor*1.1,fogColor*0.85,clamp(WorldPos.y/1500.,0.0,1.0)), 1.0f), fogFactor);
 		FragColor.a = WorldPos.y/waterHeight;
 	}else{
 		FragColor = color;

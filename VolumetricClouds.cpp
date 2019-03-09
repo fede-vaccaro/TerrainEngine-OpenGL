@@ -10,10 +10,10 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 
 	//cloudsFBO = new FrameBufferObject(SW, SH, 4);
 	cloudsFBO = new TextureSet(SW, SH, 4);
-	cloudsPostProcessingFBO = new FrameBufferObject(SW, SH, 2);
+	cloudsPostProcessingFBO = new FrameBufferObject(Window::SCR_WIDTH, Window::SCR_HEIGHT, 2);
 	lastFrameCloudsFBO = new FrameBufferObject(SH, SH, 2);
 
-	reflection = false;
+	postProcess = true;
 	this->coverage = 0.45;
 
 	/////////////////// TEXTURE GENERATION //////////////////
@@ -118,7 +118,7 @@ void VolumetricClouds::draw() {
 	
 	//copy to lastFrameFBO
 
-	if (!reflection) {
+	if (postProcess) {
 		// cloud post processing filtering
 		cloudsPostProcessingFBO->bind();
 		Shader& cloudsPPShader = ppShader->getShader();
@@ -130,7 +130,8 @@ void VolumetricClouds::draw() {
 		cloudsPPShader.setSampler2D("depthMap", s->sceneFBO.depthTex, 2);
 		cloudsPPShader.setSampler2D("lastFrame", lastFrameCloudsFBO->tex, 3);
 
-		cloudsPPShader.setVec2("resolution", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
+		cloudsPPShader.setVec2("cloudRenderResolution", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
+		cloudsPPShader.setVec2("resolution", glm::vec2(Window::SCR_WIDTH , Window::SCR_HEIGHT));
 
 		glm::mat4 lightModel;
 		lightModel = glm::translate(lightModel, s->lightPos);

@@ -18,7 +18,7 @@ public:
 	~VolumetricClouds();
 
 	unsigned int getCloudsTexture() { 
-		return cloudsPostProcessingFBO->getColorAttachmentTex(0);
+		return (postProcess ? cloudsPostProcessingFBO->getColorAttachmentTex(0) : getCloudsRawTexture());
 	}
 
 	unsigned int getCloudsRawTexture(){
@@ -35,8 +35,8 @@ public:
 		}
 	}
 
-	void setReflection(bool v) { reflection = v; }
-	bool getReflection() { return reflection; }
+	void setPostProcess(bool v) { postProcess = v; }
+	bool getPostProcess() { return postProcess; }
 
 private:
 	int SCR_WIDTH, SCR_HEIGHT;
@@ -44,7 +44,7 @@ private:
 	Shader * volumetricCloudsShader;
 	ScreenQuad * ppShader, * copyShader;
 	int frameIter = 0;
-	bool reflection;
+	bool postProcess;
 	TextureSet * cloudsFBO;
 	FrameBufferObject *cloudsPostProcessingFBO, * lastFrameCloudsFBO;
 

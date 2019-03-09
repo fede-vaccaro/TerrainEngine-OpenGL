@@ -21,7 +21,7 @@ public:
 	static void drawQuad();
 
 	static void disableTests() {
-		glDisable(GL_CLIP_DISTANCE0);
+		//glDisable(GL_CLIP_DISTANCE0);
 		glDisable(GL_DEPTH_TEST);
 	}
 

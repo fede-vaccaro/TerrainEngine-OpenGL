@@ -53,8 +53,9 @@ int main()
 
 	window.camera = &camera;
 
-	glm::vec3 fogColor(0.6 + 0.1, 0.71 + 0.1, 0.85 + 0.1);
-	fogColor *= 0.7;
+	//glm::vec3 fogColor(0.6 + 0.1, 0.71 + 0.1, 0.85 + 0.1);
+	glm::vec3 fogColor(0.5,0.6,0.7);
+	//fogColor *= 0.7;
 	glm::vec3 lightColor(255, 255, 230);
 	lightColor /= 255.0;
 
@@ -65,7 +66,7 @@ int main()
 	Skybox skybox; //unused
 	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT);
 	VolumetricClouds reflectionVolumetricClouds(1280, 720); //a different object is needed because it has a state-dependent draw method
-	reflectionVolumetricClouds.setReflection(true);
+	reflectionVolumetricClouds.setPostProcess(false);
 
 	float waterHeight = 128.0 + 50.0;
 	Water water(glm::vec2(0.0, 0.0), scale*gl, waterHeight);
@@ -84,6 +85,10 @@ int main()
 
 	ScreenQuad fboVisualizer("shaders/visualizeFbo.frag");
 
+
+	unsigned int testTexture = Texture2D(1920, 1080);
+	Shader testComp("TEST", "shaders/testComputeShaderA.comp");
+	int frameIter = 0;
 	while (window.continueLoop())
 	{
 
@@ -128,7 +133,7 @@ int main()
 		water.bindReflectionFBO();
 		glClearColor(0.0, 0.4*0.8, 0.7*0.8, 1.0);
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
+		//glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		scene.cam.invertPitch();
@@ -160,6 +165,9 @@ int main()
 		//draw to water refraction buffer object
 		water.bindRefractionFBO();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+
 		terrain.up = -1.0;
 		terrain.draw();
 
@@ -185,10 +193,18 @@ int main()
 		PostProcessing.draw();
 
 		///////////////
+
+		testComp.use();
+		testComp.setInt("frameIter", (frameIter++)/64 % 16);
+
+		bindTexture2D(testTexture, 0);
+		glDispatchCompute(1920 / 8, 1080 / 8, 1);
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
 		// Texture visualizer
 		Shader& fboVisualizerShader = fboVisualizer.getShader();
 		fboVisualizerShader.use();
-		fboVisualizerShader.setSampler2D("fboTex", 0, 0);
+		fboVisualizerShader.setSampler2D("fboTex", testTexture, 0);
 		//fboVisualizer.draw();
 		
 

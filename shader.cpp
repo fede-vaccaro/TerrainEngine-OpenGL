@@ -43,7 +43,7 @@
 		ID = glCreateProgram();
 	}
 
-	Shader::Shader(std::string name, const char * computeShaderPath)
+	Shader::Shader(std::string name, const char * computeShaderPath) : name(name)
 	{
 		linked = false;
 		isCompute = false;

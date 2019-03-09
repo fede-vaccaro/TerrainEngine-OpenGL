@@ -46,7 +46,7 @@ Tile::Tile(float scale, float dispFactor, int gl) : dispFactor(dispFactor), scal
 
 	this->I = glm::vec2(1, 0)*s;
 	this->J = glm::vec2(0, 1)*s;
-	res = 6;
+	res = 4;
 	initializePlaneVAO(res, tileW, &planeVAO, &planeVBO, &planeEBO);
 	//planeModel = new Model("resources/plane.obj", GL_PATCHES);
 	//waterModel = new Model("resources/plane.obj", GL_TRIANGLES);
@@ -195,9 +195,9 @@ bool Tile::inTile(Camera camera, glm::vec2 pos) {
 	float y = pos.y;
 
 	bool inX = false;
-	if ((camX < x + scaleFactor * tileW/2.0f) && (camX > x - scaleFactor * tileW/2.0f)) { inX = true; }
+	if ((camX <= x + scaleFactor * tileW/2.0f) && (camX >= x - scaleFactor * tileW/2.0f)) { inX = true; }
 	bool inY = false;
-	if ((camY < y + scaleFactor * tileW/2.0f) && (camY > y - scaleFactor * tileW/2.0f)) { inY = true; }
+	if ((camY <= y + scaleFactor * tileW/2.0f) && (camY >= y - scaleFactor * tileW/2.0f)) { inY = true; }
 
 	bool result = inX && inY;
 
@@ -234,20 +234,20 @@ void Tile::updateTiles() {
 		posN = posC + I,
 		posE = posC + J,
 		posW = posC - J,
-		posSE = posS + posE,
-		posSW = posS + posW,
-		posNE = posN + posE,
-		posNW = posN + posW;
+		posSE = posS + posE - posC,
+		posSW = posS + posW - posC,
+		posNE = posN + posE - posC,
+		posNW = posN + posW - posC;
 
 	//if (tile->inTile(s->cam, posC)) std::cout << "IN C" << std::endl;
 	if (inTile(se->cam, posS)) whichTile = S, howManyTiles++;// , std::cout << "IN S" << std::endl;
 	if (inTile(se->cam, posE)) whichTile = E, howManyTiles++;// , std::cout << "IN E" << std::endl;
 	if (inTile(se->cam, posW)) whichTile = W, howManyTiles++;// , std::cout << "IN W" << std::endl;
 	if (inTile(se->cam, posN)) whichTile = N, howManyTiles++;// , std::cout << "IN N" << std::endl;
-	//if (tile->inTile(s->cam, posNE)) whichTile = NE, howManyTiles++;
-	//if (tile->inTile(s->cam, posNW)) whichTile = NW, howManyTiles++;
-	//if (tile->inTile(s->cam, posSE)) whichTile = SE, howManyTiles++;
-	//if (tile->inTile(s->cam, posSW)) whichTile = SW, howManyTiles++;
+	if (inTile(se->cam, posNE)) whichTile = NE, howManyTiles++;
+	if (inTile(se->cam, posNW)) whichTile = NW, howManyTiles++;
+	if (inTile(se->cam, posSE)) whichTile = SE, howManyTiles++;
+	if (inTile(se->cam, posSW)) whichTile = SW, howManyTiles++;
 
 	for (int i = 0; i < positionVec.size(); i++) {
 		if (inTile(se->cam, positionVec[i])) {
