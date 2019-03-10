@@ -28,30 +28,16 @@ uniform mat4 inv_view;
 uniform mat4 inv_proj;
 
 uniform mat4 invViewProj;
-uniform mat4 oldFrameVP;
 
 uniform vec3 lightColor = vec3(1.0);
 uniform sampler3D cloud;
 uniform sampler3D worley32;
 uniform sampler2D weatherTex;
 uniform sampler2D depthMap;
-uniform sampler2D lastFrameAlphaness;
-uniform sampler2D lastFrameColor;
 uniform vec3 lightDirection;
 uniform float coverage_multiplier = 0.4;
-uniform int frameIter;
 
 uniform vec3 cameraPosition;
-
-const int MAX_MARCHING_STEPS = 255;
-const float MIN_DIST = 0.0;
-const float MAX_DIST = 100.0;
-const float EPSILON = 0.001;
-const float e = 2.71828182846;
-const float PI_r = 0.3183098;
-
-const vec4 cloud_bright = vec4(0.99, 0.96, 0.95, 1.0);
-const vec4 cloud_dark = vec4(0.671, 0.725, 0.753, 1.0);
 
 // Cone sampling random offsets
 uniform vec3 noiseKernel[6u] = vec3[] 
@@ -257,7 +243,6 @@ float sampleCloudDensity(vec3 p, bool expensive, float lod){
 	float base_cloud_with_coverage = remap(base_cloud , cloud_coverage , 1.0 , 0.0 , 1.0);
 	base_cloud_with_coverage *= cloud_coverage;
 
-
 	//bool expensive = true;
 	
 	if(expensive)
@@ -441,27 +426,6 @@ float computeFogAmount(in vec3 startPos, in float factor = 0.00006){
 	return (1.-exp( -dist*alpha*factor));
 }
 
-uniform int bayerMatrix9[9] = int[](
-    0, 7, 3,
-    6, 5, 2,
-    4, 1, 8
-);
-
-uniform int bayerMatrix16[16] = int[]
-(
-	0, 8, 2, 10,
-	12, 4, 14, 6,
-	3, 11, 1, 9,
-	15, 7, 13, 5
-);
-
-
-bool writePixel(ivec2 icoord){
-	int index = bayerMatrix16[frameIter];
-	//ivec2 icoord = ivec2(gl_GlobalInvocationID.xy);
-    return ((icoord.x + 4*icoord.y) % 16 == index);
-}
-
 #define HDR(col, exps) 1.0 - exp(-col * exps)
 
 void main()
@@ -476,15 +440,6 @@ void main()
 	ray_view = vec4(ray_view.xy, -1.0, 0.0);
 	vec3 worldDir = (inv_view * ray_view).xyz;
 	worldDir = normalize(worldDir);
-
-	//for picking previous frame color -- temporal projection
-	vec4 camToWorldPos = invViewProj*ray_clip;
-	camToWorldPos /= camToWorldPos.w;
-	vec4 pPrime = oldFrameVP*camToWorldPos;
-	pPrime /= pPrime.w;
-	vec2 prevFrameScreenPos = computeScreenPos(pPrime.xy); 
-	bool isOut = any(greaterThan(abs(prevFrameScreenPos - 0.5) , vec2(0.5)));
-
 
 	vec3 startPos, endPos;
 	vec4 v = vec4(0.0);
@@ -531,24 +486,9 @@ void main()
 		return;
 	}
 
-	//early exit -- search for low alphaness areas
-	float oldFrameAlphaness = 1.0;
+	v = marchToCloud(startPos,endPos, bg.rgb);
+	cloudColor_v = v;
 
-	if(!isOut){
-		oldFrameAlphaness = texture(lastFrameAlphaness, prevFrameScreenPos).r;
-	}
-	const bool enableOptimization = false;
-
-	if( !enableOptimization || (oldFrameAlphaness >= 0.0 || frameIter == 0) && (writePixel(fragCoord) || isOut)) // if the pixel must be drawn
-	{
-		v = marchToCloud(startPos,endPos, bg.rgb);
-		//cloudColor = v;
-		cloudColor_v = v;
-	}else{
-		v = texture(lastFrameColor, prevFrameScreenPos); // else do temporal reprojection
-		//cloudColor = v;
-		cloudColor_v = v;
-	}
 	float cloudAlphaness = threshold(v.a, 0.2);
 	v.rgb = v.rgb*1.8 - 0.1; // contrast-illumination tuning
 

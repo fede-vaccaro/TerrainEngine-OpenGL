@@ -6,12 +6,10 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 	//volumetricCloudsShader = new ScreenQuad("shaders/volumetric_clouds.frag");
 	volumetricCloudsShader = new Shader("volumetricCloudsShader","shaders/volumetric_clouds.comp");
 	ppShader = new ScreenQuad("shaders/clouds_post.frag");
-	copyShader = new ScreenQuad("shaders/copyFrame.frag");
 
 	//cloudsFBO = new FrameBufferObject(SW, SH, 4);
 	cloudsFBO = new TextureSet(SW, SH, 4);
 	cloudsPostProcessingFBO = new FrameBufferObject(Window::SCR_WIDTH, Window::SCR_HEIGHT, 2);
-	lastFrameCloudsFBO = new FrameBufferObject(SH, SH, 2);
 
 	postProcess = true;
 	this->coverage = 0.45;
@@ -96,19 +94,15 @@ void VolumetricClouds::draw() {
 	cloudsShader.setVec3("lightDirection", glm::normalize(s->lightPos - s->cam.Position));
 	cloudsShader.setVec3("lightColor", s->lightColor);
 	cloudsShader.setFloat("coverage_multiplier", coverage);
-	cloudsShader.setInt("frameIter", frameIter);
 	glm::mat4 vp = s->projMatrix*s->cam.GetViewMatrix();
 
 	cloudsShader.setMat4("invViewProj", glm::inverse(vp));
-	cloudsShader.setMat4("oldFrameVP", oldFrameVP);
 	cloudsShader.setMat4("gVP", vp);
 
 	cloudsShader.setSampler3D("cloud", this->perlinTex, 0);
 	cloudsShader.setSampler3D("worley32", this->worley32, 1);
 	cloudsShader.setSampler2D("weatherTex", this->weatherTex, 2);
 	cloudsShader.setSampler2D("depthMap", s->sceneFBO.depthTex, 3);
-	cloudsShader.setSampler2D("lastFrameAlphaness", lastFrameCloudsFBO->getColorAttachmentTex(0), 4);
-	cloudsShader.setSampler2D("lastFrameColor", lastFrameCloudsFBO->getColorAttachmentTex(1), 5);
 
 	//actual draw
 	//volumetricCloudsShader->draw();
@@ -128,7 +122,6 @@ void VolumetricClouds::draw() {
 		cloudsPPShader.setSampler2D("clouds", cloudsFBO->getColorAttachmentTex(0), 0);
 		cloudsPPShader.setSampler2D("emissions", cloudsFBO->getColorAttachmentTex(1), 1);
 		cloudsPPShader.setSampler2D("depthMap", s->sceneFBO.depthTex, 2);
-		cloudsPPShader.setSampler2D("lastFrame", lastFrameCloudsFBO->tex, 3);
 
 		cloudsPPShader.setVec2("cloudRenderResolution", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
 		cloudsPPShader.setVec2("resolution", glm::vec2(Window::SCR_WIDTH , Window::SCR_HEIGHT));
@@ -155,20 +148,6 @@ void VolumetricClouds::draw() {
 		cloudsPPShader.setFloat("time", glfwGetTime());
 		ppShader->draw();
 	}
-
-	//Copy last frame (blit doesn't worked to me)
-	lastFrameCloudsFBO->bind();
-	Shader& copy = copyShader->getShader();
-	copy.use();
-	copy.setSampler2D("colorTex", cloudsFBO->getColorAttachmentTex(3), 0);
-	copy.setSampler2D("alphanessTex", cloudsFBO->getColorAttachmentTex(2), 1);
-	copyShader->draw();
-
-	//copy last VP matrix
-	oldFrameVP = vp;
-
-	//increment frame counter mod 16, for temporal reprojection
-	frameIter = (frameIter + 1)%16;
 }
 
 

@@ -7,7 +7,6 @@ in vec2 TexCoords;
 uniform sampler2D clouds;
 uniform sampler2D emissions;
 uniform sampler2D depthMap;
-uniform sampler2D lastFrame;
 
 uniform float time;
 uniform vec4 lightPos;

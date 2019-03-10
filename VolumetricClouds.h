@@ -43,13 +43,10 @@ private:
 	float coverage;
 	Shader * volumetricCloudsShader;
 	ScreenQuad * ppShader, * copyShader;
-	int frameIter = 0;
 	bool postProcess;
 	TextureSet * cloudsFBO;
-	FrameBufferObject *cloudsPostProcessingFBO, * lastFrameCloudsFBO;
+	FrameBufferObject *cloudsPostProcessingFBO;
 
 	unsigned int perlinTex, worley32, weatherTex;
-
-	glm::mat4 oldFrameVP;
 };
 
