@@ -378,7 +378,7 @@ void main()
 	// putting all together
     vec4 color = heightColor*vec4((ambient + specular*0 + diffuse)*vec3(1.0f) , 1.0f);
 	if(drawFog){
-		FragColor = mix(color, vec4(mix(fogColor*1.1,fogColor*0.85,clamp(WorldPos.y/1500.,0.0,1.0)), 1.0f), fogFactor);
+		FragColor = mix(color, vec4(mix(fogColor*1.1,fogColor*0.85,clamp(WorldPos.y/(1500.*16.)*gDispFactor,0.0,1.0)), 1.0f), fogFactor);
 		FragColor.a = WorldPos.y/waterHeight;
 	}else{
 		FragColor = color;

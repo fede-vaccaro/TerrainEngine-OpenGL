@@ -7,12 +7,7 @@
 // Reinder https://www.shadertoy.com/user/reinder 
 // Thanks to Rikard Olajos https://github.com/rikardolajos/clouds
 // Thanks to Clay John https://github.com/clayjohn/realtime_clouds
-/*
-layout (location = 0) out vec4 fragColor;
-layout (location = 1) out vec4 bloom;
-layout (location = 2) out vec4 alphaness;
-layout (location = 3) out vec4 cloudColor;
-*/
+
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
 layout(rgba32f, binding = 0) uniform image2D fragColor;
@@ -35,9 +30,18 @@ uniform sampler3D worley32;
 uniform sampler2D weatherTex;
 uniform sampler2D depthMap;
 uniform vec3 lightDirection;
+
 uniform float coverage_multiplier = 0.4;
+uniform float cloudSpeed;
+uniform float crispiness = 0.4;
 
 uniform vec3 cameraPosition;
+
+uniform vec3 cloudColorTop = (vec3(169., 149., 149.)*(1.5/255.));
+uniform vec3 cloudColorBottom =  (vec3(65., 70., 80.)*(1.5/255.));
+
+#define CLOUDS_AMBIENT_COLOR_TOP cloudColorTop
+#define CLOUDS_AMBIENT_COLOR_BOTTOM cloudColorBottom
 
 // Cone sampling random offsets
 uniform vec3 noiseKernel[6u] = vec3[] 
@@ -61,8 +65,7 @@ uniform vec3 noiseKernel[6u] = vec3[]
 #define SPHERE_OUTER_RADIUS (SPHERE_INNER_RADIUS + 17000.0)
 #define SPHERE_DELTA float(SPHERE_OUTER_RADIUS - SPHERE_INNER_RADIUS)
 
-#define CLOUDS_AMBIENT_COLOR_TOP (vec3(169., 149., 149.)*(1.5/255.))
-#define CLOUDS_AMBIENT_COLOR_BOTTOM (vec3(65., 70., 80.)*(1.5/255.))
+
 #define CLOUDS_MIN_TRANSMITTANCE 1e-1
 #define CLOUDS_TRANSMITTANCE_THRESHOLD 1.0 - CLOUDS_MIN_TRANSMITTANCE
 
@@ -114,6 +117,28 @@ void swap(in float a, in float b){
 	b = c;
 }
 
+bool raySphereintersectionSkyMap(vec3 rd, float radius, out vec3 startPos){
+	
+	float t;
+
+	vec3 sphereCenter_ = vec3(0.0);
+
+	float radius2 = radius*radius;
+
+	vec3 L = - sphereCenter_;
+	float a = dot(rd, rd);
+	float b = 2.0 * dot(rd, L);
+	float c = dot(L,L) - radius2;
+
+	float discr = b*b - 4.0 * a * c;
+	t = max(0.0, (-b + sqrt(discr))/2);
+
+	startPos = rd*t;
+
+	return true;
+}
+
+
 bool raySphereintersection(vec3 ro, vec3 rd, float radius, out vec3 startPos){
 	
 	float t;
@@ -162,13 +187,16 @@ bool raySphereintersection2(vec3 ro, vec3 rd, float radius, out vec3 startPos){
 	return true;
 }
 
-vec4 colorCubeMap(vec3 endPos, vec3 d)
+uniform vec3 skyColorBottom;
+uniform vec3 skyColorTop;
+
+vec4 colorCubeMap(vec3 endPos, const vec3 d)
 {
     // background sky     
-	vec3 col = vec3(0.6,0.71,0.85) - endPos.y*0.2*vec3(1.0,0.5,1.0) + 0.15*0.5;
-	//vec3 col = mix(vec3(0.6,0.71,0.9)*1.2, vec3(0.5,0.60,0.75)*1.2, pow(endPos.y + 0.5,0.5));
+	//vec3 col = vec3(0.6,0.71,0.85) - endPos.y*0.2*vec3(1.0,0.5,1.0) + 0.15*0.5;
+	vec3 col = mix(skyColorBottom, skyColorTop, pow(clamp(endPos.y + 0.5,0.0,1.0),1.));
 	float sun = clamp( dot(SUN_DIR,d), 0.0, 1.0 );
-	col += 0.8*vec3(1.0,.6,0.1)*pow( sun, 256.0 );
+	col += 0.8*vec3(1.0,.6,0.1)*pow( sun, 350.0 );
 
 	return vec4(col, 1.0);
 }
@@ -216,8 +244,8 @@ vec2 getUVProjection(vec3 p){
 
 #define CLOUD_TOP_OFFSET 750.0
 #define SATURATE(x) clamp(x, 0.0, 1.0)
-#define CLOUD_SCALE 40.0
-#define CLOUD_SPEED 300.0
+#define CLOUD_SCALE crispiness
+#define CLOUD_SPEED cloudSpeed
 
 float sampleCloudDensity(vec3 p, bool expensive, float lod){
 
@@ -380,7 +408,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
 		if(density_sample > 0.)
 		{
 			float height = getHeightFraction(pos);
-			vec3 ambientLight = mix( CLOUDS_AMBIENT_COLOR_BOTTOM, CLOUDS_AMBIENT_COLOR_TOP, 0. );
+			vec3 ambientLight = CLOUDS_AMBIENT_COLOR_BOTTOM; //mix( CLOUDS_AMBIENT_COLOR_BOTTOM, CLOUDS_AMBIENT_COLOR_TOP, height );
 			float light_density = raymarchToLight(pos, ds*0.1, SUN_DIR, density_sample, lightDotEye);
 			float scattering = mix(HG(lightDotEye, -0.08), HG(lightDotEye, 0.08), clamp(lightDotEye*0.5 + 0.5, 0.0, 1.0));
 			//scattering = 0.6;
@@ -446,9 +474,12 @@ void main()
 
 	//compute background color
 	vec3 stub, cubeMapEndPos;
-	intersectCubeMap(vec3(0.0, 0.0, 0.0), worldDir, stub, cubeMapEndPos);
+	//intersectCubeMap(vec3(0.0, 0.0, 0.0), worldDir, stub, cubeMapEndPos);
+	bool hit = raySphereintersectionSkyMap(worldDir, 0.5, cubeMapEndPos);
+
 	vec4 bg = colorCubeMap(cubeMapEndPos, worldDir);
 	vec3 red = vec3(1.0);
+
 	bg = mix( mix(red.rgbr, vec4(1.0), SUN_DIR.y), bg, pow( max(cubeMapEndPos.y+0.1, .0), 0.2));
 	//vec4 bg = vec4( TonemapACES(preetham(worldDir)), 1.0);
 	int case_ = 0;

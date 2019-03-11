@@ -36,6 +36,11 @@
 #include <vector>
 #include <functional>
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include "Main.h"
+
 const int MAX_FPS = 144;
 
 float t1 = 0.0, t2 = 0.0, frameTime = 0.0; // time variables
@@ -50,6 +55,14 @@ int main()
 	int success;
 	Window window(success, 1920, 1080);
 	if (!success) return -1;
+
+	// GUI
+	ImGui::CreateContext();
+	//ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGlfw_InitForOpenGL(window.getWindow(), true);
+	ImGui_ImplOpenGL3_Init("#version 130");
 
 	window.camera = &camera;
 
@@ -89,12 +102,18 @@ int main()
 	unsigned int testTexture = Texture2D(1920, 1080);
 	Shader testComp("TEST", "shaders/testComputeShaderA.comp");
 	int frameIter = 0;
+
+	glm::vec3 clearTopCloudColor = *volumetricClouds.getCloudColorTopPtr();
+	glm::vec3 clearBottomCloudColor = *volumetricClouds.getCloudColorBottomPtr();
+	glm::vec3 lightDir = glm::vec3(-.5, .4, 1.0);
+
+
 	while (window.continueLoop())
 	{
 
 		t1 = glfwGetTime();
-
-		scene.lightPos = glm::vec3(-.5, .4, 1.0)*1e9f + camera.Position;
+		lightDir = glm::normalize(lightDir);
+		scene.lightPos = lightDir*1e9f + camera.Position;
 		// input
 		window.processInput(frameTime);
 
@@ -113,7 +132,10 @@ int main()
 		glClearColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
 		// toggle/untoggle wireframe mode
 		if (window.isWireframeActive()) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -207,6 +229,29 @@ int main()
 		fboVisualizerShader.setSampler2D("fboTex", testTexture, 0);
 		//fboVisualizer.draw();
 		
+		{
+			static int counter = 0;
+
+			ImGui::Begin("Scene controls: ");                          
+			volumetricClouds.setGui();
+			terrain.setGui();
+			ImGui::TextColored(ImVec4(1, 1, 0, 1), "Other controls");
+			ImGui::DragFloat3("Light Position", &lightDir[0], 0.03, -1.0, 1.0);
+			ImGui::ColorEdit3("Light color", (float*)&lightColor); 
+			ImGui::ColorEdit3("Fog color", (float*)&fogColor);
+
+			if (ImGui::Button("Button"))                            
+				counter++;
+			ImGui::SameLine();
+			ImGui::Text("counter = %d", counter);
+
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
+		}
+
+		//gui
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		window.swapBuffersAndPollEvents();
@@ -223,6 +268,10 @@ int main()
 
 	}
 
+	//
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 	// close glfw
 	window.terminate();
 }

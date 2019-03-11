@@ -1,6 +1,7 @@
 #include "Tile.h"
 #include "sceneElements.h"
 #include <GLFW/glfw3.h>
+#include "imgui/imgui.h"
 
 bool Tile::drawFog = true;
 
@@ -142,6 +143,25 @@ void Tile::draw(){
 
 	glDisable(GL_CLIP_DISTANCE0);
 	up = 0.0;
+}
+
+void Tile::setGui()
+{
+	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Terrain Controls");
+	//ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+	//ImGui::Checkbox("Clouds PostProc + God Rays", this->getPostProcPointer());
+	ImGui::SliderInt("Octaves", &octaves, 1, 20);
+	ImGui::SliderFloat("Frequency",&frequency, 0.0f, 0.05f);
+	ImGui::SliderFloat("Displacement factor", &dispFactor, 0.0f, 32.f);
+	ImGui::SliderFloat("Grass coverage", &grassCoverage, 0.0f, 1.f);
+	ImGui::SliderFloat("Tessellation multiplier", &tessMultiplier, 0.1f, 5.f);
+
+	//glm::vec3 * cloudBottomColor = this->getCloudColorBottomPtr();
+	//ImGui::ColorEdit3("Cloud color", (float*)cloudBottomColor); // Edit 3 floats representing a color
+
+	//ImGui::TextColored(ImVec4(1, 1, 0, 1), "Sky controls");
+	//ImGui::ColorEdit3("Sky top color", (float*)this->getSkyTopColorPtr()); // Edit 3 floats representing a color
+	//ImGui::ColorEdit3("Sky bottom color", (float*)this->getSkyBottomColorPtr()); // Edit 3 floats representing a color
 }
 
 void Tile::drawVertices(int nInstances) {

@@ -10,6 +10,7 @@ bool Window::firstMouse = true;
 float Window::lastX = SCR_WIDTH / 2.0f;
 float Window::lastY = SCR_HEIGHT / 2.0f;
 
+bool Window::mouseCursorDisabled = true;
 
 Window::Window(int& success, unsigned int scrW, unsigned int scrH, std::string name) : name(name)
 {
@@ -24,9 +25,6 @@ Window::Window(int& success, unsigned int scrW, unsigned int scrH, std::string n
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	//glfwWindowHint(GLFW_DOUBLEBUFFER, GL_FALSE);
-
-
-
 
 	// glfw window creation										 
 	this->w = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, name.c_str(), NULL, NULL);
@@ -43,6 +41,8 @@ Window::Window(int& success, unsigned int scrW, unsigned int scrH, std::string n
 	glfwSetScrollCallback(this->w, &Window::scroll_callback);
 
 	Window::camera = 0;
+	oldState = newState = GLFW_RELEASE;
+	
 	/*
 	for (int i = 0; i < 10; i++) {
 		Window::keyBools[i] = false;
@@ -62,7 +62,7 @@ Window::Window(int& success, unsigned int scrW, unsigned int scrH, std::string n
 int Window::inMain() {
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(this->w, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(this->w, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
@@ -90,8 +90,8 @@ void Window::mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 	lastX = xpos;
 	lastY = ypos;
-
-	Window::camera->ProcessMouseMovement(xoffset, yoffset);
+	if(!mouseCursorDisabled)
+		Window::camera->ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
@@ -118,7 +118,20 @@ void Window::processInput(float frameTime) {
 		camera->ProcessKeyboard(LEFT, frameTime);
 	if (glfwGetKey(this->w, GLFW_KEY_D) == GLFW_PRESS)
 		camera->ProcessKeyboard(RIGHT, frameTime);
+	
+	newState = glfwGetMouseButton(this->w, GLFW_MOUSE_BUTTON_RIGHT);
 
+	if (newState == GLFW_RELEASE && oldState == GLFW_PRESS) {
+		glfwSetInputMode(this->w, GLFW_CURSOR, (mouseCursorDisabled
+		? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL));
+		mouseCursorDisabled = !mouseCursorDisabled;
+		if (mouseCursorDisabled)
+			firstMouse = true;
+		std::cout << "MOUSE R PRESSED!" << std::endl;
+	}
+
+	oldState = newState;
+	
 	// WIREFRAME
 	if (glfwGetKey(this->w, GLFW_KEY_T) == GLFW_PRESS) {
 		if (keyBools[4] == false) {

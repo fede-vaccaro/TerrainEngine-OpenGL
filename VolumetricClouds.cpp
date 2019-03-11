@@ -1,6 +1,16 @@
 #include "VolumetricClouds.h"
+#include "imgui/imgui.h"
 
 #define INT_CEIL(n,d) (int)ceil((float)n/d)
+
+float VolumetricClouds::cloudSpeed = 300.0;
+float VolumetricClouds::coverage = 0.45;
+float VolumetricClouds::crispiness = 40.;
+glm::vec3 VolumetricClouds::cloudColorTop = (glm::vec3(169., 149., 149.)*(1.5f / 255.f));
+glm::vec3 VolumetricClouds::cloudColorBottom = (glm::vec3(65., 70., 80.)*(1.5f / 255.f));
+
+glm::vec3 VolumetricClouds::skyColorTop = glm::vec3(0.6, 0.8, 0.9)*1.05f;
+glm::vec3 VolumetricClouds::skyColorBottom = glm::vec3(0.5, 0.7, 0.8)*1.05f;
 
 VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH) {
 	//volumetricCloudsShader = new ScreenQuad("shaders/volumetric_clouds.frag");
@@ -12,7 +22,6 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 	cloudsPostProcessingFBO = new FrameBufferObject(Window::SCR_WIDTH, Window::SCR_HEIGHT, 2);
 
 	postProcess = true;
-	this->coverage = 0.45;
 
 	/////////////////// TEXTURE GENERATION //////////////////
 
@@ -70,6 +79,21 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 }
 #define TIMETO(CODE, TASK) 	t1 = glfwGetTime(); CODE; t2 = glfwGetTime(); std::cout << "Time to " + std::string(TASK) + " :" << (t2 - t1)*1e3 << "ms" << std::endl;
 
+void VolumetricClouds::setGui() {
+	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Clouds Controls");
+	//ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+	ImGui::Checkbox("Clouds PostProc + God Rays", this->getPostProcPointer());
+	ImGui::SliderFloat("Clouds coverage", this->getCoveragePointer(), 0.0f, 1.0f);
+	ImGui::SliderFloat("Clouds speed", this->getCloudSpeedPtr(), 0.0f, 5.0E3);
+	ImGui::SliderFloat("Cloud crispiness", this->getCloudCrispinessPtr(), 0.0f, 100.0f);
+
+	glm::vec3 * cloudBottomColor = this->getCloudColorBottomPtr();
+	ImGui::ColorEdit3("Cloud color", (float*)cloudBottomColor); // Edit 3 floats representing a color
+
+	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Sky controls");
+	ImGui::ColorEdit3("Sky top color", (float*)this->getSkyTopColorPtr()); // Edit 3 floats representing a color
+	ImGui::ColorEdit3("Sky bottom color", (float*)this->getSkyBottomColorPtr()); // Edit 3 floats representing a color
+}
 
 void VolumetricClouds::draw() {
 
@@ -93,9 +117,18 @@ void VolumetricClouds::draw() {
 	cloudsShader.setFloat("FOV", s->cam.Zoom);
 	cloudsShader.setVec3("lightDirection", glm::normalize(s->lightPos - s->cam.Position));
 	cloudsShader.setVec3("lightColor", s->lightColor);
+	
 	cloudsShader.setFloat("coverage_multiplier", coverage);
-	glm::mat4 vp = s->projMatrix*s->cam.GetViewMatrix();
+	cloudsShader.setFloat("cloudSpeed", cloudSpeed);
+	cloudsShader.setFloat("crispiness", crispiness);
 
+	cloudsShader.setVec3("cloudColorTop", cloudColorTop);
+	cloudsShader.setVec3("cloudColorBottom", cloudColorBottom);
+	
+	cloudsShader.setVec3("skyColorTop", skyColorTop);
+	cloudsShader.setVec3("skyColorBottom", skyColorBottom);
+
+	glm::mat4 vp = s->projMatrix*s->cam.GetViewMatrix();
 	cloudsShader.setMat4("invViewProj", glm::inverse(vp));
 	cloudsShader.setMat4("gVP", vp);
 

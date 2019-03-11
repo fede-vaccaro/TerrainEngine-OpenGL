@@ -21,6 +21,8 @@ public:
 	virtual ~Tile();
 	//void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up, std::vector<glm::vec2> & pos);
 	virtual void draw();
+	virtual void setGui();
+
 	void updateTiles();
 	
 	void setPositionsUniforms(std::vector<glm::vec2> & pos);

@@ -15,7 +15,10 @@ class VolumetricClouds : public drawableObject
 public:
 	VolumetricClouds(int SW, int SH);
 	virtual void draw();
+	virtual void setGui();
 	~VolumetricClouds();
+
+
 
 	unsigned int getCloudsTexture() { 
 		return (postProcess ? cloudsPostProcessingFBO->getColorAttachmentTex(0) : getCloudsRawTexture());
@@ -29,21 +32,57 @@ public:
 		return coverage;
 	}
 
+	float * getCoveragePointer() {
+		return &coverage;
+	}
+	bool * getPostProcPointer() {
+		return &postProcess;
+	}
+
 	void setCoverage(float c) {
 		if (c >= 0.0 && c <= 1.0) {
 			coverage = c;
 		}
 	}
 
+	float * getCloudSpeedPtr() {
+		return &cloudSpeed;
+	}
+
+	glm::vec3 * getCloudColorTopPtr() {
+		return &cloudColorTop;
+	}
+
+	glm::vec3 * getCloudColorBottomPtr() {
+		return &cloudColorBottom;
+	}
+
+	glm::vec3 * getSkyTopColorPtr() {
+		return &skyColorTop;
+	}
+
+	glm::vec3 * getSkyBottomColorPtr() {
+		return &skyColorBottom;
+	}
+
+	float * getCloudCrispinessPtr() {
+		return &crispiness;
+	}
+
 	void setPostProcess(bool v) { postProcess = v; }
 	bool getPostProcess() { return postProcess; }
 
+
 private:
 	int SCR_WIDTH, SCR_HEIGHT;
-	float coverage;
+	static float coverage, cloudSpeed, crispiness;
+	static glm::vec3 cloudColorTop, cloudColorBottom;
+	static glm::vec3 skyColorTop, skyColorBottom;
+	
+	bool postProcess;
+	
 	Shader * volumetricCloudsShader;
 	ScreenQuad * ppShader, * copyShader;
-	bool postProcess;
 	TextureSet * cloudsFBO;
 	FrameBufferObject *cloudsPostProcessingFBO;
 

@@ -14,7 +14,8 @@ public:
 	Window(int& success, unsigned int SCR_WIDTH = 1600, unsigned int SCR_HEIGHT = 900, std::string name = "TerrainEngine OpenGL");
 	~Window();
 	GLFWwindow * w;
-	
+	GLFWwindow * getWindow() const { return w; }
+
 	void processInput(float frameTime); //input handler
 
 	// screen settings
@@ -43,6 +44,7 @@ public:
 	static Camera * camera;
 
 private:
+	int oldState, newState;
 	int inMain(); // set mouse input and load opengl functions 
 
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -51,6 +53,8 @@ private:
 
 	// avoid infinite key press
 	static bool keyBools[10];
+
+	static bool mouseCursorDisabled;
 
 	// wireframe mode
 	static bool wireframe;
