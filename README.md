@@ -1,14 +1,12 @@
 ## Procedural Scene in OpenGL 4 ##
 *A little OpenGL application which renders an (almost) procedural scene, featuring a terrain with distance adaptive LOD, water surface simulation and volumetric clouds.*
 
-**depandancies needed:**
-* GLFW 
-* Assimp
-* OpenGL 4
+**dependancies needed:**
+* GLFW (compiled library in the files)
+* imgui (also in the files, which is the lovely framework from which the GUI is made!)
 * *An OpenGL 4 ready graphics card!*
 
-*Include/* directory has been already uploaded.
-Put freetype.dll, assimp-vc140-mt.dll resources/ and shaders/ in .exe folder.
+*Include/* and *Libraries/* directory has been already uploaded.
 
 ![Demonstrative image](/resources/pic.jpg)
 ![Another demonstrative image](/resources/pic2.jpg)

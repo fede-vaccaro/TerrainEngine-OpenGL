@@ -178,9 +178,6 @@
     <ClCompile Include="drawableObject.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="glError.cpp" />
-    <ClCompile Include="imgui\example_glfw_opengl3\main.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
