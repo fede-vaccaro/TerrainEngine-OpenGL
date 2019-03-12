@@ -12,6 +12,7 @@ uniform vec3 u_LightPosition;
 uniform vec3 gEyeWorldPos;
 uniform vec3 u_ViewPosition;
 uniform vec3 fogColor;
+uniform vec3 seed;
 uniform vec2 offset;
 uniform int octaves;
 uniform bool drawFog;
@@ -48,7 +49,7 @@ const int primes[30] = int[30](995615039, 600173719, 701464987,
 
 float Random2D(in vec2 st)
 {
-	return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+	return fract(sin(dot(st.xy, vec2(12.9898, 78.233) + seed.xy)) * 43758.5453123);
 }
 
 float Interpolate(float a, float b, float x) {  // cosine interpolation

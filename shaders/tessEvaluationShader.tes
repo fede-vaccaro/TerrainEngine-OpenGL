@@ -9,7 +9,8 @@ uniform float gDispFactor;
 uniform float freq;
 uniform int octaves;
 
-uniform vec3 gEyeWorldPos;                                                                      
+uniform vec3 gEyeWorldPos;  
+uniform vec3 seed;
 uniform vec4 clipPlane;
 					   
 in vec3 WorldPos_ES_in[];                                                                       
@@ -59,7 +60,7 @@ vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2)
 
 float Random2D(in vec2 st)
 {
-	return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+	return fract(sin(dot(st.xy, vec2(12.9898, 78.233) + seed.xy)) * 43758.5453123);
 }
 
 float Interpolate(float a, float b, float x) {  // cosine interpolation

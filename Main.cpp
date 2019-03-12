@@ -19,8 +19,6 @@
 #include <stb_image.h>
 //#include <model.h>
 
-#include "TextArea.h"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -30,16 +28,26 @@
 #include "drawableObject.h"
 
 #include <map>
-#include <stdlib.h>
 #include <iostream>
-#include <stdlib.h>
 #include <vector>
 #include <functional>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
-#include "Main.h"
+
+glm::vec3 genRandomVec3() {
+	std::random_device rd;  //Will be used to obtain a seed for the random number engine
+	std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+	std::uniform_real_distribution<> dis(.0, 100.);
+
+	float x, y, z;
+	x = dis(gen);
+	y = dis(gen);
+	z = dis(gen);
+
+	return glm::vec3(x, y, z);
+}
 
 const int MAX_FPS = 144;
 
@@ -53,12 +61,11 @@ int main()
 	Camera camera(startPosition);
 
 	int success;
-	Window window(success, 1920, 1080);
+	Window window(success, 1600, 900);
 	if (!success) return -1;
 
 	// GUI
 	ImGui::CreateContext();
-	//ImGuiIO& io = ImGui::GetIO(); (void)io;
 	ImGui::StyleColorsDark();
 
 	ImGui_ImplGlfw_InitForOpenGL(window.getWindow(), true);
@@ -72,12 +79,22 @@ int main()
 	glm::vec3 lightColor(255, 255, 230);
 	lightColor /= 255.0;
 
+	FrameBufferObject SceneFBO(Window::SCR_WIDTH, Window::SCR_HEIGHT);
+	glm::vec3 lightPosition, seed;
+	glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 5.f, 10000000.0f);
+
+	seed = genRandomVec3();
+	//Every scene object need this information to be rendered
+	sceneElements scene(lightPosition, lightColor, fogColor, seed, proj, camera, SceneFBO);
+
+	drawableObject::scene = &scene;
+
 	float scale = 100.0f,  dispFactor = 16.0;
 	//TileController tc(scale, dispFactor, 51);
 	int gl = 120;
 	Tile terrain(scale, dispFactor, gl);
 	Skybox skybox; //unused
-	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT);
+	VolumetricClouds volumetricClouds(1280, 720);
 	VolumetricClouds reflectionVolumetricClouds(1280, 720); //a different object is needed because it has a state-dependent draw method
 	reflectionVolumetricClouds.setPostProcess(false);
 
@@ -87,20 +104,8 @@ int main()
 	std::cout << "============ OPENING POST PROCESSING SHADER ============" << std::endl; // its purpose is to merge different framebuffer and add some postproc if needed
 	ScreenQuad PostProcessing("shaders/post_processing.frag");
 
-	FrameBufferObject SceneFBO(Window::SCR_WIDTH, Window::SCR_HEIGHT);
-	glm::vec3 lightPosition;
-	glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 5.f, 10000000.0f);
-
-	//Every scene object need this information to be rendered
-	sceneElements scene(lightPosition, lightColor, fogColor, proj, camera, SceneFBO);
-
-	drawableObject::scene = &scene;
-
 	ScreenQuad fboVisualizer("shaders/visualizeFbo.frag");
 
-
-	unsigned int testTexture = Texture2D(1920, 1080);
-	Shader testComp("TEST", "shaders/testComputeShaderA.comp");
 	int frameIter = 0;
 
 	glm::vec3 clearTopCloudColor = *volumetricClouds.getCloudColorTopPtr();
@@ -214,19 +219,12 @@ int main()
 		post.setSampler2D("depthTex", SceneFBO.depthTex, 2);
 		PostProcessing.draw();
 
-		///////////////
 
-		testComp.use();
-		testComp.setInt("frameIter", (frameIter++)/64 % 16);
-
-		bindTexture2D(testTexture, 0);
-		glDispatchCompute(1920 / 8, 1080 / 8, 1);
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 		// Texture visualizer
 		Shader& fboVisualizerShader = fboVisualizer.getShader();
 		fboVisualizerShader.use();
-		fboVisualizerShader.setSampler2D("fboTex", testTexture, 0);
+		fboVisualizerShader.setSampler2D("fboTex", 0, 0);
 		//fboVisualizer.draw();
 		
 		{

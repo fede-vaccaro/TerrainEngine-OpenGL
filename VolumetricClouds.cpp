@@ -71,6 +71,7 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 
 	//compute
 	weather.use();
+	weather.setVec3("seed", scene->seed);
 	std::cout << "computing weather!" << std::endl;
 	glDispatchCompute(INT_CEIL(1024, 8), INT_CEIL(1024, 8),1);
 	std::cout << "weather computed!!" << std::endl;

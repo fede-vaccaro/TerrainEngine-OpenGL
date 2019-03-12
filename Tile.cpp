@@ -103,6 +103,7 @@ void Tile::draw(){
 	shad->setVec3("u_LightPosition", se->lightPos);
 	shad->setVec3("u_ViewPosition", se->cam.Position);
 	shad->setVec3("fogColor", se->fogColor);
+	shad->setVec3("seed", se->seed);
 	//shad->setFloat("tessLevel", 0.0f);
 	shad->setInt("octaves", octaves);
 	shad->setFloat("freq", frequency);
