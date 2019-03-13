@@ -61,7 +61,7 @@ int main()
 	Camera camera(startPosition);
 
 	int success;
-	Window window(success, 1600, 900);
+	Window window(success, 2560*0.9, 1440*0.9);
 	if (!success) return -1;
 
 	// GUI
@@ -94,13 +94,13 @@ int main()
 	int gl = 120;
 	Tile terrain(scale, dispFactor, gl);
 	Skybox skybox; //unused
-	VolumetricClouds volumetricClouds(1280, 720);
+	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT);
 	VolumetricClouds reflectionVolumetricClouds(1280, 720); //a different object is needed because it has a state-dependent draw method
 	reflectionVolumetricClouds.setPostProcess(false);
 
-	float waterHeight = 128.0 + 50.0;
+	float waterHeight = 100.;
 	Water water(glm::vec2(0.0, 0.0), scale*gl, waterHeight);
-
+	terrain.waterPtr = &water;
 	std::cout << "============ OPENING POST PROCESSING SHADER ============" << std::endl; // its purpose is to merge different framebuffer and add some postproc if needed
 	ScreenQuad PostProcessing("shaders/post_processing.frag");
 
@@ -112,6 +112,7 @@ int main()
 	glm::vec3 clearBottomCloudColor = *volumetricClouds.getCloudColorBottomPtr();
 	glm::vec3 lightDir = glm::vec3(-.5, .4, 1.0);
 
+	bool useSeed = true;
 
 	while (window.continueLoop())
 	{
@@ -142,7 +143,7 @@ int main()
 		ImGui::NewFrame();
 
 		// toggle/untoggle wireframe mode
-		if (window.isWireframeActive()) {
+		if (scene.wireframe) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			Tile::drawFog = false;
 		}
@@ -164,7 +165,7 @@ int main()
 		glCullFace(GL_BACK);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		scene.cam.invertPitch();
-		scene.cam.Position.y -= 2 * (scene.cam.Position.y - waterHeight);
+		scene.cam.Position.y -= 2 * (scene.cam.Position.y - water.getHeight());
 		
 		terrain.up = 1.0;
 		terrain.draw();
@@ -187,7 +188,7 @@ int main()
 		ScreenQuad::enableTests();
 		
 		scene.cam.invertPitch();
-		scene.cam.Position.y += 2 * abs(scene.cam.Position.y - waterHeight);
+		scene.cam.Position.y += 2 * abs(scene.cam.Position.y - water.getHeight());
 		
 		//draw to water refraction buffer object
 		water.bindRefractionFBO();
@@ -212,11 +213,19 @@ int main()
 		// blend volumetric clouds rendering with terrain and apply some post process
 		unbindCurrentFrameBuffer(); // on-screen drawing
 		//Shader& post = PostProcessing.getShader();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 		post.use();
 		post.setVec2("resolution", glm::vec2(Window::SCR_WIDTH, Window::SCR_HEIGHT));
+		post.setVec3("cameraPosition", scene.cam.Position);
 		post.setSampler2D("screenTexture", SceneFBO.tex, 0);
 		post.setSampler2D("cloudTEX", volumetricClouds.getCloudsTexture(), 1);
 		post.setSampler2D("depthTex", SceneFBO.depthTex, 2);
+		post.setSampler2D("cloudDistance", volumetricClouds.getCloudsTexture(3), 3);
+
+		post.setBool("wireframe", scene.wireframe);
+
+		post.setMat4("VP", scene.projMatrix * view);
 		PostProcessing.draw();
 
 
@@ -231,17 +240,25 @@ int main()
 			static int counter = 0;
 
 			ImGui::Begin("Scene controls: ");                          
+			
 			volumetricClouds.setGui();
 			terrain.setGui();
+			water.setGui();
+
 			ImGui::TextColored(ImVec4(1, 1, 0, 1), "Other controls");
 			ImGui::DragFloat3("Light Position", &lightDir[0], 0.03, -1.0, 1.0);
 			ImGui::ColorEdit3("Light color", (float*)&lightColor); 
 			ImGui::ColorEdit3("Fog color", (float*)&fogColor);
 
-			if (ImGui::Button("Button"))                            
-				counter++;
+			ImGui::Checkbox("Wireframe mode", &scene.wireframe);
+
+			if (ImGui::Button("Generate"))
+				scene.seed = genRandomVec3();
 			ImGui::SameLine();
-			ImGui::Text("counter = %d", counter);
+			ImGui::Text("Generate a new seed");
+
+			if (ImGui::Button("Use default seed"))
+				scene.seed = glm::vec3(0.0, 0.0, 0.0);
 
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();

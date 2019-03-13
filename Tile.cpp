@@ -27,7 +27,9 @@ Tile::Tile(float scale, float dispFactor, int gl) : dispFactor(dispFactor), scal
 	octaves = 10;
 	frequency = 0.025;
 	grassCoverage = 0.73;
-	tessMultiplier = 2.0;
+	tessMultiplier = 1.0;
+
+	fogFalloff = 3.;
 
 	posBuffer = 0;
 
@@ -38,8 +40,6 @@ Tile::Tile(float scale, float dispFactor, int gl) : dispFactor(dispFactor), scal
 	shad->attachShader("shaders/tessEvaluationShader.tes");
 	shad->attachShader("shaders/tessFragmentShader.frag");
 	shad->linkPrograms();
-	std::cout << "============= TSHADER CREATED ==============" << std::endl;
-
 
 	this->gridLength = gl + (gl + 1) % 2; //ensure gridLength is odd
 
@@ -47,7 +47,7 @@ Tile::Tile(float scale, float dispFactor, int gl) : dispFactor(dispFactor), scal
 
 	this->I = glm::vec2(1, 0)*s;
 	this->J = glm::vec2(0, 1)*s;
-	res = 4;
+	res = 5;
 	initializePlaneVAO(res, tileW, &planeVAO, &planeVBO, &planeEBO);
 	//planeModel = new Model("resources/plane.obj", GL_PATCHES);
 	//waterModel = new Model("resources/plane.obj", GL_TRIANGLES);
@@ -94,10 +94,9 @@ void Tile::draw(){
 	shad->setMat4("gWorld", gWorld);
 	shad->setMat4("gVP", gVP);
 	shad->setFloat("gDispFactor", dispFactor);
-	float correction = 0.0f;
-	if (up < 0.0f) correction = 0.05f * dispFactor;
-	float waterHeight = (waterPtr ? waterPtr->getModelMatrix()[1][3] : 100.0);
-	glm::vec4 clipPlane(0.0, 1.0, 0.0, -waterHeight - correction);
+
+	float waterHeight = (waterPtr ? waterPtr->getModelMatrix()[3][1] : 100.0);
+	glm::vec4 clipPlane(0.0, 1.0, 0.0, -waterHeight);
 	shad->setVec4("clipPlane", clipPlane*up);
 	shad->setVec3("u_LightColor", se->lightColor);
 	shad->setVec3("u_LightPosition", se->lightPos);
@@ -110,7 +109,7 @@ void Tile::draw(){
 	shad->setFloat("u_grassCoverage", grassCoverage);
 	shad->setFloat("waterHeight", waterHeight);
 	shad->setFloat("tessMultiplier", tessMultiplier);
-
+	shad->setFloat("fogFalloff", fogFalloff*1.e-6);
 
 	shad->setBool("normals", true);
 	shad->setBool("drawFog", Tile::drawFog);
@@ -156,6 +155,7 @@ void Tile::setGui()
 	ImGui::SliderFloat("Displacement factor", &dispFactor, 0.0f, 32.f);
 	ImGui::SliderFloat("Grass coverage", &grassCoverage, 0.0f, 1.f);
 	ImGui::SliderFloat("Tessellation multiplier", &tessMultiplier, 0.1f, 5.f);
+	ImGui::SliderFloat("Fog fall-off", &fogFalloff, 0.0f, 10.);
 
 	//glm::vec3 * cloudBottomColor = this->getCloudColorBottomPtr();
 	//ImGui::ColorEdit3("Cloud color", (float*)cloudBottomColor); // Edit 3 floats representing a color
@@ -338,7 +338,7 @@ void Tile::changeTiles(tPosition currentTile) {
 	}
 
 	if (waterPtr) {
-		float waterHeight = waterPtr->getModelMatrix()[1][3];
+		float waterHeight = waterPtr->getModelMatrix()[3][1];
 		waterPtr->setPosition(getPos(gridLength / 2, gridLength / 2), scaleFactor*gridLength, waterHeight);
 	}
 }

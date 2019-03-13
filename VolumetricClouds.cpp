@@ -6,6 +6,9 @@
 float VolumetricClouds::cloudSpeed = 300.0;
 float VolumetricClouds::coverage = 0.45;
 float VolumetricClouds::crispiness = 40.;
+float VolumetricClouds::density = 0.02;
+float VolumetricClouds::absorption = 0.35;
+
 glm::vec3 VolumetricClouds::cloudColorTop = (glm::vec3(169., 149., 149.)*(1.5f / 255.f));
 glm::vec3 VolumetricClouds::cloudColorBottom = (glm::vec3(65., 70., 80.)*(1.5f / 255.f));
 
@@ -87,6 +90,8 @@ void VolumetricClouds::setGui() {
 	ImGui::SliderFloat("Clouds coverage", this->getCoveragePointer(), 0.0f, 1.0f);
 	ImGui::SliderFloat("Clouds speed", this->getCloudSpeedPtr(), 0.0f, 5.0E3);
 	ImGui::SliderFloat("Cloud crispiness", this->getCloudCrispinessPtr(), 0.0f, 100.0f);
+	ImGui::SliderFloat("Cloud density", &density, 0.0f, 0.1f);
+	//ImGui::SliderFloat("Cloud absorption", &absorption, 0.0f, 1.0f);
 
 	glm::vec3 * cloudBottomColor = this->getCloudColorBottomPtr();
 	ImGui::ColorEdit3("Cloud color", (float*)cloudBottomColor); // Edit 3 floats representing a color
@@ -122,6 +127,8 @@ void VolumetricClouds::draw() {
 	cloudsShader.setFloat("coverage_multiplier", coverage);
 	cloudsShader.setFloat("cloudSpeed", cloudSpeed);
 	cloudsShader.setFloat("crispiness", crispiness);
+	cloudsShader.setFloat("absorption", absorption*0.01);
+	cloudsShader.setFloat("densityFactor", density);
 
 	cloudsShader.setVec3("cloudColorTop", cloudColorTop);
 	cloudsShader.setVec3("cloudColorBottom", cloudColorBottom);
@@ -140,7 +147,8 @@ void VolumetricClouds::draw() {
 
 	//actual draw
 	//volumetricCloudsShader->draw();
-	glDispatchCompute(INT_CEIL(SCR_WIDTH, 16), INT_CEIL(SCR_HEIGHT, 16), 1);
+	if(!s->wireframe)
+		glDispatchCompute(INT_CEIL(SCR_WIDTH, 16), INT_CEIL(SCR_HEIGHT, 16), 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 	
@@ -180,7 +188,8 @@ void VolumetricClouds::draw() {
 		cloudsPPShader.setFloat("lightDotCameraFront", lightDotCameraFront);
 
 		cloudsPPShader.setFloat("time", glfwGetTime());
-		ppShader->draw();
+		if (!s->wireframe)
+			ppShader->draw();
 	}
 }
 

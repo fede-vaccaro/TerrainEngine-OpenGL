@@ -57,19 +57,8 @@ vec4 gaussianBlur(sampler2D tex, vec2 uv){
 void main()
 {
 
+	FragColor = gaussianBlur(clouds, TexCoords);
 	
-	if( texture(depthMap, TexCoords).r < 1.0){
-		FragColor = vec4(0.0);
-		//return;
-	}//else if(gl_FragCoord.x/resolution.x > 0.5)
-	//{
-	//FragColor = gaussianBlur(lastFrame);
-	//return;
-	//}
-	else{
-		FragColor = gaussianBlur(clouds, TexCoords);
-	}
-
 
 	/////////////////////////////////////////////// RADIAL BLUR - CREPUSCOLAR RAYS
 	bvec2 lowerLimit = greaterThan(lightPos.xy, vec2(0.0));

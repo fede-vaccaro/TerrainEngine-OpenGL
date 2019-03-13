@@ -36,7 +36,7 @@ public:
 	float up = 0.0;
 	
 	bool inTile(Camera camera, glm::vec2 pos);
-	static const int tileW = 5.0;
+	static const int tileW = 10.;
 
 	//Model * planeModel;
 	Water * waterPtr;
@@ -83,7 +83,7 @@ private:
 	void drawVertices(int nInstances);
 	unsigned int planeVBO, planeVAO, planeEBO;
 
-	float dispFactor, scaleFactor, frequency, grassCoverage, tessMultiplier;
+	float dispFactor, scaleFactor, frequency, grassCoverage, tessMultiplier, fogFalloff;
 	int octaves;
 	int gridLength;
 	glm::vec2 I, J;

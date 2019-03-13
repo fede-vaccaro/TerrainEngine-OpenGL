@@ -7,6 +7,8 @@ uniform vec3 gEyeWorldPos;
 uniform float tessLevel;
 uniform float tessMultiplier;
 					   
+uniform vec3 seed;
+
 // attributes of the input CPs                                                                  
 in vec3 WorldPos_CS_in[];                                                                       
 in vec2 TexCoord_CS_in[];                                                                       
@@ -17,21 +19,106 @@ out vec3 WorldPos_ES_in[];
 out vec2 TexCoord_ES_in[];                                                                      
 out vec3 Normal_ES_in[]; 
 
+
+float Random2D(in vec2 st)
+{
+	return fract(sin(dot(st.xy, vec2(12.9898, 78.233) + seed.xy)) * 43758.5453123);
+}
+
+float Interpolate(float a, float b, float x) {  // cosine interpolation
+	float ft = x * 3.1415927f;
+	float f = (1 - cos(ft)) * 0.5;
+	return  a * (1 - f) + b * f;
+}
+
+float InterpolatedNoise(int ind, float x, float y) {
+	int integer_X = int(floor(x));
+	float fractional_X = fract(x);
+	int integer_Y = int(floor(y));
+	float fractional_Y = fract(y);
+	vec2 randomInput = vec2(integer_X, integer_Y);
+	float a = Random2D(randomInput);
+	float b = Random2D(randomInput + vec2(1.0, 0.0));
+	float c = Random2D(randomInput + vec2(0.0, 1.0));
+	float d = Random2D(randomInput + vec2(1.0, 1.0));
+	//float v1 = Random2D(randomInput);
+	//float v2 = Random2D(randomInput + vec2(1.0, 0.0));
+	//float v3 = Random2D(randomInput + vec2(0.0, 1.0));
+	//float v4 = Random2D(randomInput + vec2(1.0, 1.0));
+
+	vec2 w = vec2(fractional_X, fractional_Y);
+	w = w*w*w*(10.0 + w*(-15.0 + 6.0*w));
+
+	//fractional_X = smoothstep(0.0, 1.0, fractional_X);
+	//fractional_Y = smoothstep(0.0, 1.0, fractional_Y);
+	//return a + fractional_X*(b-a) + fractional_Y*c + fractional_X*fractional_Y*(d-c) - a*fractional_Y - fractional_X*fractional_Y*(b-a);
+	float k0 = a, 
+	k1 = b - a, 
+	k2 = c - a, 
+	k3 = d - c - b + a;
+
+	return k0 + k1*w.x + k2*w.y + k3*w.x*w.y;
+}
+
+const mat2 m = mat2(0.8,-0.6,0.6,0.8);
+
+uniform int octaves;
+uniform float gDispFactor;      
+uniform float freq;
+
+
+float perlin(float x, float y){
+	
+    int numOctaves = octaves;
+	float persistence = 0.5;
+	float total = 0,
+		frequency = 0.005*freq,
+		amplitude = gDispFactor;
+	for (int i = 0; i < numOctaves; ++i) {
+		frequency *= 2.;
+		amplitude *= persistence;
+		
+		total += InterpolatedNoise( 0, x * frequency, y * frequency) * amplitude;
+	}
+	return total*total*total;
+}
+
+float perlin(vec2 st){
+    
+    //st *= freq;
+    
+    //int numOctaves = 10;
+	float persistence = 0.5;
+	float total = 0.0,
+		frequency = 0.005*freq,
+		amplitude = gDispFactor;
+	for (int i = 0; i < octaves; ++i) {
+		frequency *= 2.0;
+		amplitude *= persistence;
+
+        //st = frequency*m*st;
+
+		vec2 v = frequency*m*st;
+
+		total += InterpolatedNoise(0, v.x,v.y) * amplitude;
+	}
+	return total*total*total;
+}
                                                                                                 
 float GetTessLevel(float Distance0, float Distance1)                                            
 {                                                       
 
     float AvgDistance = (Distance0 + Distance1) / 2.0;
-    if (AvgDistance <= 200.0*10.0) {                                                                   
+    if (AvgDistance <= 300.0*10.0) { 
         return 10.0;                                                                            
-    }else if(AvgDistance <= 300.0*10.0){
-		return 4.0;
+    }else if(AvgDistance <= 1200.0*10.0){
+		return 6.0;
 	}
-    else if (AvgDistance <= 600.0*10.0) {                                                              
+    else if (AvgDistance <= 3000.0*10.0) {  
         return 2.0;                                                                             
     }                                                                                           
-    else {                                                                                      
-        return 1.0;                                                                             
+    else {                                 
+        return 2.0;                                                                             
     }
 }                                                                                               
                                                                                                 
@@ -43,9 +130,10 @@ void main()
     WorldPos_ES_in[gl_InvocationID] = WorldPos_CS_in[gl_InvocationID];                          
                                                                                                 
     // Calculate the distance from the camera to the three control points                       
-    float EyeToVertexDistance0 = distance(gEyeWorldPos, WorldPos_ES_in[0]);                     
-    float EyeToVertexDistance1 = distance(gEyeWorldPos, WorldPos_ES_in[1]);                     
-    float EyeToVertexDistance2 = distance(gEyeWorldPos, WorldPos_ES_in[2]);                     
+    vec3 pos = vec3(gEyeWorldPos.x, perlin(gEyeWorldPos.xz), gEyeWorldPos.z);
+	float EyeToVertexDistance0 = distance(pos, WorldPos_ES_in[0]);                     
+    float EyeToVertexDistance1 = distance(pos, WorldPos_ES_in[1]);                     
+    float EyeToVertexDistance2 = distance(pos, WorldPos_ES_in[2]);                     
                                                                                                 
     // Calculate the tessellation levels                                                        
     gl_TessLevelOuter[0] = tessMultiplier*GetTessLevel(EyeToVertexDistance1, EyeToVertexDistance2);            

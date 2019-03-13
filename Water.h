@@ -14,6 +14,7 @@ public:
 	Water(glm::vec2 position, float scale, float height);
 	virtual ~Water();
 	virtual void draw();
+	virtual void setGui();
 	void bindRefractionFBO();
 	void bindReflectionFBO();
 	void unbindFBO();
@@ -29,12 +30,15 @@ public:
 		float scale = modelMatrix[0][0];
 		float position_x = modelMatrix[3][1];
 		float position_z = modelMatrix[3][2];
-		std::cout << position_x << " " << position_z << std::endl;
 
 		glm::mat4 identity;
 		glm::mat4 scaleMatrix = glm::scale(identity, glm::vec3(scale, scale, scale));
 		glm::mat4 transMatrix = glm::translate(identity, glm::vec3(position_x, height, position_z));
 		this->modelMatrix = transMatrix * scaleMatrix;
+	}
+
+	float getHeight() {
+		return height;
 	}
 
 	glm::mat4 getModelMatrix() {

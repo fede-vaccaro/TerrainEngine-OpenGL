@@ -253,7 +253,7 @@ float perlin(float x, float y, int oct){
 		
 		total += InterpolatedNoise(vec2(x,y)*frequency) * amplitude;
 	}
-	return total*total*total;
+	return total;
 }
 
 
@@ -281,8 +281,9 @@ vec4 getTexture(inout vec3 normal, const mat3 TBN){
 
 	float grassCoverage = u_grassCoverage;//pow(u_grassCoverage, 0.33);
 
+	/*
 	float transMultiplier = 4.0;
-	float snowHeight = gDispFactor*gDispFactor +  1800.0  - perlinBlendingCoeff*600.0;
+	float snowHeight = gDispFactor*gDispFactor*gDispFactor*0.3 +  1800.0  - perlinBlendingCoeff*600.0*3.;
 	if( WorldPos.y > snowHeight - trans*transMultiplier && WorldPos.y < snowHeight + trans*transMultiplier ){
 		float gradient = clamp((WorldPos.y - (snowHeight - trans*transMultiplier))/(2.0*trans*transMultiplier), 0.0, 1.0);
 		grass_t.rgb = mix(grass_t.rgb, texture(snow, texCoord*5.0).rgb*1.35, gradient);
@@ -291,7 +292,7 @@ vec4 getTexture(inout vec3 normal, const mat3 TBN){
 		grass_t.rgb =texture(snow, texCoord*5.0).rgb*1.35;
 		grassCoverage = grassCoverage - 0.12;
 	}
-
+	*/
 	vec4 heightColor;
 	float cosV = abs(dot(normal, vec3(0.0, 1.0, 0.0)));
 	float tenPercentGrass = grassCoverage - grassCoverage*0.1;
@@ -316,6 +317,8 @@ vec4 getTexture(inout vec3 normal, const mat3 TBN){
 	return heightColor;
 }
 
+uniform float fogFalloff;
+
 const float c = 18.;
 const float b = 3.e-6;
 
@@ -324,7 +327,7 @@ float applyFog( in vec3  rgb,      // original color of the pixel
                in vec3  cameraPos,   // camera position
                in vec3  rayDir )  // camera to point vector
 {
-    float fogAmount = c * exp(-cameraPos.y*b) * (1.0-exp( -dist*rayDir.y*b ))/rayDir.y;
+    float fogAmount = c * exp(-cameraPos.y*fogFalloff) * (1.0-exp( -dist*rayDir.y*fogFalloff ))/rayDir.y;
     vec3  fogColor  = vec3(0.5,0.6,0.7);
     return clamp(fogAmount,0.0,1.0);//mix( rgb, fogColor, fogAmount );
     //return fogAmount;//mix( rgb, fogColor, fogAmount );

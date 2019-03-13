@@ -15,6 +15,7 @@ struct sceneElements {
 	glm::mat4& projMatrix;
 	Camera& cam;
 	FrameBufferObject& sceneFBO;
+	bool wireframe = false;
 };
 
 #endif

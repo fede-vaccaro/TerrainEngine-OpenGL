@@ -24,6 +24,10 @@ public:
 		return (postProcess ? cloudsPostProcessingFBO->getColorAttachmentTex(0) : getCloudsRawTexture());
 	}
 
+	unsigned int getCloudsTexture(int i) {
+		return cloudsFBO->getColorAttachmentTex(i);
+	}
+
 	unsigned int getCloudsRawTexture(){
 		return cloudsFBO->getColorAttachmentTex(0);
 	}
@@ -75,7 +79,7 @@ public:
 
 private:
 	int SCR_WIDTH, SCR_HEIGHT;
-	static float coverage, cloudSpeed, crispiness;
+	static float coverage, cloudSpeed, crispiness, density, absorption;
 	static glm::vec3 cloudColorTop, cloudColorBottom;
 	static glm::vec3 skyColorTop, skyColorBottom;
 	

@@ -13,7 +13,7 @@ layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D fragColor;
 layout(rgba32f, binding = 1) uniform image2D bloom;
 layout(rgba32f, binding = 2) uniform image2D alphaness;
-layout(rgba32f, binding = 3) uniform image2D cloudColor;
+layout(rgba32f, binding = 3) uniform image2D cloudDistance;
 
 
 uniform float FOV;
@@ -305,6 +305,8 @@ float powder(float d){
 
  vec3 eye = cameraPosition;
 
+uniform float absorption = 0.0035;
+
 float raymarchToLight(vec3 o, float stepSize, vec3 lightDir, float originalDensity, float lightDotEye)
 {
 
@@ -316,7 +318,6 @@ float raymarchToLight(vec3 o, float stepSize, vec3 lightDir, float originalDensi
 	float density = 0.0;
 	float coneDensity = 0.0;
 	float invDepth = 1.0/ds;
-	const float absorption = 0.0035;
 	float sigma_ds = -ds*absorption;
 	vec3 pos;
 
@@ -367,7 +368,8 @@ uniform float bayerFilter[16u] = float[]
 );
 
 
-vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
+uniform float densityFactor = 0.02;
+vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg, out vec4 cloudPos){
 	vec3 path = endPos - startPos;
 	float len = length(path);
 
@@ -393,8 +395,7 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
 	float lightDotEye = dot(normalize(SUN_DIR), normalize(dir));
 
 	float T = 1.0;
-	const float absorption = 0.01;
-	float sigma_ds = -ds*absorption;
+	float sigma_ds = -ds*densityFactor;
 	bool expensive = true;
 	bool entered = false;
 
@@ -407,14 +408,18 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg){
 		float density_sample = sampleCloudDensity(pos, true, i/16);
 		if(density_sample > 0.)
 		{
+			if(!entered){
+				cloudPos = vec4(pos,1.0);
+				entered = true;	
+			}
 			float height = getHeightFraction(pos);
 			vec3 ambientLight = CLOUDS_AMBIENT_COLOR_BOTTOM; //mix( CLOUDS_AMBIENT_COLOR_BOTTOM, CLOUDS_AMBIENT_COLOR_TOP, height );
 			float light_density = raymarchToLight(pos, ds*0.1, SUN_DIR, density_sample, lightDotEye);
 			float scattering = mix(HG(lightDotEye, -0.08), HG(lightDotEye, 0.08), clamp(lightDotEye*0.5 + 0.5, 0.0, 1.0));
 			//scattering = 0.6;
 			scattering = max(scattering, 1.0);
-			float powderTerm =  (1.0*0.25 + 0.75*powder(density_sample));
-			powderTerm = 1.0;
+			//float powderTerm =  powder(density_sample);
+			float powderTerm = 1.0;
 			vec3 S = 0.6*( mix( mix(ambientLight*1.8, bg, 0.2), scattering*SUN_COLOR, powderTerm*light_density)) * density_sample;
 			float dTrans = exp(density_sample*sigma_ds);
 			vec3 Sint = (S - S * dTrans) * (1. / density_sample);
@@ -458,7 +463,7 @@ float computeFogAmount(in vec3 startPos, in float factor = 0.00006){
 
 void main()
 {
-	vec4 fragColor_v, bloom_v, alphaness_v, cloudColor_v;
+	vec4 fragColor_v, bloom_v, alphaness_v, cloudDistance_v;
 	ivec2 fragCoord = ivec2(gl_GlobalInvocationID.xy);
 
 	//if(texture(depthMap, TexCoords).r < 1.0)
@@ -514,11 +519,14 @@ void main()
 		bloom_v = bg;
 		imageStore(fragColor, fragCoord, fragColor_v);
 		imageStore(bloom, fragCoord, bloom_v);
-		return;
+		imageStore(alphaness, fragCoord, vec4(0.0));
+		imageStore(cloudDistance, fragCoord, vec4(-1.0)); 
+		return; //early exit
 	}
 
-	v = marchToCloud(startPos,endPos, bg.rgb);
-	cloudColor_v = v;
+	v = marchToCloud(startPos,endPos, bg.rgb, cloudDistance_v);
+	cloudDistance_v = vec4(distance(cameraPosition, cloudDistance_v.xyz), 0.0,0.0,0.0);
+	//cloudDistance_v = v;
 
 	float cloudAlphaness = threshold(v.a, 0.2);
 	v.rgb = v.rgb*1.8 - 0.1; // contrast-illumination tuning
@@ -562,8 +570,9 @@ void main()
 		bloom_v.rgb = bloom_v.rgb*(1.0 - cloudAlphaness) + cloud.rgb;
 
 	}
+	fragColor_v.a = alphaness_v.r;
 	imageStore(fragColor, fragCoord, fragColor_v);
 	imageStore(bloom, fragCoord, bloom_v);
 	imageStore(alphaness, fragCoord, alphaness_v);
-	imageStore(cloudColor, fragCoord, cloudColor_v);
+	imageStore(cloudDistance, fragCoord, cloudDistance_v);
 }
