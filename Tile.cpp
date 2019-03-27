@@ -12,7 +12,7 @@ float sign(float x) {
 }
 
 
-Tile::Tile(float scale, float dispFactor, int gl) : dispFactor(dispFactor), scaleFactor(scale)
+Tile::Tile(float scale, int gl) : scaleFactor(scale)
 {
 	float sc = scaleFactor * tileW;
 	I = glm::vec2(1.0, 0.0);
@@ -21,15 +21,16 @@ Tile::Tile(float scale, float dispFactor, int gl) : dispFactor(dispFactor), scal
 
 	glm::mat4 id;
 	glm::mat4 scaleMatrix = glm::scale(id, glm::vec3(scale, 0.0, scale));
-	glm::mat4 positionMatrix = glm::translate(id, glm::vec3(position.x, 0.0, position.y));
+	glm::mat4 positionMatrix = glm::translate(id, glm::vec3(0., 0.0, 0.));
 	modelMatrix = positionMatrix * scaleMatrix;
 
-	octaves = 10;
-	frequency = 0.025;
-	grassCoverage = 0.73;
+	octaves = 13;
+	frequency = 0.01;
+	grassCoverage = 0.65;
 	tessMultiplier = 1.0;
+	dispFactor = 20.0;
 
-	fogFalloff = 3.;
+	fogFalloff = 1.5;
 
 	posBuffer = 0;
 
@@ -76,6 +77,8 @@ Tile::Tile(float scale, float dispFactor, int gl) : dispFactor(dispFactor), scal
 
 	setPositionsArray(positionVec);
 
+	rockColor = glm::vec4(120, 105, 75, 255)*1.5f / 255.f;
+	power = 3.0;
 }
 
 
@@ -102,6 +105,7 @@ void Tile::draw(){
 	shad->setVec3("u_LightPosition", se->lightPos);
 	shad->setVec3("u_ViewPosition", se->cam.Position);
 	shad->setVec3("fogColor", se->fogColor);
+	shad->setVec3("rockColor", rockColor);
 	shad->setVec3("seed", se->seed);
 	//shad->setFloat("tessLevel", 0.0f);
 	shad->setInt("octaves", octaves);
@@ -110,6 +114,7 @@ void Tile::draw(){
 	shad->setFloat("waterHeight", waterHeight);
 	shad->setFloat("tessMultiplier", tessMultiplier);
 	shad->setFloat("fogFalloff", fogFalloff*1.e-6);
+	shad->setFloat("power", power);
 
 	shad->setBool("normals", true);
 	shad->setBool("drawFog", Tile::drawFog);
@@ -152,16 +157,17 @@ void Tile::setGui()
 	//ImGui::Checkbox("Clouds PostProc + God Rays", this->getPostProcPointer());
 	ImGui::SliderInt("Octaves", &octaves, 1, 20);
 	ImGui::SliderFloat("Frequency",&frequency, 0.0f, 0.05f);
-	ImGui::SliderFloat("Displacement factor", &dispFactor, 0.0f, 32.f);
+	ImGui::SliderFloat("Displacement factor", &dispFactor, 0.0f, std::pow(32.f*32.f*32.f, 1/power));
 	ImGui::SliderFloat("Grass coverage", &grassCoverage, 0.0f, 1.f);
 	ImGui::SliderFloat("Tessellation multiplier", &tessMultiplier, 0.1f, 5.f);
 	ImGui::SliderFloat("Fog fall-off", &fogFalloff, 0.0f, 10.);
+	ImGui::SliderFloat("Power", &power, 0.0f, 10.);
 
 	//glm::vec3 * cloudBottomColor = this->getCloudColorBottomPtr();
 	//ImGui::ColorEdit3("Cloud color", (float*)cloudBottomColor); // Edit 3 floats representing a color
 
 	//ImGui::TextColored(ImVec4(1, 1, 0, 1), "Sky controls");
-	//ImGui::ColorEdit3("Sky top color", (float*)this->getSkyTopColorPtr()); // Edit 3 floats representing a color
+	ImGui::ColorEdit3("Rock color", (float*)&rockColor[0]); // Edit 3 floats representing a color
 	//ImGui::ColorEdit3("Sky bottom color", (float*)this->getSkyBottomColorPtr()); // Edit 3 floats representing a color
 }
 

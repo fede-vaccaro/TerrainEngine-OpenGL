@@ -60,9 +60,6 @@
     <ClInclude Include="BaseShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Main.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="sceneElements.h">
       <Filter>Header Files</Filter>
     </ClInclude>

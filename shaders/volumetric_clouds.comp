@@ -194,7 +194,7 @@ vec4 colorCubeMap(vec3 endPos, const vec3 d)
 {
     // background sky     
 	//vec3 col = vec3(0.6,0.71,0.85) - endPos.y*0.2*vec3(1.0,0.5,1.0) + 0.15*0.5;
-	vec3 col = mix(skyColorBottom, skyColorTop, pow(clamp(endPos.y + 0.5,0.0,1.0),1.));
+	vec3 col = mix(skyColorBottom, skyColorTop, clamp(1 - exp(8.5-17.*clamp(normalize(d).y*0.5 + 0.5,0.0,1.0)),0.0,1.0));
 	float sun = clamp( dot(SUN_DIR,d), 0.0, 1.0 );
 	col += 0.8*vec3(1.0,.6,0.1)*pow( sun, 350.0 );
 
@@ -247,6 +247,8 @@ vec2 getUVProjection(vec3 p){
 #define CLOUD_SCALE crispiness
 #define CLOUD_SPEED cloudSpeed
 
+uniform float curliness;
+
 float sampleCloudDensity(vec3 p, bool expensive, float lod){
 
 	float heightFraction = getHeightFraction(p);
@@ -275,7 +277,7 @@ float sampleCloudDensity(vec3 p, bool expensive, float lod){
 	
 	if(expensive)
 	{
-		vec3 erodeCloudNoise = textureLod(worley32, vec3(moving_uv*CLOUD_SCALE, heightFraction)*0.1, lod).rgb;
+		vec3 erodeCloudNoise = textureLod(worley32, vec3(moving_uv*CLOUD_SCALE, heightFraction)*curliness, lod).rgb;
 		float highFreqFBM = dot(erodeCloudNoise.rgb, vec3(0.625, 0.25, 0.125));//(erodeCloudNoise.r * 0.625) + (erodeCloudNoise.g * 0.25) + (erodeCloudNoise.b * 0.125);
 		float highFreqNoiseModifier = mix(highFreqFBM, 1.0 - highFreqFBM, clamp(heightFraction * 10.0, 0.0, 1.0));
 
@@ -560,12 +562,11 @@ void main()
 	//alphaness = vec4(cloudAlphaness, 0.0, 0.0, 1.0); // alphaness buffer
 	alphaness_v = vec4(cloudAlphaness, 0.0, 0.0, 1.0); // alphaness buffer
 
-	//bloom = bg; // bloom is occlusion buffer for post proc crepuscolar rays
 	bloom_v = bg; // bloom is occlusion buffer for post proc crepuscolar rays
 	if(cloudAlphaness > 0.1){ //apply fog to bloom buffer
 		float fogAmount = computeFogAmount(startPos, 0.00003);
 
-		vec3 cloud = mix(vec3(0.0), bloom_v.rgb*cloudAlphaness, clamp(fogAmount,0.,1.));
+		vec3 cloud = mix(vec3(0.0), bloom_v.rgb, clamp(fogAmount,0.,1.));
 		//bloom.rgb = bloom.rgb*(1.0 - cloudAlphaness) + cloud.rgb;
 		bloom_v.rgb = bloom_v.rgb*(1.0 - cloudAlphaness) + cloud.rgb;
 

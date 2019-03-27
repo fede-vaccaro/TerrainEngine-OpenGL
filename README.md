@@ -9,10 +9,13 @@
 *Include/* and *Libraries/* directory has been already uploaded.
 
 ![Demonstrative image](/resources/pic.jpg)
-![Another demonstrative image](/resources/pic2.jpg)
+![Demonstrative image2](/resources/pic2.jpg)
+![Demonstrative image3](/resources/pic3.jpg)
 
 
 [Here](https://www.youtube.com/watch?v=-9i_FZbO86c) you can see a really short video about. (08/16/18)
+
+I'm looking for someone who might help me with this work! If you want to help me adding some feature like Procedural Grass, Cascading Shadow Map, SSAO, Motion Blur, improving the terrain or the water please contact me! 
 
 A special thanks to [Prof. Stefano Berretti](https://www.micc.unifi.it/people/stefano-berretti/), for introducing me to the discipline at the University) and  [Joey DeVries](https://learnopengl.com/), the project is based on his framework! 
 It was initially made in collaboration with @rickie95 as a course project, but even after the delivery I decided to keep working on it implementing the volumetric clouds rendering, with the hope that I'll have the time (and the will!) to add other features!

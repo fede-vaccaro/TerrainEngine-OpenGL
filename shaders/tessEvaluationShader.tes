@@ -100,6 +100,8 @@ float InterpolatedNoise(int ind, float x, float y) {
 
 const mat2 m = mat2(0.8,-0.6,0.6,0.8);
 
+uniform float power;
+
 
 float perlin(float x, float y){
 	
@@ -114,8 +116,9 @@ float perlin(float x, float y){
 		
 		total += InterpolatedNoise( 0, x * frequency, y * frequency) * amplitude;
 	}
-	return total*total*total;
+	return pow(total, power);
 }
+
 
 float perlin(vec2 st){
     
@@ -136,7 +139,7 @@ float perlin(vec2 st){
 
 		total += InterpolatedNoise(0, v.x,v.y) * amplitude;
 	}
-	return total*total*total;
+	return pow(total, power);
 }
 
                                                                                       

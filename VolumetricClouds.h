@@ -18,7 +18,11 @@ public:
 	virtual void setGui();
 	~VolumetricClouds();
 
+	void generateWeatherMap();
 
+	void SunsetPreset();
+
+	void SunsetPreset1();
 
 	unsigned int getCloudsTexture() { 
 		return (postProcess ? cloudsPostProcessingFBO->getColorAttachmentTex(0) : getCloudsRawTexture());
@@ -79,17 +83,19 @@ public:
 
 private:
 	int SCR_WIDTH, SCR_HEIGHT;
-	static float coverage, cloudSpeed, crispiness, density, absorption;
+	static float coverage, cloudSpeed, crispiness, curliness, density, absorption;
 	static glm::vec3 cloudColorTop, cloudColorBottom;
 	static glm::vec3 skyColorTop, skyColorBottom;
 	
+	static glm::vec3 seed, oldSeed;
+
 	bool postProcess;
 	
-	Shader * volumetricCloudsShader;
+	Shader * volumetricCloudsShader, * weatherShader;
 	ScreenQuad * ppShader, * copyShader;
 	TextureSet * cloudsFBO;
 	FrameBufferObject *cloudsPostProcessingFBO;
 
-	unsigned int perlinTex, worley32, weatherTex;
+	static unsigned int perlinTex, worley32, weatherTex;
 };
 

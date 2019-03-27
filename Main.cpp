@@ -91,15 +91,15 @@ int main()
 
 	float scale = 100.0f,  dispFactor = 16.0;
 	//TileController tc(scale, dispFactor, 51);
-	int gl = 120;
-	Tile terrain(scale, dispFactor, gl);
+	int gridLength = 120;
+	Tile terrain(scale, gridLength);
 	Skybox skybox; //unused
 	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT);
 	VolumetricClouds reflectionVolumetricClouds(1280, 720); //a different object is needed because it has a state-dependent draw method
 	reflectionVolumetricClouds.setPostProcess(false);
 
-	float waterHeight = 100.;
-	Water water(glm::vec2(0.0, 0.0), scale*gl, waterHeight);
+	float waterHeight = 120.;
+	Water water(glm::vec2(0.0, 0.0), scale*gridLength, waterHeight);
 	terrain.waterPtr = &water;
 	std::cout << "============ OPENING POST PROCESSING SHADER ============" << std::endl; // its purpose is to merge different framebuffer and add some postproc if needed
 	ScreenQuad PostProcessing("shaders/post_processing.frag");
@@ -247,16 +247,22 @@ int main()
 
 			ImGui::TextColored(ImVec4(1, 1, 0, 1), "Other controls");
 			ImGui::DragFloat3("Light Position", &lightDir[0], 0.03, -1.0, 1.0);
+			ImGui::InputFloat3("Camera Position", &camera.Position[0], 7);
 			ImGui::ColorEdit3("Light color", (float*)&lightColor); 
 			ImGui::ColorEdit3("Fog color", (float*)&fogColor);
-
+			ImGui::SliderFloat("Camera speed", &camera.MovementSpeed, 0.0, SPEED*3.0);
 			ImGui::Checkbox("Wireframe mode", &scene.wireframe);
 
-			if (ImGui::Button("Generate"))
+			if (ImGui::Button("Generate seed"))
 				scene.seed = genRandomVec3();
+			//ImGui::SameLine();
+			//ImGui::Text("Generate a new seed");
 			ImGui::SameLine();
-			ImGui::Text("Generate a new seed");
-
+			if (ImGui::Button("Use default seed"))
+				scene.seed = glm::vec3(0.0, 0.0, 0.0);
+			if (ImGui::Button("Sunset")) {
+				volumetricClouds.SunsetPreset();
+			}
 			if (ImGui::Button("Use default seed"))
 				scene.seed = glm::vec3(0.0, 0.0, 0.0);
 

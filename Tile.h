@@ -17,7 +17,7 @@ class Tile : public drawableObject
 {
 public:
 
-	Tile(float scale, float disp, int gl);
+	Tile(float scale, int gl);
 	virtual ~Tile();
 	//void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up, std::vector<glm::vec2> & pos);
 	virtual void draw();
@@ -83,10 +83,11 @@ private:
 	void drawVertices(int nInstances);
 	unsigned int planeVBO, planeVAO, planeEBO;
 
-	float dispFactor, scaleFactor, frequency, grassCoverage, tessMultiplier, fogFalloff;
+	float dispFactor, scaleFactor, frequency, grassCoverage, tessMultiplier, fogFalloff, power;
 	int octaves;
 	int gridLength;
 	glm::vec2 I, J;
+	glm::vec3 rockColor;
 
 	unsigned int * textures, posBuffer;
 

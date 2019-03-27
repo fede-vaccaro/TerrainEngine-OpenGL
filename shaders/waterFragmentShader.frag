@@ -153,7 +153,7 @@ float worley(vec3 st) {
 
 void main(){
 	float distFromPos = distance(position.xyz, cameraPosition); 
-	vec2 u_FogDist = vec2(2000.0, 8000.0);
+	vec2 u_FogDist = vec2(4000.0, 12000.0);
 	float fogFactor = SATURATE((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x));
 
 	float grain = 50.0;

@@ -3,17 +3,54 @@
 
 #define INT_CEIL(n,d) (int)ceil((float)n/d)
 
-float VolumetricClouds::cloudSpeed = 300.0;
+float VolumetricClouds::cloudSpeed = 450.0;
 float VolumetricClouds::coverage = 0.45;
 float VolumetricClouds::crispiness = 40.;
+float VolumetricClouds::curliness = .1;
 float VolumetricClouds::density = 0.02;
 float VolumetricClouds::absorption = 0.35;
+
+glm::vec3 VolumetricClouds::seed = glm::vec3(0.0, 0.0, 0.0);
+glm::vec3 VolumetricClouds::oldSeed = glm::vec3(0.0, 0.0, 0.0);
 
 glm::vec3 VolumetricClouds::cloudColorTop = (glm::vec3(169., 149., 149.)*(1.5f / 255.f));
 glm::vec3 VolumetricClouds::cloudColorBottom = (glm::vec3(65., 70., 80.)*(1.5f / 255.f));
 
-glm::vec3 VolumetricClouds::skyColorTop = glm::vec3(0.6, 0.8, 0.9)*1.05f;
-glm::vec3 VolumetricClouds::skyColorBottom = glm::vec3(0.5, 0.7, 0.8)*1.05f;
+glm::vec3 VolumetricClouds::skyColorTop = glm::vec3(0.5, 0.7, 0.8)*1.05f;
+glm::vec3 VolumetricClouds::skyColorBottom =  glm::vec3(0.9 , 0.9, 0.95);
+
+unsigned int VolumetricClouds::weatherTex = 0;
+unsigned int VolumetricClouds::perlinTex = 0;
+unsigned int VolumetricClouds::worley32 = 0;
+
+void VolumetricClouds::generateWeatherMap() {
+	bindTexture2D(weatherTex, 0);
+	weatherShader->use();
+	weatherShader->setVec3("seed", scene->seed);
+	std::cout << "computing weather!" << std::endl;
+	glDispatchCompute(INT_CEIL(1024, 8), INT_CEIL(1024, 8), 1);
+	std::cout << "weather computed!!" << std::endl;
+
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+}
+
+void VolumetricClouds::SunsetPreset() {
+	cloudColorBottom = glm::vec3(89, 96, 109) / 255.f;
+	skyColorTop = glm::vec3(177, 174, 119) / 255.f;
+	skyColorBottom = glm::vec3(234, 125, 125) / 255.f;
+
+	scene->lightColor = glm::vec3(255, 171, 125) / 255.f;
+	scene->fogColor = glm::vec3(85, 97, 120) / 255.f;
+}
+
+void VolumetricClouds::SunsetPreset1() {
+	cloudColorBottom = glm::vec3(97, 98, 120) / 255.f;
+	skyColorTop = glm::vec3(133, 158, 214) / 255.f;
+	skyColorBottom = glm::vec3(241, 161, 161) / 255.f;
+
+	scene->lightColor = glm::vec3(255, 201, 201) / 255.f;
+	scene->fogColor = glm::vec3(128, 153, 179) / 255.f;
+}
 
 VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH) {
 	//volumetricCloudsShader = new ScreenQuad("shaders/volumetric_clouds.frag");
@@ -28,69 +65,72 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 
 	/////////////////// TEXTURE GENERATION //////////////////
 
-	//compute shaders
-	Shader comp("perlinWorley");
-	comp.attachShader("shaders/perlinworley.comp");
-	comp.linkPrograms();
+	if (!perlinTex) {
+		//compute shaders
+		Shader comp("perlinWorley");
+		comp.attachShader("shaders/perlinworley.comp");
+		comp.linkPrograms();
 
-	//make texture
-	this->perlinTex = Texture3D(128, 128, 128);
+		//make texture
+		this->perlinTex = Texture3D(128, 128, 128);
+		//compute
+		comp.use();
+		comp.setVec3("u_resolution", glm::vec3(128, 128, 128));
+		std::cout << "computing perlinworley!" << std::endl;
+		glActiveTexture(GL_TEXTURE0);
+		comp.setInt("outVolTex", 0);
+		glDispatchCompute(INT_CEIL(128, 4), INT_CEIL(128, 4), INT_CEIL(128, 4));
+		std::cout << "computed!!" << std::endl;
+		//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		glGenerateMipmap(GL_TEXTURE_3D);
+	}
 
-	//compute
-	comp.use();
-	comp.setVec3("u_resolution", glm::vec3(128, 128, 128));
-	std::cout << "computing perlinworley!" << std::endl;
-	glActiveTexture(GL_TEXTURE0);
-	comp.setInt("outVolTex", 0);
-	glDispatchCompute(INT_CEIL(128,4), INT_CEIL(128, 4), INT_CEIL(128, 4));
-	std::cout << "computed!!" << std::endl;
-	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-	glGenerateMipmap(GL_TEXTURE_3D);
+	if (!worley32) {
+		//compute shaders
+		Shader worley_git("worleyComp");
+		worley_git.attachShader("shaders/worley.comp");
+		worley_git.linkPrograms();
 
-	//compute shaders
-	Shader worley_git("worleyComp");
-	worley_git.attachShader("shaders/worley.comp");
-	worley_git.linkPrograms();
+		//make texture
+		this->worley32 = Texture3D(32, 32, 32);
 
-	//make texture
-	this->worley32 = Texture3D(32, 32, 32);
+		//compute
+		worley_git.use();
+		worley_git.setVec3("u_resolution", glm::vec3(32, 32, 32));
+		std::cout << "computing worley 32!" << std::endl;
+		glDispatchCompute(INT_CEIL(32, 4), INT_CEIL(32, 4), INT_CEIL(32, 4));
+		std::cout << "computed!!" << std::endl;
+		glGenerateMipmap(GL_TEXTURE_3D);
+	}
 
-	//compute
-	worley_git.use();
-	worley_git.setVec3("u_resolution", glm::vec3(32, 32, 32));
-	std::cout << "computing worley 32!" << std::endl;
-	glDispatchCompute(INT_CEIL(32, 4), INT_CEIL(32, 4), INT_CEIL(32, 4));
-	std::cout << "computed!!" << std::endl;
-	glGenerateMipmap(GL_TEXTURE_3D);
 
-	////////////////////////
-	//compute shaders
-	Shader weather("weatherMap");
-	weather.attachShader("shaders/weather.comp");
-	weather.linkPrograms();
+		////////////////////////
+		//compute shaders
+		weatherShader = new Shader("weatherMap");
+		weatherShader->attachShader("shaders/weather.comp");
+		weatherShader->linkPrograms();
+		if (!weatherTex) {
+		//make texture
+		this->weatherTex = Texture2D(1024, 1024);
 
-	//make texture
-	this->weatherTex = Texture2D(1024, 1024);
+		//compute
+		generateWeatherMap();
 
-	//compute
-	weather.use();
-	weather.setVec3("seed", scene->seed);
-	std::cout << "computing weather!" << std::endl;
-	glDispatchCompute(INT_CEIL(1024, 8), INT_CEIL(1024, 8),1);
-	std::cout << "weather computed!!" << std::endl;
-
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-}
+		VolumetricClouds::seed = scene->seed;
+		VolumetricClouds::oldSeed = seed;
+	}
+	}
 #define TIMETO(CODE, TASK) 	t1 = glfwGetTime(); CODE; t2 = glfwGetTime(); std::cout << "Time to " + std::string(TASK) + " :" << (t2 - t1)*1e3 << "ms" << std::endl;
 
 void VolumetricClouds::setGui() {
 	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Clouds Controls");
 	//ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-	ImGui::Checkbox("Clouds PostProc + God Rays", this->getPostProcPointer());
-	ImGui::SliderFloat("Clouds coverage", this->getCoveragePointer(), 0.0f, 1.0f);
-	ImGui::SliderFloat("Clouds speed", this->getCloudSpeedPtr(), 0.0f, 5.0E3);
-	ImGui::SliderFloat("Cloud crispiness", this->getCloudCrispinessPtr(), 0.0f, 100.0f);
-	ImGui::SliderFloat("Cloud density", &density, 0.0f, 0.1f);
+	ImGui::Checkbox("PostProc + God Rays", this->getPostProcPointer());
+	ImGui::SliderFloat("Coverage", this->getCoveragePointer(), 0.0f, 1.0f);
+	ImGui::SliderFloat("Speed", this->getCloudSpeedPtr(), 0.0f, 5.0E3);
+	ImGui::SliderFloat("Crispiness", this->getCloudCrispinessPtr(), 0.0f, 100.0f);
+	ImGui::SliderFloat("Curliness", &curliness, 0.0f, 3.0f);
+	ImGui::SliderFloat("Density", &density, 0.0f, 0.1f);
 	//ImGui::SliderFloat("Cloud absorption", &absorption, 0.0f, 1.0f);
 
 	glm::vec3 * cloudBottomColor = this->getCloudColorBottomPtr();
@@ -104,6 +144,12 @@ void VolumetricClouds::setGui() {
 void VolumetricClouds::draw() {
 
 	float t1, t2;
+
+	seed = scene->seed;
+	if (seed != oldSeed) {
+		generateWeatherMap();
+		oldSeed = seed;
+	}
 
 	//cloudsFBO->bind();
 	for (int i = 0; i < cloudsFBO->getNTextures(); ++i) {
@@ -127,6 +173,7 @@ void VolumetricClouds::draw() {
 	cloudsShader.setFloat("coverage_multiplier", coverage);
 	cloudsShader.setFloat("cloudSpeed", cloudSpeed);
 	cloudsShader.setFloat("crispiness", crispiness);
+	cloudsShader.setFloat("curliness", curliness);
 	cloudsShader.setFloat("absorption", absorption*0.01);
 	cloudsShader.setFloat("densityFactor", density);
 

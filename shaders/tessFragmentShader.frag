@@ -162,6 +162,8 @@ vec2 InterpolatedNoiseD(vec2 xy) {
 	return vec2(dndx, dndy);
 }
 
+uniform float power;
+
 float perlin(float x, float y){
     
     //st *= freq;
@@ -181,7 +183,7 @@ float perlin(float x, float y){
 
 		total += InterpolatedNoise(v) * amplitude;
 	}
-	return total*total*total;
+	return pow(total, power);
 }
 
 
@@ -257,19 +259,20 @@ float perlin(float x, float y, int oct){
 }
 
 
+uniform vec3 rockColor;
 
 vec4 getTexture(inout vec3 normal, const mat3 TBN){
 	float trans = 20.;
 
 	vec4 sand_t = vec4(244, 231, 127, 255)/255;//texture(sand, texCoord*5.0);
-	vec4 rock_t = vec4(85, 80, 75, 255)/255;//texture(rock, texCoord*15.0);
+	vec4 rock_t = vec4(rockColor,1.0);//texture(rock, texCoord*15.0);
 	vec4 grass_t = vec4(92, 196, 66, 255)/255;//texture(grass, texCoord*5.0);
 
 
 
 	sand_t = texture(sand, texCoord*10.0);
 	sand_t.rg *= 1.3;
-	rock_t = texture(rock, texCoord*vec2(2.0, 2.5).yx);
+	rock_t = texture(rock, texCoord*vec2(1.0, 1.256).yx);
 	rock_t.rgb *= vec3(2.5, 2.0, 2.0);
 	grass_t = texture(grass, texCoord*12.0);//*vec4(0.0, 1.5, 0.0, 1.0);
 	vec4 grass_t1 = texture(grass1, texCoord*12.0);//*
