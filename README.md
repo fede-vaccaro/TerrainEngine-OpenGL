@@ -13,7 +13,7 @@
 ![Demonstrative image3](/resources/pic3.jpg)
 
 
-[Here](https://www.youtube.com/watch?v=-9i_FZbO86c) you can see a really short video about. (08/16/18)
+[Here](https://youtu.be/B7wUUqXgkUc) you can see a video about on YouTube. (Updated at 27/03/19)
 
 I'm looking for someone who might help me with this work! If you want to help me adding some feature like Procedural Grass, Cascading Shadow Map, SSAO, Motion Blur, improving the terrain or the water please contact me! 
 
