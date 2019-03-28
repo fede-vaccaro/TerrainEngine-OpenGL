@@ -28,7 +28,7 @@ public:
 
 	void setHeight(float height) {
 		float scale = modelMatrix[0][0];
-		float position_x = modelMatrix[3][1];
+		float position_x = modelMatrix[3][0];
 		float position_z = modelMatrix[3][2];
 
 		glm::mat4 identity;

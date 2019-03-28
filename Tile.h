@@ -24,7 +24,7 @@ public:
 	virtual void draw();
 	virtual void setGui();
 
-	void updateTiles();
+	void updateTilesPositions();
 	
 	void setPositionsUniforms(std::vector<glm::vec2> & pos);
 	void setPositionsArray(std::vector<glm::vec2> & pos);

@@ -248,12 +248,11 @@ Tile::~Tile()
 
 }
 
-void Tile::updateTiles() {
+void Tile::updateTilesPositions() {
 	sceneElements* se = drawableObject::scene;
 	glm::vec2 camPosition(se->cam.Position.x, se->cam.Position.z);
 	int whichTile = -1;
 	int howManyTiles = 0;
-	bool found = false;
 
 	glm::vec2 currentTile;
 	if (getWhichTileCameraIs(currentTile)) {
@@ -264,8 +263,8 @@ void Tile::updateTiles() {
 		setPositionsArray(positionVec);
 
 		if (waterPtr) {
-			float waterHeight = waterPtr->getModelMatrix()[3][1];
-			waterPtr->setPosition(getPos(gridLength / 2, gridLength / 2), scaleFactor*gridLength, waterHeight);
+			glm::vec2 center = getPos(gridLength / 2, gridLength / 2);
+			waterPtr->setPosition(center, scaleFactor*gridLength, waterPtr->getHeight());
 		}
 	}
 }

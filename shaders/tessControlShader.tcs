@@ -117,15 +117,15 @@ float GetTessLevel(float Distance0, float Distance1)
         return 30.0;                                                                            
     }
 	else if (AvgDistance <= 300.0*10.0) { 
-        return 10.0;                                                                            
+        return 5.0;                                                                            
     }else if(AvgDistance <= 1200.0*10.0){
-		return 5.0;
+		return 2.5;
 	}
     else if (AvgDistance <= 3000.0*10.0) {  
-        return 2.0;                                                                             
+        return 1.0;                                                                             
     }                                                                                           
     else {                                 
-        return 2.0;                                                                             
+        return 1.0;                                                                             
     }
 }                                                                                               
                                                                                                 

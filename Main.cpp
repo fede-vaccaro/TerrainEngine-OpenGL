@@ -124,7 +124,7 @@ int main()
 		window.processInput(frameTime);
 
 		//update tiles position to make the world infinite
-		terrain.updateTiles();
+		terrain.updateTilesPositions();
 
 		SceneFBO.bind();
 		// render
@@ -269,6 +269,8 @@ int main()
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 		}
+
+		//camera.Position += glm::vec3(200, 0, 0);
 
 		//gui
 		ImGui::Render();
