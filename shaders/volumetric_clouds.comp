@@ -190,16 +190,24 @@ bool raySphereintersection2(vec3 ro, vec3 rd, float radius, out vec3 startPos){
 uniform vec3 skyColorBottom;
 uniform vec3 skyColorTop;
 
+vec3 getSun(const vec3 d, float powExp){
+	float sun = clamp( dot(SUN_DIR,d), 0.0, 1.0 );
+	vec3 col = 0.8*vec3(1.0,.6,0.1)*pow( sun, powExp );
+	return col;
+}
+
 vec4 colorCubeMap(vec3 endPos, const vec3 d)
 {
     // background sky     
 	//vec3 col = vec3(0.6,0.71,0.85) - endPos.y*0.2*vec3(1.0,0.5,1.0) + 0.15*0.5;
 	vec3 col = mix(skyColorBottom, skyColorTop, clamp(1 - exp(8.5-17.*clamp(normalize(d).y*0.5 + 0.5,0.0,1.0)),0.0,1.0));
-	float sun = clamp( dot(SUN_DIR,d), 0.0, 1.0 );
-	col += 0.8*vec3(1.0,.6,0.1)*pow( sun, 350.0 );
+	
+	col += getSun(d, 350.0);
 
 	return vec4(col, 1.0);
 }
+
+
 
 
 float Random2D(in vec3 st)
@@ -514,7 +522,7 @@ void main()
 	float fogAmount = computeFogAmount(fogRay, 0.00006);
 
 	fragColor_v = bg;
-	bloom_v = bg;
+	bloom_v = vec4(getSun(worldDir, 128)*1.3,1.0);
 
 	if(fogAmount > 0.965){
 		fragColor_v = bg;
@@ -562,7 +570,7 @@ void main()
 	//alphaness = vec4(cloudAlphaness, 0.0, 0.0, 1.0); // alphaness buffer
 	alphaness_v = vec4(cloudAlphaness, 0.0, 0.0, 1.0); // alphaness buffer
 
-	bloom_v = bg; // bloom is occlusion buffer for post proc crepuscolar rays
+	//bloom_v = bg; // bloom is occlusion buffer for post proc crepuscolar rays
 	if(cloudAlphaness > 0.1){ //apply fog to bloom buffer
 		float fogAmount = computeFogAmount(startPos, 0.00003);
 

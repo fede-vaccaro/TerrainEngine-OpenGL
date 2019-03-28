@@ -10,7 +10,6 @@ Water::Water(glm::vec2 position, float scale, float height): scale(scale), heigh
 	shad->attachShader("shaders/waterVertexShader.vert");
 	shad->attachShader("shaders/waterFragmentShader.frag");
 	shad->linkPrograms();
-	std::cout << "============= CREATING WaterSHADER ==============" << std::endl;
 	//waterPlane = new Model("resources/plane.obj", GL_TRIANGLES);
 
 	//dudvMap = TextureFromFile("waterDUDV.png", "resources", false);

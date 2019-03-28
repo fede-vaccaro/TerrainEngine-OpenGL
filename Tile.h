@@ -18,6 +18,7 @@ class Tile : public drawableObject
 public:
 
 	Tile(float scale, int gl);
+	
 	virtual ~Tile();
 	//void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up, std::vector<glm::vec2> & pos);
 	virtual void draw();
@@ -107,6 +108,10 @@ private:
 	void changeTiles(tPosition currentTile);
 	void addColumn(int direction);
 	void addRow(int direction);
+
+	void generateTileGrid(glm::vec2 offset);
+
+	bool getWhichTileCameraIs(glm::vec2& result);
 
 	void getColRow(int i, int& col, int& row) {
 		col = (i) % gridLength;

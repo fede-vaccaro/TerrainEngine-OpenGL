@@ -68,17 +68,34 @@ Tile::Tile(float scale, int gl) : scaleFactor(scale)
 	//waterHeight = 128.0 + 50.0;
 
 	positionVec.resize(gridLength*gridLength);
-	for (int i = 0; i < gridLength; i++) {
-		for (int j = 0; j < gridLength; j++) {
-			glm::vec2 pos = (float)(j - gridLength / 2)*glm::vec2(I) + (float)(i - gridLength / 2)*glm::vec2(J);
-			setPos(i, j, pos);
-		}
-	}
+	generateTileGrid(glm::vec2(0.0,0.0));
 
 	setPositionsArray(positionVec);
 
 	rockColor = glm::vec4(120, 105, 75, 255)*1.5f / 255.f;
 	power = 3.0;
+}
+
+void Tile::generateTileGrid(glm::vec2 offset)
+{
+	for (int i = 0; i < gridLength; i++) {
+		for (int j = 0; j < gridLength; j++) {
+			glm::vec2 pos = (float)(j - gridLength / 2)*glm::vec2(I) + (float)(i - gridLength / 2)*glm::vec2(J);
+			setPos(i, j, pos + offset);
+		}
+	}
+}
+
+bool Tile::getWhichTileCameraIs(glm::vec2& result) {
+
+	for (glm::vec2 p : positionVec) {
+		if (inTile(scene->cam, p)) {
+			//std::cout << "You're in Tile: " << p.x << ", " << p.y << std::endl;
+			result = p;
+			return true;
+		}
+	}
+	return false;
 }
 
 
@@ -179,22 +196,6 @@ void Tile::drawVertices(int nInstances) {
 	glBindVertexArray(0);
 }
 
-void Tile::setPositionsUniforms( std::vector<glm::vec2> & pos) {
-	shad->use();
-	float t1 = glfwGetTime();
-	int nIstances = pos.size();
-	for (int i = 0; i < nIstances; i++) {
-		std::stringstream ss;
-		ss << i;
-		std::string num = ss.str();
-		shad->setVec2("position[" + num + "]", pos[i]);
-	}
-	float t2 = glfwGetTime();
-
-	std::cout << "Time to submit positions: " << t2 - t1 << "; ";
-
-}
-
 void Tile::setPositionsArray(std::vector<glm::vec2> & pos) {
 	if (posBuffer) {
 		this->deleteBuffer();
@@ -254,48 +255,19 @@ void Tile::updateTiles() {
 	int howManyTiles = 0;
 	bool found = false;
 
-
-
-	glm::vec2 posC = getPos(gridLength / 2, gridLength / 2),
-		posS = posC - I,
-		posN = posC + I,
-		posE = posC + J,
-		posW = posC - J,
-		posSE = posS + posE - posC,
-		posSW = posS + posW - posC,
-		posNE = posN + posE - posC,
-		posNW = posN + posW - posC;
-
-	//if (tile->inTile(s->cam, posC)) std::cout << "IN C" << std::endl;
-	if (inTile(se->cam, posS)) whichTile = S, howManyTiles++;// , std::cout << "IN S" << std::endl;
-	if (inTile(se->cam, posE)) whichTile = E, howManyTiles++;// , std::cout << "IN E" << std::endl;
-	if (inTile(se->cam, posW)) whichTile = W, howManyTiles++;// , std::cout << "IN W" << std::endl;
-	if (inTile(se->cam, posN)) whichTile = N, howManyTiles++;// , std::cout << "IN N" << std::endl;
-	if (inTile(se->cam, posNE)) whichTile = NE, howManyTiles++;
-	if (inTile(se->cam, posNW)) whichTile = NW, howManyTiles++;
-	if (inTile(se->cam, posSE)) whichTile = SE, howManyTiles++;
-	if (inTile(se->cam, posSW)) whichTile = SW, howManyTiles++;
-
-	for (int i = 0; i < positionVec.size(); i++) {
-		if (inTile(se->cam, positionVec[i])) {
-			int row, col;
-			this->getColRow(i, col, row);
-			//std::cout << "In position, col: " << col << ", row: " << row << std::endl;
+	glm::vec2 currentTile;
+	if (getWhichTileCameraIs(currentTile)) {
+		glm::vec2 center = getPos(gridLength / 2, gridLength / 2);
+		for (glm::vec2& p : positionVec) {
+			p += currentTile - center;
 		}
-
-	}
-
-	//std::cout << camPosition.x << " " << camPosition.y << std::endl;
-
-	if (howManyTiles == 1) {
-		std::cout << "Changing tile reference system to: " << direction((tPosition)whichTile) << std::endl;
-		changeTiles((tPosition)whichTile);
 		setPositionsArray(positionVec);
-	}
-	else if (howManyTiles > 1) {
-		std::cout << "You're on a border!" << std::endl;
-	}
 
+		if (waterPtr) {
+			float waterHeight = waterPtr->getModelMatrix()[3][1];
+			waterPtr->setPosition(getPos(gridLength / 2, gridLength / 2), scaleFactor*gridLength, waterHeight);
+		}
+	}
 }
 
 
@@ -311,100 +283,4 @@ void Tile::reset() {
 	setGrassCoverage(grassCoverage);
 	setDispFactor(dispFactor);
 	setTessMultiplier(tessMultiplier);
-}
-
-void Tile::changeTiles(tPosition currentTile) {
-	if (currentTile == N) {
-		addRow(1);
-	}
-	else if (currentTile == S) {
-		addRow(-1);
-	}
-	else if (currentTile == E) {
-		addColumn(1);
-	}
-	else if (currentTile = W) {
-		addColumn(-1);
-	}
-	else if (currentTile = NW) {
-		addRow(1);
-		addColumn(-1);
-	}
-	else if (currentTile = NE) {
-		addRow(1);
-		addColumn(1);
-	}
-	else if (currentTile = SW) {
-		addRow(-1);
-		addColumn(-1);
-	}
-	else if (currentTile = SE) {
-		addRow(-1);
-		addColumn(1);
-	}
-
-	if (waterPtr) {
-		float waterHeight = waterPtr->getModelMatrix()[3][1];
-		waterPtr->setPosition(getPos(gridLength / 2, gridLength / 2), scaleFactor*gridLength, waterHeight);
-	}
-}
-
-void Tile::addColumn(int direction) {
-	if (direction > 0) {
-
-		for (int i = 0; i < gridLength - 1; i++) {
-			for (int j = 0; j < gridLength; j++) {
-				setPos(i, j, getPos(i + 1, j));
-			}
-		}
-
-		int i = gridLength - 1;
-		for (int j = 0; j < gridLength; j++) {
-			setPos(i, j, getPos(i, j) + this->J);
-		}
-
-	}
-	else if (direction < 0) {
-		for (int i = gridLength - 1; i > 0; i--) {
-			for (int j = 0; j < gridLength; j++) {
-				setPos(i, j, getPos(i - 1, j));
-			}
-		}
-
-		int i = 0;
-		for (int j = 0; j < gridLength; j++) {
-			setPos(i, j, getPos(i, j) - this->J);
-		}
-
-	}
-}
-
-void Tile::addRow(int direction) {
-	if (direction > 0) {
-
-		for (int i = 0; i < gridLength; i++) {
-			for (int j = 0; j < gridLength - 1; j++) {
-				setPos(i, j, getPos(i, j + 1));
-			}
-		}
-
-		int j = gridLength - 1;
-		for (int i = 0; i < gridLength; i++) {
-			setPos(i, j, getPos(i, j) + this->I);
-		}
-
-	}
-	else if (direction < 0) {
-		for (int i = 0; i < gridLength; i++) {
-			for (int j = gridLength - 1; j > 0; j--) {
-				setPos(i, j, getPos(i, j - 1));
-			}
-		}
-
-		int j = 0;
-		for (int i = 0; i < gridLength; i++) {
-			setPos(i, j, getPos(i, j) - this->I);
-		}
-
-	}
 }
