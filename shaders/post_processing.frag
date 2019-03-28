@@ -6,6 +6,7 @@ in vec2 TexCoords;
 uniform sampler2D screenTexture;
 uniform sampler2D cloudTEX;
 uniform sampler2D depthTex;
+uniform bool wireframe;
 
 uniform vec2 resolution;
 
@@ -29,7 +30,7 @@ void main()
 	vec4 cloud = texture(cloudTEX, TexCoords);
 	vec4 bg = texture(screenTexture, TexCoords);
 	float mixVal = (texture(depthTex, TexCoords).r < 1.0 ? 0.0 : 1.0);
-	vec4 col = mix(bg, cloud, mixVal);
+	vec4 col = mix(bg, cloud, (!wireframe ? mixVal : 0.0));
 
 	const float gamma = 2.2;
     const float exposure = 3.0;

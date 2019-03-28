@@ -48,7 +48,7 @@ Tile::Tile(float scale, int gl) : scaleFactor(scale)
 
 	this->I = glm::vec2(1, 0)*s;
 	this->J = glm::vec2(0, 1)*s;
-	res = 5;
+	res = 4;
 	initializePlaneVAO(res, tileW, &planeVAO, &planeVBO, &planeEBO);
 	//planeModel = new Model("resources/plane.obj", GL_PATCHES);
 	//waterModel = new Model("resources/plane.obj", GL_TRIANGLES);

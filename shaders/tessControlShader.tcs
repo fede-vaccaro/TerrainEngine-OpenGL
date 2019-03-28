@@ -117,7 +117,7 @@ float GetTessLevel(float Distance0, float Distance1)
         return 30.0;                                                                            
     }
 	else if (AvgDistance <= 300.0*10.0) { 
-        return 5.0;                                                                            
+        return 10.0;                                                                            
     }else if(AvgDistance <= 1200.0*10.0){
 		return 2.5;
 	}
@@ -137,10 +137,16 @@ void main()
     WorldPos_ES_in[gl_InvocationID] = WorldPos_CS_in[gl_InvocationID];                          
                                                                                                 
     // Calculate the distance from the camera to the three control points                       
-    vec3 pos = vec3(gEyeWorldPos.x, perlin(gEyeWorldPos.xz), gEyeWorldPos.z);
-	float EyeToVertexDistance0 = distance(pos, WorldPos_ES_in[0]);                     
-    float EyeToVertexDistance1 = distance(pos, WorldPos_ES_in[1]);                     
-    float EyeToVertexDistance2 = distance(pos, WorldPos_ES_in[2]);                     
+    //vec3 pos = vec3(gEyeWorldPos.x, perlin(gEyeWorldPos.xz), gEyeWorldPos.z);
+
+	vec3 WorldPos1 = vec3(WorldPos_ES_in[0].x, perlin(WorldPos_ES_in[0].xz), WorldPos_ES_in[0].z);
+	vec3 WorldPos2 = vec3(WorldPos_ES_in[1].x, perlin(WorldPos_ES_in[1].xz), WorldPos_ES_in[1].z);
+	vec3 WorldPos3 = vec3(WorldPos_ES_in[2].x, perlin(WorldPos_ES_in[2].xz), WorldPos_ES_in[2].z);
+
+
+	float EyeToVertexDistance0 = distance(gEyeWorldPos, WorldPos1);                     
+    float EyeToVertexDistance1 = distance(gEyeWorldPos, WorldPos2);                
+    float EyeToVertexDistance2 = distance(gEyeWorldPos, WorldPos3);                      
                                                                                                 
     // Calculate the tessellation levels                                                        
     gl_TessLevelOuter[0] = tessMultiplier*GetTessLevel(EyeToVertexDistance1, EyeToVertexDistance2);            
