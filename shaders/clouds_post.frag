@@ -14,6 +14,7 @@ uniform vec2 resolution;// = vec2(1920.0, 1080.0);
 uniform vec2 cloudRenderResolution;
 
 uniform bool isLightInFront = true;
+uniform bool enableGodRays;
 uniform float lightDotCameraFront;
 
 #define  offset_x  1. / cloudRenderResolution.x  
@@ -63,7 +64,7 @@ void main()
 	/////////////////////////////////////////////// RADIAL BLUR - CREPUSCOLAR RAYS
 	bvec2 lowerLimit = greaterThan(lightPos.xy, vec2(0.0));
 	bvec2 upperLimit = lessThan(lightPos.xy, vec2(1.));
-	if(  lightDotCameraFront > 0.0 )
+	if(  lightDotCameraFront > 0.0 && enableGodRays)
 	{
     // Screen coordinates.
     vec2 uv = gl_FragCoord.xy / resolution;

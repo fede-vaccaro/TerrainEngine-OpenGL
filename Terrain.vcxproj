@@ -196,7 +196,6 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\clouds_post.comp" />
     <None Include="shaders\clouds_post.frag" />
     <None Include="shaders\copyFrame.frag" />
     <None Include="shaders\perlinworley.comp" />

@@ -226,8 +226,5 @@
     <None Include="shaders\volumetric_clouds.comp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\clouds_post.comp">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

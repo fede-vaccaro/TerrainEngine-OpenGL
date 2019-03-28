@@ -61,7 +61,7 @@ int main()
 	Camera camera(startPosition);
 
 	int success;
-	Window window(success, 2560*0.9, 1440*0.9);
+	Window window(success, 2560*0.85, 1440*0.85);
 	if (!success) return -1;
 
 	// GUI

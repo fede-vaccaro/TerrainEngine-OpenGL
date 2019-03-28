@@ -10,6 +10,8 @@ float VolumetricClouds::curliness = .1;
 float VolumetricClouds::density = 0.02;
 float VolumetricClouds::absorption = 0.35;
 
+bool VolumetricClouds::enableGodRays = false;
+
 glm::vec3 VolumetricClouds::seed = glm::vec3(0.0, 0.0, 0.0);
 glm::vec3 VolumetricClouds::oldSeed = glm::vec3(0.0, 0.0, 0.0);
 
@@ -125,13 +127,14 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 void VolumetricClouds::setGui() {
 	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Clouds Controls");
 	//ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-	ImGui::Checkbox("PostProc + God Rays", this->getPostProcPointer());
+	ImGui::Checkbox("Post Processing (Gaussian Blur)", this->getPostProcPointer());
+	ImGui::Checkbox("God Rays", &enableGodRays);
 	ImGui::SliderFloat("Coverage", this->getCoveragePointer(), 0.0f, 1.0f);
 	ImGui::SliderFloat("Speed", this->getCloudSpeedPtr(), 0.0f, 5.0E3);
 	ImGui::SliderFloat("Crispiness", this->getCloudCrispinessPtr(), 0.0f, 100.0f);
 	ImGui::SliderFloat("Curliness", &curliness, 0.0f, 3.0f);
 	ImGui::SliderFloat("Density", &density, 0.0f, 0.1f);
-	//ImGui::SliderFloat("Cloud absorption", &absorption, 0.0f, 1.0f);
+	ImGui::SliderFloat("Cloud absorption", &absorption, 0.0f, 1.0f);
 
 	glm::vec3 * cloudBottomColor = this->getCloudColorBottomPtr();
 	ImGui::ColorEdit3("Cloud color", (float*)cloudBottomColor); // Edit 3 floats representing a color
@@ -232,6 +235,7 @@ void VolumetricClouds::draw() {
 		}
 
 		cloudsPPShader.setBool("isLightInFront", isLightInFront);
+		cloudsPPShader.setBool("enableGodRays", enableGodRays);
 		cloudsPPShader.setFloat("lightDotCameraFront", lightDotCameraFront);
 
 		cloudsPPShader.setFloat("time", glfwGetTime());
