@@ -110,9 +110,16 @@ int main()
 
 	glm::vec3 clearTopCloudColor = *volumetricClouds.getCloudColorTopPtr();
 	glm::vec3 clearBottomCloudColor = *volumetricClouds.getCloudColorBottomPtr();
-	glm::vec3 lightDir = glm::vec3(-.5, .4, 1.0);
 
 	bool useSeed = true;
+	glm::vec3 lightDir = glm::vec3(-.5, 0.5, 1.0);
+
+
+	colorPreset presetHighSun = volumetricClouds.DefaultPreset();
+	colorPreset presetSunset = volumetricClouds.SunsetPreset();
+
+	auto sigmoid = [](float v) { return 1/(1.0 + exp(8.0-v*40.0)); };
+	volumetricClouds.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
 
 	while (window.continueLoop())
 	{
@@ -239,19 +246,27 @@ int main()
 		{
 			static int counter = 0;
 
-			
-			volumetricClouds.setGui();
-
 			ImGui::Begin("Scene controls: ");
+			volumetricClouds.setGui();
 			terrain.setGui();
 			water.setGui();
 
 			ImGui::TextColored(ImVec4(1, 1, 0, 1), "Other controls");
-			ImGui::DragFloat3("Light Position", &lightDir[0], 0.03, -1.0, 1.0);
+			if (ImGui::DragFloat3("Light Position", &lightDir[0], 0.01, -1.0, 1.0)) {
+				auto saturate = [](float v) { return std::min(std::max(v, 0.0f), 0.8f); };
+				
+				lightDir.y = saturate(lightDir.y);
+				volumetricClouds.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
+
+			}
 			ImGui::InputFloat3("Camera Position", &camera.Position[0], 7);
 			ImGui::ColorEdit3("Light color", (float*)&lightColor); 
 			ImGui::ColorEdit3("Fog color", (float*)&fogColor);
 			ImGui::SliderFloat("Camera speed", &camera.MovementSpeed, 0.0, SPEED*3.0);
+			
+			
+
+			
 			ImGui::Checkbox("Wireframe mode", &scene.wireframe);
 
 			if (ImGui::Button("Generate seed"))
@@ -261,11 +276,22 @@ int main()
 			ImGui::SameLine();
 			if (ImGui::Button("Use default seed"))
 				scene.seed = glm::vec3(0.0, 0.0, 0.0);
-			if (ImGui::Button("Sunset")) {
-				volumetricClouds.SunsetPreset();
+
+			/*ImGui::SameLine();
+			if (ImGui::Button("Default Preset")) {
+				volumetricClouds.DefaultPreset();
+				lightDir.y = 0.5;
+			}*/
+			//ImGui::SameLine();
+			if (ImGui::Button("Sunset Preset 1")) {
+				presetSunset = volumetricClouds.SunsetPreset();
+				volumetricClouds.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
 			}
-			if (ImGui::Button("Use default seed"))
-				scene.seed = glm::vec3(0.0, 0.0, 0.0);
+			ImGui::SameLine();
+			if (ImGui::Button("Sunset Preset 2")) {
+				presetSunset = volumetricClouds.SunsetPreset1();
+				volumetricClouds.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
+			}
 
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();

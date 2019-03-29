@@ -127,7 +127,7 @@ void Window::processInput(float frameTime) {
 		mouseCursorDisabled = !mouseCursorDisabled;
 		if (mouseCursorDisabled)
 			firstMouse = true;
-		std::cout << "MOUSE R PRESSED!" << std::endl;
+		//std::cout << "MOUSE R PRESSED!" << std::endl;
 	}
 
 	oldState = newState;

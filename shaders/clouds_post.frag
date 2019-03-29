@@ -97,7 +97,7 @@ void main()
     
     //FragColor -= 0.2;
 	//FragColor.rgb += (smoothstep(0., 1., colRays)*exposure - 0.2);
-	vec3 colorWithRays = FragColor.rgb +  (smoothstep(0., 1., colRays)*exposure - 0.2);
+	vec3 colorWithRays = FragColor.rgb +  (smoothstep(0., 1., colRays)*exposure);
 	FragColor.rgb = mix(FragColor.rgb, colorWithRays*0.9, lightDotCameraFront*lightDotCameraFront);
 	//FragColor.rgb = (smoothstep(0., 1., colRays)*exposure - 0.2);
 	}

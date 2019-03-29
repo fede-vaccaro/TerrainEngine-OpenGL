@@ -17,6 +17,7 @@ float VolumetricClouds::sphereOuterRadius = 17000.0;
 float VolumetricClouds::perlinFrequency = 0.8;
 
 bool VolumetricClouds::enableGodRays = false;
+bool VolumetricClouds::enablePowder = false;
 
 glm::vec3 VolumetricClouds::seed = glm::vec3(0.0, 0.0, 0.0);
 glm::vec3 VolumetricClouds::oldSeed = glm::vec3(0.0, 0.0, 0.0);
@@ -43,22 +44,58 @@ void VolumetricClouds::generateWeatherMap() {
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
-void VolumetricClouds::SunsetPreset() {
-	cloudColorBottom = glm::vec3(89, 96, 109) / 255.f;
-	skyColorTop = glm::vec3(177, 174, 119) / 255.f;
-	skyColorBottom = glm::vec3(234, 125, 125) / 255.f;
 
-	scene->lightColor = glm::vec3(255, 171, 125) / 255.f;
-	scene->fogColor = glm::vec3(85, 97, 120) / 255.f;
+
+colorPreset VolumetricClouds::SunsetPreset() {
+	colorPreset preset;
+
+	preset.cloudColorBottom  = glm::vec3(89, 96, 109) / 255.f;
+	preset.skyColorTop  = glm::vec3(177, 174, 119) / 255.f;
+	preset.skyColorBottom  = glm::vec3(234, 125, 125) / 255.f;
+
+	preset.lightColor  = glm::vec3(255, 171, 125) / 255.f;
+	preset.fogColor  = glm::vec3(85, 97, 120) / 255.f;
+	return preset;
 }
 
-void VolumetricClouds::SunsetPreset1() {
-	cloudColorBottom = glm::vec3(97, 98, 120) / 255.f;
-	skyColorTop = glm::vec3(133, 158, 214) / 255.f;
-	skyColorBottom = glm::vec3(241, 161, 161) / 255.f;
+colorPreset VolumetricClouds::DefaultPreset() {
+	colorPreset preset;
 
-	scene->lightColor = glm::vec3(255, 201, 201) / 255.f;
-	scene->fogColor = glm::vec3(128, 153, 179) / 255.f;
+	preset.cloudColorBottom = (glm::vec3(65., 70., 80.)*(1.5f / 255.f));
+	
+	preset.skyColorTop  = glm::vec3(0.5, 0.7, 0.8)*1.05f;
+	preset.skyColorBottom  = glm::vec3(0.9, 0.9, 0.95);
+
+	preset.lightColor  = glm::vec3(255, 255, 230) / 255.f;
+	preset.fogColor  = glm::vec3(0.5, 0.6, 0.7);
+
+	return preset;
+}
+
+
+
+void VolumetricClouds::mixSkyColorPreset(float v, colorPreset p1, colorPreset p2) {
+	float a = std::min(std::max(v, 0.0f), 1.0f);
+	float b = 1.0 - a;
+
+	cloudColorBottom = p1.cloudColorBottom*a + p2.cloudColorBottom*b;
+	skyColorTop = p1.skyColorTop*a + p2.skyColorTop*b;
+	skyColorBottom = p1.skyColorBottom*a + p2.skyColorBottom*b;
+	scene->lightColor = p1.lightColor*a + p2.lightColor*b;
+	scene->fogColor = p1.fogColor*a + p2.fogColor*b;
+}
+
+colorPreset VolumetricClouds::SunsetPreset1() {
+	colorPreset preset;
+
+	preset.cloudColorBottom  = glm::vec3(97, 98, 120) / 255.f;
+	preset.skyColorTop  = glm::vec3(133, 158, 214) / 255.f;
+	preset.skyColorBottom  = glm::vec3(241, 161, 161) / 255.f;
+
+	preset.lightColor  = glm::vec3(255, 201, 201) / 255.f;
+	preset.fogColor  = glm::vec3(128, 153, 179) / 255.f;
+
+	return preset;
 }
 
 VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH) {
@@ -146,6 +183,7 @@ void VolumetricClouds::setGui() {
 	ImGui::SliderFloat("Curliness", &curliness, 0.0f, 3.0f);
 	ImGui::SliderFloat("Density", &density, 0.0f, 0.1f);
 	ImGui::SliderFloat("Light absorption", &absorption, 0.0f, 1.5f);
+	ImGui::Checkbox("Enable sugar powder effect", &enablePowder);
 
 	
 	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Dome controls");
@@ -202,6 +240,8 @@ void VolumetricClouds::draw() {
 	cloudsShader.setFloat("curliness", curliness);
 	cloudsShader.setFloat("absorption", absorption*0.01);
 	cloudsShader.setFloat("densityFactor", density);
+
+	//cloudsShader.setBool("enablePowder", enablePowder);
 	
 	cloudsShader.setFloat("earthRadius", earthRadius);
 	cloudsShader.setFloat("sphereInnerRadius", sphereInnerRadius);

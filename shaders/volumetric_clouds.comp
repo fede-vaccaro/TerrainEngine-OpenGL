@@ -382,6 +382,7 @@ uniform float bayerFilter[16u] = float[]
 	15.0*BAYER_FACTOR, 7.0*BAYER_FACTOR, 13.0*BAYER_FACTOR, 5.0*BAYER_FACTOR
 );
 
+uniform bool enablePowder = false;
 
 uniform float densityFactor = 0.02;
 vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg, out vec4 cloudPos){
@@ -433,8 +434,10 @@ vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg, out vec4 cloudPos){
 			float scattering = mix(HG(lightDotEye, -0.08), HG(lightDotEye, 0.08), clamp(lightDotEye*0.5 + 0.5, 0.0, 1.0));
 			//scattering = 0.6;
 			scattering = max(scattering, 1.0);
-			//float powderTerm =  powder(density_sample);
-			float powderTerm = 1.0;
+			float powderTerm =  powder(density_sample);
+			if(!enablePowder)
+				powderTerm = 1.0;
+			
 			vec3 S = 0.6*( mix( mix(ambientLight*1.8, bg, 0.2), scattering*SUN_COLOR, powderTerm*light_density)) * density_sample;
 			float dTrans = exp(density_sample*sigma_ds);
 			vec3 Sint = (S - S * dTrans) * (1. / density_sample);

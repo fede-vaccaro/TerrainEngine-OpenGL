@@ -10,6 +10,10 @@
 #include <algorithm>
 #include "drawableObject.h"
 
+struct colorPreset {
+	glm::vec3 cloudColorBottom, skyColorTop, skyColorBottom, lightColor, fogColor;
+};
+
 class VolumetricClouds : public drawableObject
 {
 public:
@@ -20,9 +24,11 @@ public:
 
 	void generateWeatherMap();
 
-	void SunsetPreset();
+	colorPreset DefaultPreset();
+	colorPreset SunsetPreset();
+	colorPreset SunsetPreset1();
 
-	void SunsetPreset1();
+	void mixSkyColorPreset(float v, colorPreset p1, colorPreset p2);
 
 	unsigned int getCloudsTexture() { 
 		return (postProcess ? cloudsPostProcessingFBO->getColorAttachmentTex(0) : getCloudsRawTexture());
@@ -87,6 +93,7 @@ private:
 	static float earthRadius, sphereInnerRadius, sphereOuterRadius;
 	static float perlinFrequency;
 	static bool enableGodRays;
+	static bool enablePowder;
 	static glm::vec3 cloudColorTop, cloudColorBottom;
 	static glm::vec3 skyColorTop, skyColorBottom;
 	
