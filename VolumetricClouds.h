@@ -84,6 +84,8 @@ public:
 private:
 	int SCR_WIDTH, SCR_HEIGHT;
 	static float coverage, cloudSpeed, crispiness, curliness, density, absorption;
+	static float earthRadius, sphereInnerRadius, sphereOuterRadius;
+	static float perlinFrequency;
 	static bool enableGodRays;
 	static glm::vec3 cloudColorTop, cloudColorBottom;
 	static glm::vec3 skyColorTop, skyColorBottom;

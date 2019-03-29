@@ -10,6 +10,12 @@ float VolumetricClouds::curliness = .1;
 float VolumetricClouds::density = 0.02;
 float VolumetricClouds::absorption = 0.35;
 
+float VolumetricClouds::earthRadius = 600000.0;
+float VolumetricClouds::sphereInnerRadius = 5000.0;
+float VolumetricClouds::sphereOuterRadius = 17000.0;
+
+float VolumetricClouds::perlinFrequency = 0.8;
+
 bool VolumetricClouds::enableGodRays = false;
 
 glm::vec3 VolumetricClouds::seed = glm::vec3(0.0, 0.0, 0.0);
@@ -29,6 +35,7 @@ void VolumetricClouds::generateWeatherMap() {
 	bindTexture2D(weatherTex, 0);
 	weatherShader->use();
 	weatherShader->setVec3("seed", scene->seed);
+	weatherShader->setFloat("perlinFrequency", perlinFrequency);
 	std::cout << "computing weather!" << std::endl;
 	glDispatchCompute(INT_CEIL(1024, 8), INT_CEIL(1024, 8), 1);
 	std::cout << "weather computed!!" << std::endl;
@@ -125,23 +132,39 @@ VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH
 #define TIMETO(CODE, TASK) 	t1 = glfwGetTime(); CODE; t2 = glfwGetTime(); std::cout << "Time to " + std::string(TASK) + " :" << (t2 - t1)*1e3 << "ms" << std::endl;
 
 void VolumetricClouds::setGui() {
-	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Clouds Controls");
+
+	ImGui::Begin("Clouds controls: ");
+	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Post Proceesing");
 	//ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
 	ImGui::Checkbox("Post Processing (Gaussian Blur)", this->getPostProcPointer());
 	ImGui::Checkbox("God Rays", &enableGodRays);
+	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Clouds rendering");
+
 	ImGui::SliderFloat("Coverage", this->getCoveragePointer(), 0.0f, 1.0f);
 	ImGui::SliderFloat("Speed", this->getCloudSpeedPtr(), 0.0f, 5.0E3);
-	ImGui::SliderFloat("Crispiness", this->getCloudCrispinessPtr(), 0.0f, 100.0f);
+	ImGui::SliderFloat("Crispiness", this->getCloudCrispinessPtr(), 0.0f, 120.0f);
 	ImGui::SliderFloat("Curliness", &curliness, 0.0f, 3.0f);
 	ImGui::SliderFloat("Density", &density, 0.0f, 0.1f);
-	ImGui::SliderFloat("Cloud absorption", &absorption, 0.0f, 1.0f);
+	ImGui::SliderFloat("Light absorption", &absorption, 0.0f, 1.5f);
 
+	
+	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Dome controls");
+	ImGui::SliderFloat("Sky dome radius", &earthRadius, 10000.0f, 5000000.0f);
+	ImGui::SliderFloat("Clouds bottom height", &sphereInnerRadius, 1000.0f, 15000.0f);
+	ImGui::SliderFloat("Clouds top height", &sphereOuterRadius, 1000.0f, 40000.0f);
+	
+	if(ImGui::SliderFloat("Clouds frequency", &perlinFrequency, 0.0f, 4.0f))
+		generateWeatherMap();
+
+
+	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Clouds conlors");
 	glm::vec3 * cloudBottomColor = this->getCloudColorBottomPtr();
 	ImGui::ColorEdit3("Cloud color", (float*)cloudBottomColor); // Edit 3 floats representing a color
 
-	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Sky controls");
+	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Sky colors controls");
 	ImGui::ColorEdit3("Sky top color", (float*)this->getSkyTopColorPtr()); // Edit 3 floats representing a color
 	ImGui::ColorEdit3("Sky bottom color", (float*)this->getSkyBottomColorPtr()); // Edit 3 floats representing a color
+	ImGui::End();
 }
 
 void VolumetricClouds::draw() {
@@ -179,6 +202,10 @@ void VolumetricClouds::draw() {
 	cloudsShader.setFloat("curliness", curliness);
 	cloudsShader.setFloat("absorption", absorption*0.01);
 	cloudsShader.setFloat("densityFactor", density);
+	
+	cloudsShader.setFloat("earthRadius", earthRadius);
+	cloudsShader.setFloat("sphereInnerRadius", sphereInnerRadius);
+	cloudsShader.setFloat("sphereOuterRadius", sphereOuterRadius);
 
 	cloudsShader.setVec3("cloudColorTop", cloudColorTop);
 	cloudsShader.setVec3("cloudColorBottom", cloudColorBottom);

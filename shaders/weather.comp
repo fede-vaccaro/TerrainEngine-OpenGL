@@ -26,7 +26,7 @@ float random2D( in vec2 st )
 // PERLIN NOISE SPECIFIC
 
 uniform float perlinAmplitude = 0.5;
-uniform float perlinFrecuency = 0.8;
+uniform float perlinFrequency = 0.8;
 uniform float perlinScale = 100.0;
 uniform int perlinOctaves = 4;
 
@@ -85,7 +85,7 @@ void main()
 
 	//cloudType = cloudType*0.5 + cloudType_*0.5;
 
-	float coverage = perlinNoise(uv, perlinScale*0.95, perlinFrecuency, perlinAmplitude, 4);
+	float coverage = perlinNoise(uv, perlinScale*0.95, perlinFrequency, perlinAmplitude, 4);
 	vec4 weather = vec4( clamp(coverage, 0, 1), cloudType, 0, 1);
 
 	imageStore (outWeatherTex, pixel, weather);

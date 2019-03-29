@@ -60,9 +60,14 @@ uniform vec3 noiseKernel[6u] = vec3[]
 #define STRATOCUMULUS_GRADIENT vec4(0.02, 0.2, 0.48, 0.625)
 #define CUMULUS_GRADIENT vec4(0.00, 0.1625, 0.88, 0.98)
 
-#define EARTH_RADIUS (600000.)
-#define SPHERE_INNER_RADIUS (EARTH_RADIUS + 5000.0)
-#define SPHERE_OUTER_RADIUS (SPHERE_INNER_RADIUS + 17000.0)
+
+uniform float earthRadius = 600000.0;
+uniform float sphereInnerRadius = 5000.0;
+uniform float sphereOuterRadius = 17000.0;
+
+#define EARTH_RADIUS earthRadius
+#define SPHERE_INNER_RADIUS (EARTH_RADIUS + sphereInnerRadius)
+#define SPHERE_OUTER_RADIUS (SPHERE_INNER_RADIUS + sphereOuterRadius)
 #define SPHERE_DELTA float(SPHERE_OUTER_RADIUS - SPHERE_INNER_RADIUS)
 
 
@@ -460,7 +465,7 @@ vec2 computeScreenPos(vec2 ndc){
 	return (ndc*0.5 + 0.5);
 }
 
-float computeFogAmount(in vec3 startPos, in float factor = 0.00006){
+float computeFogAmount(in vec3 startPos, in float factor){
 	float dist = length(startPos - cameraPosition);
 	float radius = (cameraPosition.y - sphereCenter.y) * 0.3;
 	float alpha = (dist / radius);

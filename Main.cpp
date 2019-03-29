@@ -239,9 +239,10 @@ int main()
 		{
 			static int counter = 0;
 
-			ImGui::Begin("Scene controls: ");                          
 			
 			volumetricClouds.setGui();
+
+			ImGui::Begin("Scene controls: ");
 			terrain.setGui();
 			water.setGui();
 
