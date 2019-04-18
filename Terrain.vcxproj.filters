@@ -81,12 +81,6 @@
     <ClInclude Include="Engine\buffers.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\computeShader.h">
-      <Filter>Header Files\Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\CustomTypes.h">
-      <Filter>Header Files\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\glError.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
@@ -153,9 +147,6 @@
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\buffers.cpp">
-      <Filter>Source Files\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\computeShader.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\glError.cpp">
@@ -227,15 +218,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\visualizeFbo.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\testComputeShaderB.comp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\testComputeShaderC.comp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\testComputeShaderA.comp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\volumetric_clouds.comp">

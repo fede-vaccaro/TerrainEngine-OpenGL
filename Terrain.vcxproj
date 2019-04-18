@@ -150,8 +150,6 @@
     <ClInclude Include="drawableObject.h" />
     <ClInclude Include="Engine\BaseShader.h" />
     <ClInclude Include="Engine\buffers.h" />
-    <ClInclude Include="Engine\computeShader.h" />
-    <ClInclude Include="Engine\CustomTypes.h" />
     <ClInclude Include="Engine\glError.h" />
     <ClInclude Include="Engine\ScreenQuad.h" />
     <ClInclude Include="Engine\shader.h" />
@@ -177,7 +175,6 @@
     <ClCompile Include="drawableObject.cpp" />
     <ClCompile Include="Engine\BaseShader.cpp" />
     <ClCompile Include="Engine\buffers.cpp" />
-    <ClCompile Include="Engine\computeShader.cpp" />
     <ClCompile Include="Engine\glError.cpp" />
     <ClCompile Include="Engine\ScreenQuad.cpp" />
     <ClCompile Include="Engine\shader.cpp" />
@@ -203,9 +200,6 @@
     <None Include="shaders\copyFrame.frag" />
     <None Include="shaders\perlinworley.comp" />
     <None Include="shaders\post_processing.frag" />
-    <None Include="shaders\testComputeShaderA.comp" />
-    <None Include="shaders\testComputeShaderB.comp" />
-    <None Include="shaders\testComputeShaderC.comp" />
     <None Include="shaders\visualizeFbo.frag" />
     <None Include="shaders\volumetric_clouds.comp" />
     <None Include="shaders\volumetric_clouds.frag" />
