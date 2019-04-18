@@ -163,24 +163,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\tessControlShader.tcs">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\tessEvaluationShader.tes">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\tessFragmentShader.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\tessVertexShader.vert">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\waterFragmentShader.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\waterVertexShader.vert">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="shaders\skyboxFrag.frag">
       <Filter>Resource Files</Filter>
     </None>
@@ -221,6 +203,24 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\volumetric_clouds.comp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\terrain.tcs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\terrain.tes">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\terrain.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\terrain.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\water.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\water.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

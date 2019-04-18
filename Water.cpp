@@ -7,8 +7,8 @@ Water::Water(glm::vec2 position, float scale, float height): scale(scale), heigh
 
 	//shad = new Shader("shaders/waterVertexShader.vert", "shaders/waterFragmentShader.frag");
 	shad = new Shader("WaterShader");
-	shad->attachShader("shaders/waterVertexShader.vert");
-	shad->attachShader("shaders/waterFragmentShader.frag");
+	shad->attachShader("shaders/water.vert");
+	shad->attachShader("shaders/water.frag");
 	shad->linkPrograms();
 	//waterPlane = new Model("resources/plane.obj", GL_TRIANGLES);
 
@@ -25,7 +25,7 @@ Water::Water(glm::vec2 position, float scale, float height): scale(scale), heigh
 	reflectionFBO = new FrameBufferObject(FBOw, FBOh);
 	refractionFBO = new FrameBufferObject(FBOw, FBOh);
 
-	initializePlaneVAO(2, Tile::tileW, &planeVAO, &planeVBO, &planeEBO);
+	initializePlaneVAO(2, Terrain::tileW, &planeVAO, &planeVBO, &planeEBO);
 }
 
 void Water::bindReflectionFBO() {

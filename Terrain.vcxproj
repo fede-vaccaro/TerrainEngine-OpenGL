@@ -208,12 +208,12 @@
     <None Include="shaders\screen.vert" />
     <None Include="shaders\skyboxFrag.frag" />
     <None Include="shaders\skyboxVert.vert" />
-    <None Include="shaders\tessControlShader.tcs" />
-    <None Include="shaders\tessEvaluationShader.tes" />
-    <None Include="shaders\tessFragmentShader.frag" />
-    <None Include="shaders\tessVertexShader.vert" />
-    <None Include="shaders\waterFragmentShader.frag" />
-    <None Include="shaders\waterVertexShader.vert" />
+    <None Include="shaders\terrain.tcs" />
+    <None Include="shaders\terrain.tes" />
+    <None Include="shaders\terrain.frag" />
+    <None Include="shaders\terrain.vert" />
+    <None Include="shaders\water.frag" />
+    <None Include="shaders\water.vert" />
     <None Include="shaders\weather.comp" />
     <None Include="shaders\worley.comp" />
   </ItemGroup>

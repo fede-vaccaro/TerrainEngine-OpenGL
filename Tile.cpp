@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include "imgui/imgui.h"
 
-bool Tile::drawFog = true;
+bool Terrain::drawFog = true;
 
 float sign(float x) {
 	if (x > 0.0f) return 1.0f;
@@ -12,7 +12,7 @@ float sign(float x) {
 }
 
 
-Tile::Tile(float scale, int gl) : scaleFactor(scale)
+Terrain::Terrain(float scale, int gl) : scaleFactor(scale)
 {
 	float sc = scaleFactor * tileW;
 	I = glm::vec2(1.0, 0.0);
@@ -34,17 +34,16 @@ Tile::Tile(float scale, int gl) : scaleFactor(scale)
 
 	posBuffer = 0;
 
-	//shad = new TessellationShader("shaders/tessVertexShader.vert", "shaders/tessControlShader.tcs", "shaders/tessEvaluationShader.tes", "shaders/tessFragmentShader.frag");
 	shad = new Shader("TerrainTessShader");
-	shad->attachShader("shaders/tessVertexShader.vert");
-	shad->attachShader("shaders/tessControlShader.tcs");
-	shad->attachShader("shaders/tessEvaluationShader.tes");
-	shad->attachShader("shaders/tessFragmentShader.frag");
+	shad->attachShader("shaders/terrain.vert");
+	shad->attachShader("shaders/terrain.tcs");
+	shad->attachShader("shaders/terrain.tes");
+	shad->attachShader("shaders/terrain.frag");
 	shad->linkPrograms();
 
 	this->gridLength = gl + (gl + 1) % 2; //ensure gridLength is odd
 
-	float s = scale * Tile::tileW;
+	float s = scale * Terrain::tileW;
 
 	this->I = glm::vec2(1, 0)*s;
 	this->J = glm::vec2(0, 1)*s;
@@ -76,7 +75,7 @@ Tile::Tile(float scale, int gl) : scaleFactor(scale)
 	power = 3.0;
 }
 
-void Tile::generateTileGrid(glm::vec2 offset)
+void Terrain::generateTileGrid(glm::vec2 offset)
 {
 	for (int i = 0; i < gridLength; i++) {
 		for (int j = 0; j < gridLength; j++) {
@@ -86,7 +85,7 @@ void Tile::generateTileGrid(glm::vec2 offset)
 	}
 }
 
-bool Tile::getWhichTileCameraIs(glm::vec2& result) {
+bool Terrain::getWhichTileCameraIs(glm::vec2& result) {
 
 	for (glm::vec2 p : positionVec) {
 		if (inTile(scene->cam, p)) {
@@ -99,7 +98,7 @@ bool Tile::getWhichTileCameraIs(glm::vec2& result) {
 }
 
 
-void Tile::draw(){
+void Terrain::draw(){
 
 	sceneElements* se = drawableObject::scene;
 
@@ -134,7 +133,7 @@ void Tile::draw(){
 	shad->setFloat("power", power);
 
 	shad->setBool("normals", true);
-	shad->setBool("drawFog", Tile::drawFog);
+	shad->setBool("drawFog", Terrain::drawFog);
 
 
 	// set textures
@@ -167,7 +166,7 @@ void Tile::draw(){
 	up = 0.0;
 }
 
-void Tile::setGui()
+void Terrain::setGui()
 {
 	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Terrain Controls");
 	//ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
@@ -188,7 +187,7 @@ void Tile::setGui()
 	//ImGui::ColorEdit3("Sky bottom color", (float*)this->getSkyBottomColorPtr()); // Edit 3 floats representing a color
 }
 
-void Tile::drawVertices(int nInstances) {
+void Terrain::drawVertices(int nInstances) {
 	glBindVertexArray(planeVAO);
 	//shader.use();
 	shad->use();
@@ -196,7 +195,7 @@ void Tile::drawVertices(int nInstances) {
 	glBindVertexArray(0);
 }
 
-void Tile::setPositionsArray(std::vector<glm::vec2> & pos) {
+void Terrain::setPositionsArray(std::vector<glm::vec2> & pos) {
 	if (posBuffer) {
 		this->deleteBuffer();
 	}
@@ -215,7 +214,7 @@ void Tile::setPositionsArray(std::vector<glm::vec2> & pos) {
 	
 }
 
-bool Tile::inTile(Camera camera, glm::vec2 pos) {
+bool Terrain::inTile(Camera camera, glm::vec2 pos) {
 	float camX = camera.Position.x;
 	float camY = camera.Position.z;
 
@@ -243,12 +242,12 @@ bool Tile::inTile(Camera camera, glm::vec2 pos) {
 }
 
 
-Tile::~Tile()
+Terrain::~Terrain()
 {
 
 }
 
-void Tile::updateTilesPositions() {
+void Terrain::updateTilesPositions() {
 	sceneElements* se = drawableObject::scene;
 	glm::vec2 camPosition(se->cam.Position.x, se->cam.Position.z);
 	int whichTile = -1;
@@ -270,7 +269,7 @@ void Tile::updateTilesPositions() {
 }
 
 
-void Tile::reset() {
+void Terrain::reset() {
 	int octaves = this->getOctaves();
 	float freq = this->getFreq();
 	float grassCoverage = this->getGrassCoverage();

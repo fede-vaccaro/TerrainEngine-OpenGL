@@ -90,7 +90,7 @@ int main()
 	float scale = 100.0f,  dispFactor = 16.0;
 	//TileController tc(scale, dispFactor, 51);
 	int gridLength = 120;
-	Tile terrain(scale, gridLength);
+	Terrain terrain(scale, gridLength);
 	Skybox skybox; //unused
 	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT);
 	VolumetricClouds reflectionVolumetricClouds(1280, 720); //a different object is needed because it has a state-dependent draw method
@@ -150,11 +150,11 @@ int main()
 		// toggle/untoggle wireframe mode
 		if (scene.wireframe) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			Tile::drawFog = false;
+			Terrain::drawFog = false;
 		}
 		else {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			Tile::drawFog = true;
+			Terrain::drawFog = true;
 		}
 
 		// Camera (View Matrix) setting

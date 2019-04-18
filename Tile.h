@@ -13,13 +13,13 @@ enum tPosition {
 	C, N, S, E, W, SE, SW, NE, NW, totTiles
 };
 
-class Tile : public drawableObject
+class Terrain : public drawableObject
 {
 public:
 
-	Tile(float scale, int gl);
+	Terrain(float scale, int gl);
 	
-	virtual ~Tile();
+	virtual ~Terrain();
 	//void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up, std::vector<glm::vec2> & pos);
 	virtual void draw();
 	virtual void setGui();
