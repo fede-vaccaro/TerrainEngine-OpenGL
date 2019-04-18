@@ -4,12 +4,10 @@
 #endif
 #include <GLFW/glfw3.h>
 
-#include "Window.h"
-#include "shader.h"
-//#include "TessShader.h"
-//#include "computeShader.h"
-#include "ScreenQuad.h"
-#include "texture.h"
+#include "Engine/Window.h"
+#include "Engine/shader.h"
+#include "Engine/ScreenQuad.h"
+#include "Engine/texture.h"
 #include "VolumetricClouds.h"
 #include "Tile.h"
 #include "Skybox.h"
@@ -23,7 +21,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/random.hpp>
-#include "glError.h"
+#include "Engine/glError.h"
 #include "sceneElements.h"
 #include "drawableObject.h"
 
@@ -61,7 +59,7 @@ int main()
 	Camera camera(startPosition);
 
 	int success;
-	Window window(success, 2560*0.85, 1440*0.85);
+	Window window(success, 1600, 900);
 	if (!success) return -1;
 
 	// GUI

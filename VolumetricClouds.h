@@ -1,8 +1,8 @@
 #pragma once
-#include "ScreenQuad.h"
-#include "buffers.h"
-#include "computeShader.h"
-#include "texture.h"
+#include "Engine/ScreenQuad.h"
+#include "Engine/buffers.h"
+#include "Engine/computeShader.h"
+#include "Engine/texture.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

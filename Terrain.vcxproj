@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{9ED7DDF1-191D-4C84-AA23-B64F01047E65}</ProjectGuid>
     <RootNamespace>Terrain</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -147,10 +147,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BaseShader.h" />
-    <ClInclude Include="buffers.h" />
     <ClInclude Include="drawableObject.h" />
-    <ClInclude Include="glError.h" />
+    <ClInclude Include="Engine\BaseShader.h" />
+    <ClInclude Include="Engine\buffers.h" />
+    <ClInclude Include="Engine\computeShader.h" />
+    <ClInclude Include="Engine\CustomTypes.h" />
+    <ClInclude Include="Engine\glError.h" />
+    <ClInclude Include="Engine\ScreenQuad.h" />
+    <ClInclude Include="Engine\shader.h" />
+    <ClInclude Include="Engine\texture.h" />
+    <ClInclude Include="Engine\Window.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />
@@ -162,21 +168,22 @@
     <ClInclude Include="Include\camera.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="sceneElements.h" />
-    <ClInclude Include="ScreenQuad.h" />
-    <ClInclude Include="shader.h" />
     <ClInclude Include="Skybox.h" />
-    <ClInclude Include="texture.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="VolumetricClouds.h" />
     <ClInclude Include="Water.h" />
-    <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BaseShader.cpp" />
-    <ClCompile Include="buffers.cpp" />
     <ClCompile Include="drawableObject.cpp" />
+    <ClCompile Include="Engine\BaseShader.cpp" />
+    <ClCompile Include="Engine\buffers.cpp" />
+    <ClCompile Include="Engine\computeShader.cpp" />
+    <ClCompile Include="Engine\glError.cpp" />
+    <ClCompile Include="Engine\ScreenQuad.cpp" />
+    <ClCompile Include="Engine\shader.cpp" />
+    <ClCompile Include="Engine\texture.cpp" />
+    <ClCompile Include="Engine\Window.cpp" />
     <ClCompile Include="glad.c" />
-    <ClCompile Include="glError.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -184,16 +191,12 @@
     <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="ScreenQuad.cpp" />
-    <ClCompile Include="shader.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="stb_image_write.cpp" />
-    <ClCompile Include="texture.cpp" />
     <ClCompile Include="Tile.cpp" />
     <ClCompile Include="VolumetricClouds.cpp" />
     <ClCompile Include="Water.cpp" />
-    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\clouds_post.frag" />
