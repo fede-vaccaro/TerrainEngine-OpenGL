@@ -87,17 +87,16 @@ int main()
 
 	drawableObject::scene = &scene;
 
-	float scale = 100.0f,  dispFactor = 16.0;
-	//TileController tc(scale, dispFactor, 51);
+
 	int gridLength = 120;
-	Terrain terrain(scale, gridLength);
+	Terrain terrain(gridLength);
 	Skybox skybox; //unused
 	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT);
 	VolumetricClouds reflectionVolumetricClouds(1280, 720); //a different object is needed because it has a state-dependent draw method
 	reflectionVolumetricClouds.setPostProcess(false);
 
 	float waterHeight = 120.;
-	Water water(glm::vec2(0.0, 0.0), scale*gridLength, waterHeight);
+	Water water(glm::vec2(0.0, 0.0), gridLength, waterHeight);
 	terrain.waterPtr = &water;
 	std::cout << "============ OPENING POST PROCESSING SHADER ============" << std::endl; // its purpose is to merge different framebuffer and add some postproc if needed
 	ScreenQuad PostProcessing("shaders/post_processing.frag");

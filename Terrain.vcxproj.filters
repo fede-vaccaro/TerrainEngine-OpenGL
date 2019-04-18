@@ -87,10 +87,10 @@
     <ClInclude Include="Engine\ScreenQuad.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\shader.h">
+    <ClInclude Include="Engine\texture.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\texture.h">
+    <ClInclude Include="Engine\Shader.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
   </ItemGroup>
@@ -155,10 +155,10 @@
     <ClCompile Include="Engine\ScreenQuad.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\shader.cpp">
+    <ClCompile Include="Engine\texture.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\texture.cpp">
+    <ClCompile Include="Engine\Shader.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
   </ItemGroup>

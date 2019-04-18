@@ -7,15 +7,10 @@ Water::Water(glm::vec2 position, float scale, float height): scale(scale), heigh
 
 	//shad = new Shader("shaders/waterVertexShader.vert", "shaders/waterFragmentShader.frag");
 	shad = new Shader("WaterShader");
-	shad->attachShader("shaders/water.vert");
-	shad->attachShader("shaders/water.frag");
-	shad->linkPrograms();
-	//waterPlane = new Model("resources/plane.obj", GL_TRIANGLES);
+	shad->attachShader("shaders/water.vert")
+		->attachShader("shaders/water.frag")
+		->linkPrograms();
 
-	//dudvMap = TextureFromFile("waterDUDV.png", "resources", false);
-	//normalMap = TextureFromFile("normalMap.png", "resources", false);
-
-	//height = 128.0 + 50.0;
 
 	glm::mat4 identity;
 	glm::mat4 scaleMatrix = glm::scale(identity, glm::vec3(scale, scale, scale));

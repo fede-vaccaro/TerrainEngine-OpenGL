@@ -20,7 +20,7 @@ public:
 	//Shader(const char* vertexPath, const char* fragmentPath);
 	Shader(std::string name);
 	Shader(std::string name, const char * computeShader);
-	void attachShader(BaseShader s);
+	Shader * attachShader(BaseShader s);
 	void linkPrograms();
 
 	virtual ~Shader();

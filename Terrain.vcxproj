@@ -152,7 +152,7 @@
     <ClInclude Include="Engine\buffers.h" />
     <ClInclude Include="Engine\glError.h" />
     <ClInclude Include="Engine\ScreenQuad.h" />
-    <ClInclude Include="Engine\shader.h" />
+    <ClInclude Include="Engine\Shader.h" />
     <ClInclude Include="Engine\texture.h" />
     <ClInclude Include="Engine\Window.h" />
     <ClInclude Include="imgui\imconfig.h" />
@@ -177,7 +177,7 @@
     <ClCompile Include="Engine\buffers.cpp" />
     <ClCompile Include="Engine\glError.cpp" />
     <ClCompile Include="Engine\ScreenQuad.cpp" />
-    <ClCompile Include="Engine\shader.cpp" />
+    <ClCompile Include="Engine\Shader.cpp" />
     <ClCompile Include="Engine\texture.cpp" />
     <ClCompile Include="Engine\Window.cpp" />
     <ClCompile Include="glad.c" />

@@ -17,7 +17,7 @@ class Terrain : public drawableObject
 {
 public:
 
-	Terrain(float scale, int gl);
+	Terrain(int gl);
 	
 	virtual ~Terrain();
 	//void drawTile(Camera * camera, glm::mat4 proj, glm::vec3 lightPosition, glm::vec3 lightColor, glm::vec3 fogColor, float waterHeight, float up, std::vector<glm::vec2> & pos);
@@ -26,8 +26,8 @@ public:
 
 	void updateTilesPositions();
 	
-	void setPositionsUniforms(std::vector<glm::vec2> & pos);
 	void setPositionsArray(std::vector<glm::vec2> & pos);
+
 	void deleteBuffer() {
 		glDeleteBuffers(1, &posBuffer);
 		posBuffer = 0;
@@ -37,7 +37,7 @@ public:
 	float up = 0.0;
 	
 	bool inTile(Camera camera, glm::vec2 pos);
-	static const int tileW = 10.;
+	static const int tileW = 10.*100.;
 
 	//Model * planeModel;
 	Water * waterPtr;
@@ -87,7 +87,6 @@ private:
 	float dispFactor, scaleFactor, frequency, grassCoverage, tessMultiplier, fogFalloff, power;
 	int octaves;
 	int gridLength;
-	glm::vec2 I, J;
 	glm::vec3 rockColor;
 
 	unsigned int * textures, posBuffer;

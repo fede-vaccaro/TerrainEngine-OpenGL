@@ -12,17 +12,14 @@ float sign(float x) {
 }
 
 
-Terrain::Terrain(float scale, int gl) : scaleFactor(scale)
+Terrain::Terrain(int gl)
 {
-	float sc = scaleFactor * tileW;
-	I = glm::vec2(1.0, 0.0);
-	J = glm::vec2(0.0, 1.0);
-	I *= sc, J *= sc;
+
 
 	glm::mat4 id;
-	glm::mat4 scaleMatrix = glm::scale(id, glm::vec3(scale, 0.0, scale));
+	glm::mat4 scaleMatrix = glm::scale(id, glm::vec3(1.0, 0.0, 1.0));
 	glm::mat4 positionMatrix = glm::translate(id, glm::vec3(0., 0.0, 0.));
-	modelMatrix = positionMatrix * scaleMatrix;
+	modelMatrix = positionMatrix;
 
 	octaves = 13;
 	frequency = 0.01;
@@ -35,22 +32,17 @@ Terrain::Terrain(float scale, int gl) : scaleFactor(scale)
 	posBuffer = 0;
 
 	shad = new Shader("TerrainTessShader");
-	shad->attachShader("shaders/terrain.vert");
-	shad->attachShader("shaders/terrain.tcs");
-	shad->attachShader("shaders/terrain.tes");
-	shad->attachShader("shaders/terrain.frag");
-	shad->linkPrograms();
+	shad->attachShader("shaders/terrain.vert")
+		->attachShader("shaders/terrain.tcs")
+		->attachShader("shaders/terrain.tes")
+		->attachShader("shaders/terrain.frag")
+		->linkPrograms();
 
 	this->gridLength = gl + (gl + 1) % 2; //ensure gridLength is odd
 
-	float s = scale * Terrain::tileW;
 
-	this->I = glm::vec2(1, 0)*s;
-	this->J = glm::vec2(0, 1)*s;
 	res = 4;
 	initializePlaneVAO(res, tileW, &planeVAO, &planeVBO, &planeEBO);
-	//planeModel = new Model("resources/plane.obj", GL_PATCHES);
-	//waterModel = new Model("resources/plane.obj", GL_TRIANGLES);
 
 	//load a bunch of textures
 	this->textures = new unsigned int[6];
@@ -60,11 +52,6 @@ Terrain::Terrain(float scale, int gl) : scaleFactor(scale)
 	textures[3] = TextureFromFile("snow2.jpg", "resources");
 	textures[4] = TextureFromFile("rnormal.jpg", "resources");
 	textures[5] = TextureFromFile("terrainTexture.jpg", "resources");
-
-	//dudvMap = TextureFromFile("waterDUDV.png", "resources", false);
-	//normalMap = TextureFromFile("normalMap.png", "resources", false);
-
-	//waterHeight = 128.0 + 50.0;
 
 	positionVec.resize(gridLength*gridLength);
 	generateTileGrid(glm::vec2(0.0,0.0));
@@ -77,6 +64,11 @@ Terrain::Terrain(float scale, int gl) : scaleFactor(scale)
 
 void Terrain::generateTileGrid(glm::vec2 offset)
 {
+	float sc = tileW;
+
+	glm::vec2 I = glm::vec2(1, 0)*sc;
+	glm::vec2 J = glm::vec2(0, 1)*sc;
+
 	for (int i = 0; i < gridLength; i++) {
 		for (int j = 0; j < gridLength; j++) {
 			glm::vec2 pos = (float)(j - gridLength / 2)*glm::vec2(I) + (float)(i - gridLength / 2)*glm::vec2(J);
@@ -123,7 +115,7 @@ void Terrain::draw(){
 	shad->setVec3("fogColor", se->fogColor);
 	shad->setVec3("rockColor", rockColor);
 	shad->setVec3("seed", se->seed);
-	//shad->setFloat("tessLevel", 0.0f);
+
 	shad->setInt("octaves", octaves);
 	shad->setFloat("freq", frequency);
 	shad->setFloat("u_grassCoverage", grassCoverage);
@@ -158,7 +150,7 @@ void Terrain::draw(){
 	shad->setSampler2D("rockNormal", textures[4], 6);
 
 	int nIstances = positionVec.size();
-	//planeModel->Draw(*shad, nIstances);
+
 	drawVertices(nIstances);
 
 
@@ -222,9 +214,9 @@ bool Terrain::inTile(Camera camera, glm::vec2 pos) {
 	float y = pos.y;
 
 	bool inX = false;
-	if ((camX <= x + scaleFactor * tileW/2.0f) && (camX >= x - scaleFactor * tileW/2.0f)) { inX = true; }
+	if ((camX <= x + 1.0 * tileW/2.0f) && (camX >= x - 1.0 * tileW/2.0f)) { inX = true; }
 	bool inY = false;
-	if ((camY <= y + scaleFactor * tileW/2.0f) && (camY >= y - scaleFactor * tileW/2.0f)) { inY = true; }
+	if ((camY <= y + 1.0 * tileW/2.0f) && (camY >= y - 1.0 * tileW/2.0f)) { inY = true; }
 
 	bool result = inX && inY;
 
@@ -263,7 +255,7 @@ void Terrain::updateTilesPositions() {
 
 		if (waterPtr) {
 			glm::vec2 center = getPos(gridLength / 2, gridLength / 2);
-			waterPtr->setPosition(center, scaleFactor*gridLength, waterPtr->getHeight());
+			waterPtr->setPosition(center, 1.0*gridLength, waterPtr->getHeight());
 		}
 	}
 }

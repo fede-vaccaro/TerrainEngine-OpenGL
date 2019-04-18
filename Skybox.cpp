@@ -6,9 +6,10 @@ Skybox::Skybox()
 {
 	//shader = new Shader(, );
 	shader = new Shader("SkyboxShader");
-	shader->attachShader(BaseShader("shaders/skyboxVert.vert"));
-	shader->attachShader(BaseShader("shaders/skyboxFrag.frag"));
-	shader->linkPrograms();
+	shader->attachShader(BaseShader("shaders/skyboxVert.vert"))
+		->attachShader(BaseShader("shaders/skyboxFrag.frag"))
+		->linkPrograms();
+	
 	float skyboxVertices[] = {
 		// positions          
 		-1.0f,  1.0f, -1.0f,

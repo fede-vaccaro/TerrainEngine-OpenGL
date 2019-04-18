@@ -1,41 +1,5 @@
 #include "shader.h"
 
-
-/*
-	Shader::Shader(const char* vertexPath, const char* fragmentPath)
-	{
-		//std::cout << "CREATING BASE SHADER" << std::endl;
-		std::string vShaderCode = loadShaderFromFile(vertexPath);
-		std::string fShaderCode = loadShaderFromFile(fragmentPath);
-
-		const char * vShaderString = vShaderCode.c_str();
-		const char * fShaderString = fShaderCode.c_str();
-		// 2. compile shaders
-		unsigned int vertex, fragment;
-		int success;
-		char infoLog[512];
-		// vertex shader
-		vertex = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(vertex, 1, &vShaderString, NULL);
-		glCompileShader(vertex);
-		checkCompileErrors(vertex, "VERTEX", getShaderName(vertexPath));
-		// fragment Shader
-		fragment = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(fragment, 1, &fShaderString, NULL);
-		glCompileShader(fragment);
-		checkCompileErrors(fragment, "FRAGMENT", getShaderName(fragmentPath));
-		// shader Program
-		ID = glCreateProgram();
-		glAttachShader(ID, vertex);
-		glAttachShader(ID, fragment);
-		glLinkProgram(ID);
-		checkCompileErrors(ID, "PROGRAM", "");
-		// delete the shaders as they're linked into our program now and no longer necessary
-		glDeleteShader(vertex);
-		glDeleteShader(fragment);
-		std::cout << "SHADERS " << getShaderName(vertexPath) << " AND " << getShaderName(fragmentPath) << " LOADED AND COMPILED!" << std::endl;
-	}
-	*/
 	Shader::Shader(std::string name) : name(name)
 	{
 		linked = false;
@@ -54,7 +18,7 @@
 	}
 
 
-	void Shader::attachShader(BaseShader s)
+	Shader * Shader::attachShader(BaseShader s)
 	{
 		if (!isCompute) {
 			glAttachShader(ID, s.getShad());
@@ -65,6 +29,8 @@
 		else {
 			std::cout << "ERROR: TRYING TO LINK A NON COMPUTE SHADER TO COMPUTE PROGRAM" << std::endl;
 		}
+
+		return this;
 	}
 
 	void Shader::linkPrograms()
