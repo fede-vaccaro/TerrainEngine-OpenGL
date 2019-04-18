@@ -1,6 +1,6 @@
 #include "Water.h"
 #include "sceneElements.h"
-#include "Tile.h"
+#include "Terrain.h"
 #include "imgui/imgui.h"
 
 Water::Water(glm::vec2 position, float scale, float height): scale(scale), height(height){

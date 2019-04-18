@@ -9,7 +9,7 @@
 #include "Engine/ScreenQuad.h"
 #include "Engine/texture.h"
 #include "VolumetricClouds.h"
-#include "Tile.h"
+#include "Terrain.h"
 #include "Skybox.h"
 #include "Water.h"
 
@@ -46,10 +46,6 @@ glm::vec3 genRandomVec3() {
 
 	return glm::vec3(x, y, z);
 }
-
-const int MAX_FPS = 144;
-
-float t1 = 0.0, t2 = 0.0, frameTime = 0.0; // time variables
 
 int main()
 {
@@ -90,27 +86,22 @@ int main()
 
 	int gridLength = 120;
 	Terrain terrain(gridLength);
-	Skybox skybox; //unused
-	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT);
-	VolumetricClouds reflectionVolumetricClouds(1280, 720); //a different object is needed because it has a state-dependent draw method
-	reflectionVolumetricClouds.setPostProcess(false);
 
 	float waterHeight = 120.;
 	Water water(glm::vec2(0.0, 0.0), gridLength, waterHeight);
 	terrain.waterPtr = &water;
-	std::cout << "============ OPENING POST PROCESSING SHADER ============" << std::endl; // its purpose is to merge different framebuffer and add some postproc if needed
+
+	Skybox skybox; //unused
+	
+	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT);
+	VolumetricClouds reflectionVolumetricClouds(1280, 720); //a different object is needed because it has a state-dependent draw method
+	reflectionVolumetricClouds.setPostProcess(false);
+
 	ScreenQuad PostProcessing("shaders/post_processing.frag");
-
 	ScreenQuad fboVisualizer("shaders/visualizeFbo.frag");
-
-	int frameIter = 0;
-
-	glm::vec3 clearTopCloudColor = *volumetricClouds.getCloudColorTopPtr();
-	glm::vec3 clearBottomCloudColor = *volumetricClouds.getCloudColorBottomPtr();
 
 	bool useSeed = true;
 	glm::vec3 lightDir = glm::vec3(-.5, 0.5, 1.0);
-
 
 	colorPreset presetHighSun = volumetricClouds.DefaultPreset();
 	colorPreset presetSunset = volumetricClouds.SunsetPreset();
@@ -120,20 +111,15 @@ int main()
 
 	while (window.continueLoop())
 	{
-
-		t1 = glfwGetTime();
 		lightDir = glm::normalize(lightDir);
 		scene.lightPos = lightDir*1e9f + camera.Position;
 		// input
-		window.processInput(frameTime);
+		window.processInput(1 / ImGui::GetIO().Framerate);
 
 		//update tiles position to make the world infinite
 		terrain.updateTilesPositions();
 
 		SceneFBO.bind();
-		// render
-		//glEnable(GL_MULTISAMPLE);
-		//glEnable(GL_FRAMEBUFFER_SRGB); //gamma correction
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
@@ -149,11 +135,9 @@ int main()
 		// toggle/untoggle wireframe mode
 		if (scene.wireframe) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			Terrain::drawFog = false;
 		}
 		else {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			Terrain::drawFog = true;
 		}
 
 		// Camera (View Matrix) setting
@@ -302,17 +286,6 @@ int main()
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		window.swapBuffersAndPollEvents();
-
-		t2 = glfwGetTime();
-		frameTime = t2 - t1;
-		float timeToSleep = 1000.0f / MAX_FPS - (t2 - t1)*1000.0f;
-		if (timeToSleep > 0.0f) {
-			//	Sleep(timeToSleep);
-		}
-		t2 = glfwGetTime();
-		frameTime = t2 - t1;
-		//std::cout << 1.0f / frameTime << " FPS" << std::endl;
-
 	}
 
 	//

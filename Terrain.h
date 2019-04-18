@@ -25,13 +25,8 @@ public:
 	virtual void setGui();
 
 	void updateTilesPositions();
-	
 	void setPositionsArray(std::vector<glm::vec2> & pos);
 
-	void deleteBuffer() {
-		glDeleteBuffers(1, &posBuffer);
-		posBuffer = 0;
-	}
 
 	glm::vec2 position, eps;
 	float up = 0.0;
@@ -77,24 +72,25 @@ public:
 	float getGrassCoverage() const { return grassCoverage; }
 	float getTessMultiplier() const { return tessMultiplier; }
 
-	static bool drawFog;
 private:
-	int res;
-	//void initializePlaneVAO();
-	void drawVertices(int nInstances);
-	unsigned int planeVBO, planeVAO, planeEBO;
 
+	void deleteBuffer();
+	int res;
+	unsigned int planeVBO, planeVAO, planeEBO;
 	float dispFactor, scaleFactor, frequency, grassCoverage, tessMultiplier, fogFalloff, power;
 	int octaves;
 	int gridLength;
 	glm::vec3 rockColor;
 
+	static bool drawFog;
 	unsigned int * textures, posBuffer;
 
 	Shader * shad;
 	glm::mat4 modelMatrix;
 
 	std::vector<glm::vec2> positionVec;
+
+	void drawVertices(int nInstances);
 
 	void setPos(int row, int col, glm::vec2 pos) {
 		positionVec[col + row * gridLength] = pos;
@@ -104,37 +100,13 @@ private:
 		return positionVec[col + row * gridLength];
 	}
 
-	void changeTiles(tPosition currentTile);
-	void addColumn(int direction);
-	void addRow(int direction);
-
 	void generateTileGrid(glm::vec2 offset);
-
 	bool getWhichTileCameraIs(glm::vec2& result);
 
 	void getColRow(int i, int& col, int& row) {
 		col = (i) % gridLength;
 
 		row = (i - col) / gridLength;
-
-		//col--, row--;
-	}
-
-	std::string inline direction(tPosition pos) {
-		switch (pos)
-		{
-		default: return "nowhere";
-		case C: return "Centre";
-		case N: return "North";
-		case S: return "South";
-		case E: return "East";
-		case W: return "West";
-		case NE: return "North-East";
-		case NW: return "North-West";
-		case SE: return "South-East";
-		case SW: return "South-West";
-			break;
-		}
 	}
 
 	void reset();

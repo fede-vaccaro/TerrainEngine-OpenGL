@@ -167,7 +167,7 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="sceneElements.h" />
     <ClInclude Include="Skybox.h" />
-    <ClInclude Include="Tile.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="VolumetricClouds.h" />
     <ClInclude Include="Water.h" />
   </ItemGroup>
@@ -191,7 +191,7 @@
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="stb_image_write.cpp" />
-    <ClCompile Include="Tile.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="VolumetricClouds.cpp" />
     <ClCompile Include="Water.cpp" />
   </ItemGroup>

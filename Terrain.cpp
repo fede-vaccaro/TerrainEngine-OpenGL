@@ -1,4 +1,4 @@
-#include "Tile.h"
+#include "Terrain.h"
 #include "sceneElements.h"
 #include <GLFW/glfw3.h>
 #include "imgui/imgui.h"
@@ -77,6 +77,11 @@ void Terrain::generateTileGrid(glm::vec2 offset)
 	}
 }
 
+void Terrain::deleteBuffer(){
+	glDeleteBuffers(1, &posBuffer);
+	posBuffer = 0;
+}
+
 bool Terrain::getWhichTileCameraIs(glm::vec2& result) {
 
 	for (glm::vec2 p : positionVec) {
@@ -92,7 +97,10 @@ bool Terrain::getWhichTileCameraIs(glm::vec2& result) {
 
 void Terrain::draw(){
 
+
 	sceneElements* se = drawableObject::scene;
+
+	drawFog = !se->wireframe;
 
 	if (up != 0.0f) {
 		glEnable(GL_CLIP_DISTANCE0);
