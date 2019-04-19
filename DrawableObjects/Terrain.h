@@ -1,11 +1,11 @@
 #pragma once
 #include <glm/glm.hpp>
 //#include <model.h>
-#include "Engine/texture.h"
+#include "../Engine/texture.h"
 //#include "TessShader.h"
 #include "Water.h"
 #include <camera.h>
-#include "Engine/glError.h"
+#include "../Engine/glError.h"
 #include "drawableObject.h"
 #include "Water.h"
 

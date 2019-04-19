@@ -1,8 +1,8 @@
 #include "Terrain.h"
 #include "sceneElements.h"
 #include <GLFW/glfw3.h>
-#include "imgui/imgui.h"
-#include "Engine/utils.h"
+#include "../imgui/imgui.h"
+#include "../Engine/utils.h"
 
 bool Terrain::drawFog = true;
 

@@ -25,24 +25,15 @@
     <Filter Include="Source Files\Compile">
       <UniqueIdentifier>{76d81740-ae83-4668-bf69-662a3dc034b6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\DrawableObjects">
+      <UniqueIdentifier>{b10b0930-6777-4514-a13f-850db274ba5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DrawableObjects">
+      <UniqueIdentifier>{9797f9dd-b364-4086-8700-df4e1f9229d4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Water.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Skybox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="drawableObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VolumetricClouds.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sceneElements.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="imgui\imgui_impl_glfw.h">
@@ -90,27 +81,30 @@
     <ClInclude Include="Engine\Shader.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Terrain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\utils.h">
       <Filter>Header Files\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawableObjects\Skybox.h">
+      <Filter>Header Files\DrawableObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawableObjects\Terrain.h">
+      <Filter>Header Files\DrawableObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawableObjects\VolumetricClouds.h">
+      <Filter>Header Files\DrawableObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawableObjects\Water.h">
+      <Filter>Header Files\DrawableObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawableObjects\drawableObject.h">
+      <Filter>Header Files\DrawableObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawableObjects\sceneElements.h">
+      <Filter>Header Files\DrawableObjects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Water.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Skybox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VolumetricClouds.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="drawableObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_impl_glfw.cpp">
@@ -152,9 +146,6 @@
     <ClCompile Include="Engine\Shader.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Terrain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\utils.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
@@ -166,6 +157,21 @@
     </ClCompile>
     <ClCompile Include="Compile\stb_image_write.cpp">
       <Filter>Source Files\Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawableObjects\Terrain.cpp">
+      <Filter>Source Files\DrawableObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawableObjects\VolumetricClouds.cpp">
+      <Filter>Source Files\DrawableObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawableObjects\Water.cpp">
+      <Filter>Source Files\DrawableObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawableObjects\drawableObject.cpp">
+      <Filter>Source Files\DrawableObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawableObjects\Skybox.cpp">
+      <Filter>Source Files\DrawableObjects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -193,13 +199,7 @@
     <None Include="shaders\perlinworley.comp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\raymarch_cube_box.frag">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="shaders\copyFrame.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\volumetric_clouds.frag">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\clouds_post.frag">

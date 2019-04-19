@@ -8,10 +8,10 @@
 #include "Engine/shader.h"
 #include "Engine/ScreenQuad.h"
 #include "Engine/texture.h"
-#include "VolumetricClouds.h"
-#include "Terrain.h"
-#include "Skybox.h"
-#include "Water.h"
+#include "DrawableObjects/VolumetricClouds.h"
+#include "DrawableObjects/Terrain.h"
+#include "DrawableObjects/Skybox.h"
+#include "DrawableObjects/Water.h"
 
 #include <camera.h>
 #include <stb_image.h>
@@ -21,8 +21,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/random.hpp>
 #include "Engine/glError.h"
-#include "sceneElements.h"
-#include "drawableObject.h"
+#include "DrawableObjects/sceneElements.h"
+#include "DrawableObjects/drawableObject.h"
 
 #include <iostream>
 #include <vector>

@@ -1,7 +1,7 @@
 #pragma once
 #include "shader.h"
 #include <glad/glad.h>
-#include "../drawableObject.h"
+#include "../DrawableObjects/drawableObject.h"
 
 class ScreenQuad : drawableObject
 {

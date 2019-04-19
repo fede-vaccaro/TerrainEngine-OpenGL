@@ -147,7 +147,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="drawableObject.h" />
+    <ClInclude Include="DrawableObjects\drawableObject.h" />
+    <ClInclude Include="DrawableObjects\sceneElements.h" />
+    <ClInclude Include="DrawableObjects\Skybox.h" />
+    <ClInclude Include="DrawableObjects\Terrain.h" />
+    <ClInclude Include="DrawableObjects\VolumetricClouds.h" />
+    <ClInclude Include="DrawableObjects\Water.h" />
     <ClInclude Include="Engine\BaseShader.h" />
     <ClInclude Include="Engine\buffers.h" />
     <ClInclude Include="Engine\glError.h" />
@@ -165,17 +170,16 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Include\camera.h" />
-    <ClInclude Include="sceneElements.h" />
-    <ClInclude Include="Skybox.h" />
-    <ClInclude Include="Terrain.h" />
-    <ClInclude Include="VolumetricClouds.h" />
-    <ClInclude Include="Water.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Compile\glad.c" />
     <ClCompile Include="Compile\stb_image.cpp" />
     <ClCompile Include="Compile\stb_image_write.cpp" />
-    <ClCompile Include="drawableObject.cpp" />
+    <ClCompile Include="DrawableObjects\drawableObject.cpp" />
+    <ClCompile Include="DrawableObjects\Skybox.cpp" />
+    <ClCompile Include="DrawableObjects\Terrain.cpp" />
+    <ClCompile Include="DrawableObjects\VolumetricClouds.cpp" />
+    <ClCompile Include="DrawableObjects\Water.cpp" />
     <ClCompile Include="Engine\BaseShader.cpp" />
     <ClCompile Include="Engine\buffers.cpp" />
     <ClCompile Include="Engine\glError.cpp" />
@@ -191,10 +195,6 @@
     <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Skybox.cpp" />
-    <ClCompile Include="Terrain.cpp" />
-    <ClCompile Include="VolumetricClouds.cpp" />
-    <ClCompile Include="Water.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\clouds_post.frag" />
@@ -203,8 +203,6 @@
     <None Include="shaders\post_processing.frag" />
     <None Include="shaders\visualizeFbo.frag" />
     <None Include="shaders\volumetric_clouds.comp" />
-    <None Include="shaders\volumetric_clouds.frag" />
-    <None Include="shaders\raymarch_cube_box.frag" />
     <None Include="shaders\screen.frag" />
     <None Include="shaders\screen.vert" />
     <None Include="shaders\skyboxFrag.frag" />
