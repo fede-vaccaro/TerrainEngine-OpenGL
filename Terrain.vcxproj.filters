@@ -22,11 +22,11 @@
     <Filter Include="Source Files\Engine">
       <UniqueIdentifier>{4236da97-8cf1-4236-9e25-bd1aa2bf5732}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Compile">
+      <UniqueIdentifier>{76d81740-ae83-4668-bf69-662a3dc034b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Object.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Water.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -98,16 +98,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stb_image_write.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="glad.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="stb_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Water.cpp">
@@ -166,6 +157,15 @@
     </ClCompile>
     <ClCompile Include="Engine\utils.cpp">
       <Filter>Source Files\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\glad.c">
+      <Filter>Source Files\Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\stb_image.cpp">
+      <Filter>Source Files\Compile</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile\stb_image_write.cpp">
+      <Filter>Source Files\Compile</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

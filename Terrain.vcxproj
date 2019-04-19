@@ -165,7 +165,6 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Include\camera.h" />
-    <ClInclude Include="Object.h" />
     <ClInclude Include="sceneElements.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Terrain.h" />
@@ -173,6 +172,9 @@
     <ClInclude Include="Water.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Compile\glad.c" />
+    <ClCompile Include="Compile\stb_image.cpp" />
+    <ClCompile Include="Compile\stb_image_write.cpp" />
     <ClCompile Include="drawableObject.cpp" />
     <ClCompile Include="Engine\BaseShader.cpp" />
     <ClCompile Include="Engine\buffers.cpp" />
@@ -182,7 +184,6 @@
     <ClCompile Include="Engine\texture.cpp" />
     <ClCompile Include="Engine\utils.cpp" />
     <ClCompile Include="Engine\Window.cpp" />
-    <ClCompile Include="glad.c" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -191,8 +192,6 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Skybox.cpp" />
-    <ClCompile Include="stb_image.cpp" />
-    <ClCompile Include="stb_image_write.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="VolumetricClouds.cpp" />
     <ClCompile Include="Water.cpp" />
