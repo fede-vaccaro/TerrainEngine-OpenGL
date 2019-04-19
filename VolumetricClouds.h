@@ -45,41 +45,10 @@ public:
 		return coverage;
 	}
 
-	float * getCoveragePointer() {
-		return &coverage;
-	}
-	bool * getPostProcPointer() {
-		return &postProcess;
-	}
-
 	void setCoverage(float c) {
 		if (c >= 0.0 && c <= 1.0) {
 			coverage = c;
 		}
-	}
-
-	float * getCloudSpeedPtr() {
-		return &cloudSpeed;
-	}
-
-	glm::vec3 * getCloudColorTopPtr() {
-		return &cloudColorTop;
-	}
-
-	glm::vec3 * getCloudColorBottomPtr() {
-		return &cloudColorBottom;
-	}
-
-	glm::vec3 * getSkyTopColorPtr() {
-		return &skyColorTop;
-	}
-
-	glm::vec3 * getSkyBottomColorPtr() {
-		return &skyColorBottom;
-	}
-
-	float * getCloudCrispinessPtr() {
-		return &crispiness;
 	}
 
 	void setPostProcess(bool v) { postProcess = v; }

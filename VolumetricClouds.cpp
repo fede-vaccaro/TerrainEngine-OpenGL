@@ -99,6 +99,7 @@ colorPreset VolumetricClouds::SunsetPreset1() {
 }
 
 VolumetricClouds::VolumetricClouds(int SW, int SH): SCR_WIDTH(SW), SCR_HEIGHT(SH) {
+
 	//volumetricCloudsShader = new ScreenQuad("shaders/volumetric_clouds.frag");
 	volumetricCloudsShader = new Shader("volumetricCloudsShader","shaders/volumetric_clouds.comp");
 	ppShader = new ScreenQuad("shaders/clouds_post.frag");
@@ -173,13 +174,13 @@ void VolumetricClouds::setGui() {
 	ImGui::Begin("Clouds controls: ");
 	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Post Proceesing");
 	//ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-	ImGui::Checkbox("Post Processing (Gaussian Blur)", this->getPostProcPointer());
+	ImGui::Checkbox("Post Processing (Gaussian Blur)", &postProcess);
 	ImGui::Checkbox("God Rays", &enableGodRays);
 	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Clouds rendering");
 
-	ImGui::SliderFloat("Coverage", this->getCoveragePointer(), 0.0f, 1.0f);
-	ImGui::SliderFloat("Speed", this->getCloudSpeedPtr(), 0.0f, 5.0E3);
-	ImGui::SliderFloat("Crispiness", this->getCloudCrispinessPtr(), 0.0f, 120.0f);
+	ImGui::SliderFloat("Coverage", &coverage, 0.0f, 1.0f);
+	ImGui::SliderFloat("Speed", &cloudSpeed, 0.0f, 5.0E3);
+	ImGui::SliderFloat("Crispiness", &crispiness, 0.0f, 120.0f);
 	ImGui::SliderFloat("Curliness", &curliness, 0.0f, 3.0f);
 	ImGui::SliderFloat("Density", &density, 0.0f, 0.1f);
 	ImGui::SliderFloat("Light absorption", &absorption, 0.0f, 1.5f);
@@ -196,12 +197,12 @@ void VolumetricClouds::setGui() {
 
 
 	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Clouds conlors");
-	glm::vec3 * cloudBottomColor = this->getCloudColorBottomPtr();
+	glm::vec3 * cloudBottomColor = &cloudColorBottom;
 	ImGui::ColorEdit3("Cloud color", (float*)cloudBottomColor); // Edit 3 floats representing a color
 
 	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Sky colors controls");
-	ImGui::ColorEdit3("Sky top color", (float*)this->getSkyTopColorPtr()); // Edit 3 floats representing a color
-	ImGui::ColorEdit3("Sky bottom color", (float*)this->getSkyBottomColorPtr()); // Edit 3 floats representing a color
+	ImGui::ColorEdit3("Sky top color", (float*)&skyColorTop); // Edit 3 floats representing a color
+	ImGui::ColorEdit3("Sky bottom color", (float*)&skyColorBottom); // Edit 3 floats representing a color
 	ImGui::End();
 }
 

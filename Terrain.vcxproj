@@ -154,6 +154,7 @@
     <ClInclude Include="Engine\ScreenQuad.h" />
     <ClInclude Include="Engine\Shader.h" />
     <ClInclude Include="Engine\texture.h" />
+    <ClInclude Include="Engine\utils.h" />
     <ClInclude Include="Engine\Window.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
@@ -179,6 +180,7 @@
     <ClCompile Include="Engine\ScreenQuad.cpp" />
     <ClCompile Include="Engine\Shader.cpp" />
     <ClCompile Include="Engine\texture.cpp" />
+    <ClCompile Include="Engine\utils.cpp" />
     <ClCompile Include="Engine\Window.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="imgui\imgui.cpp" />
