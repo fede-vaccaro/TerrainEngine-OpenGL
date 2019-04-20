@@ -8,10 +8,12 @@
 #include "Engine/shader.h"
 #include "Engine/ScreenQuad.h"
 #include "Engine/texture.h"
+
 #include "DrawableObjects/VolumetricClouds.h"
 #include "DrawableObjects/Terrain.h"
 #include "DrawableObjects/Skybox.h"
 #include "DrawableObjects/Water.h"
+#include "DrawableObjects/CloudsModel.h"
 
 #include <camera.h>
 #include <stb_image.h>
@@ -86,22 +88,23 @@ int main()
 	terrain.waterPtr = &water;
 
 	Skybox skybox; //unused
-	
-	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT);
-	VolumetricClouds reflectionVolumetricClouds(1280, 720); //a different object is needed because it has a state-dependent draw method
-	reflectionVolumetricClouds.setPostProcess(false);
 
+	CloudsModel cloudsModel(&scene);
+	
+	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT, &cloudsModel);
+	VolumetricClouds reflectionVolumetricClouds(1280, 720, &cloudsModel); //a different object is needed because it has a state-dependent draw method
+	
 	ScreenQuad PostProcessing("shaders/post_processing.frag");
 	ScreenQuad fboVisualizer("shaders/visualizeFbo.frag");
 
 	bool useSeed = true;
 	glm::vec3 lightDir = glm::vec3(-.5, 0.5, 1.0);
 
-	colorPreset presetHighSun = volumetricClouds.DefaultPreset();
-	colorPreset presetSunset = volumetricClouds.SunsetPreset();
+	colorPreset presetHighSun = cloudsModel.DefaultPreset();
+	colorPreset presetSunset = cloudsModel.SunsetPreset();
 
 	auto sigmoid = [](float v) { return 1/(1.0 + exp(8.0-v*40.0)); };
-	volumetricClouds.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
+	cloudsModel.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
 
 	while (window.continueLoop())
 	{
@@ -112,6 +115,7 @@ int main()
 
 		//update tiles position to make the world infinite
 		terrain.updateTilesPositions();
+		cloudsModel.update();
 
 		SceneFBO.bind();
 
@@ -222,7 +226,7 @@ int main()
 			static int counter = 0;
 
 			ImGui::Begin("Scene controls: ");
-			volumetricClouds.setGui();
+			cloudsModel.setGui();
 			terrain.setGui();
 			water.setGui();
 
@@ -231,7 +235,7 @@ int main()
 				auto saturate = [](float v) { return std::min(std::max(v, 0.0f), 0.8f); };
 				
 				lightDir.y = saturate(lightDir.y);
-				volumetricClouds.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
+				cloudsModel.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
 
 			}
 			ImGui::InputFloat3("Camera Position", &camera.Position[0], 7);
@@ -259,13 +263,13 @@ int main()
 			}*/
 			//ImGui::SameLine();
 			if (ImGui::Button("Sunset Preset 1")) {
-				presetSunset = volumetricClouds.SunsetPreset();
-				volumetricClouds.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
+				presetSunset = cloudsModel.SunsetPreset();
+				cloudsModel.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("Sunset Preset 2")) {
-				presetSunset = volumetricClouds.SunsetPreset1();
-				volumetricClouds.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
+				presetSunset = cloudsModel.SunsetPreset1();
+				cloudsModel.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
 			}
 
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);

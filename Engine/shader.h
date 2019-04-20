@@ -16,8 +16,6 @@
 class Shader
 {
 public:
-	unsigned int ID;
-	//Shader(const char* vertexPath, const char* fragmentPath);
 	Shader(std::string name);
 	Shader(std::string name, const char * computeShader);
 	Shader * attachShader(BaseShader s);
@@ -36,6 +34,8 @@ public:
 	void setSampler3D(const std::string &name, unsigned int texture, int id) const;
 
 protected:
+	unsigned int ID;
+
 	bool linked, isCompute;
 	std::list<unsigned int> shaders;
 	std::string name;

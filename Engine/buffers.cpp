@@ -143,7 +143,7 @@ TextureSet::TextureSet(int W, int H, int num)
 		nTextures = num;
 		texture = new unsigned int[num];
 		for (int i = 0; i < num; ++i) {
-			texture[i] = Texture2D(W, H);
+			texture[i] = generateTexture2D(W, H);
 		}
 	}
 }

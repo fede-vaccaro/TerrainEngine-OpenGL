@@ -71,7 +71,7 @@ unsigned int loadCubemap(vector<std::string> faces) {
 	return textureID;
 }
 
-unsigned int Texture2D(int w, int h) {
+unsigned int generateTexture2D(int w, int h) {
 	unsigned int tex_output;
 	glGenTextures(1, &tex_output);
 	glActiveTexture(GL_TEXTURE0);
@@ -90,7 +90,7 @@ unsigned int Texture2D(int w, int h) {
 
 
 
-unsigned int Texture3D(int w, int h, int d) {
+unsigned int generateTexture3D(int w, int h, int d) {
 	unsigned int tex_output;
 	glGenTextures(1, &tex_output);
 	glActiveTexture(GL_TEXTURE0);

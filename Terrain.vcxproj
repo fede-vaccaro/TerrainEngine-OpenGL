@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DrawableObjects\CloudsModel.h" />
     <ClInclude Include="DrawableObjects\drawableObject.h" />
     <ClInclude Include="DrawableObjects\sceneElements.h" />
     <ClInclude Include="DrawableObjects\Skybox.h" />
@@ -175,6 +176,7 @@
     <ClCompile Include="Compile\glad.c" />
     <ClCompile Include="Compile\stb_image.cpp" />
     <ClCompile Include="Compile\stb_image_write.cpp" />
+    <ClCompile Include="DrawableObjects\CloudsModel.cpp" />
     <ClCompile Include="DrawableObjects\drawableObject.cpp" />
     <ClCompile Include="DrawableObjects\Skybox.cpp" />
     <ClCompile Include="DrawableObjects\Terrain.cpp" />
