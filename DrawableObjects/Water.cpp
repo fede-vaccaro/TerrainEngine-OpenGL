@@ -71,7 +71,7 @@ void Water::draw() {
 	this->setHeight(height);
 
 	shad->setMat4("modelMatrix", modelMatrix);
-	shad->setMat4("gVP", se->projMatrix*se->cam.GetViewMatrix());
+	shad->setMat4("gVP", se->projMatrix*se->cam->GetViewMatrix());
 
 	shad->setVec3("u_LightColor", se->lightColor);
 	shad->setVec3("u_LightPosition", se->lightPos);
@@ -103,7 +103,7 @@ void Water::draw() {
 	float moveFactor = waveSpeed * time;
 	shad->setFloat("moveFactor", moveFactor);
 
-	shad->setVec3("cameraPosition", se->cam.Position);
+	shad->setVec3("cameraPosition", se->cam->Position);
 
 	//waterPlane->Draw(*shad);
 	this->drawVertices();

@@ -64,9 +64,16 @@ int main()
 	glm::vec3 lightPosition, seed;
 	glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 5.f, 10000000.0f);
 
-	seed = genRandomVec3();
-	//Every scene object need this information to be rendered
-	sceneElements scene(lightPosition, lightColor, fogColor, seed, proj, camera, SceneFBO);
+	//Every scene object need these informations to be rendered
+	sceneElements scene;
+	scene.lightPos = lightPosition;
+	scene.lightColor = lightColor;
+	scene.fogColor = fogColor;
+	scene.seed = seed;
+	scene.projMatrix = proj;
+	scene.cam = &camera;
+	scene.sceneFBO = &SceneFBO;
+
 
 	drawableObject::scene = &scene;
 
@@ -128,7 +135,7 @@ int main()
 		}
 
 		// Camera (View Matrix) setting
-		glm::mat4 view = scene.cam.GetViewMatrix();
+		glm::mat4 view = scene.cam->GetViewMatrix();
 		scene.projMatrix = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 5.f,10000000.0f);
 
 		
@@ -139,8 +146,8 @@ int main()
 		//glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		scene.cam.invertPitch();
-		scene.cam.Position.y -= 2 * (scene.cam.Position.y - water.getHeight());
+		scene.cam->invertPitch();
+		scene.cam->Position.y -= 2 * (scene.cam->Position.y - water.getHeight());
 		
 		terrain.up = 1.0;
 		terrain.draw();
@@ -162,8 +169,8 @@ int main()
 
 		ScreenQuad::enableTests();
 		
-		scene.cam.invertPitch();
-		scene.cam.Position.y += 2 * abs(scene.cam.Position.y - water.getHeight());
+		scene.cam->invertPitch();
+		scene.cam->Position.y += 2 * abs(scene.cam->Position.y - water.getHeight());
 		
 		//draw to water refraction buffer object
 		water.bindRefractionFBO();
@@ -175,7 +182,7 @@ int main()
 		terrain.draw();
 
 		// draw terrain
-		scene.sceneFBO.bind();
+		scene.sceneFBO->bind();
 		terrain.draw();
 		water.draw();
 
@@ -192,7 +199,7 @@ int main()
 
 		post.use();
 		post.setVec2("resolution", glm::vec2(Window::SCR_WIDTH, Window::SCR_HEIGHT));
-		post.setVec3("cameraPosition", scene.cam.Position);
+		post.setVec3("cameraPosition", scene.cam->Position);
 		post.setSampler2D("screenTexture", SceneFBO.tex, 0);
 		post.setSampler2D("cloudTEX", volumetricClouds.getCloudsTexture(), 1);
 		post.setSampler2D("depthTex", SceneFBO.depthTex, 2);

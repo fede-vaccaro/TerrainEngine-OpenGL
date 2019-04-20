@@ -85,7 +85,7 @@ Skybox::Skybox()
 void Skybox::draw() {
 	sceneElements * s = drawableObject::scene;
 
-	glm::mat4 view = s->cam.GetViewMatrix();
+	glm::mat4 view = s->cam->GetViewMatrix();
 	glm::mat4 proj = s->projMatrix;
 	glDepthFunc(GL_LEQUAL);
 	shader->use();
