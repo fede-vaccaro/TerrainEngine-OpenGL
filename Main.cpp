@@ -105,7 +105,7 @@ int main()
 		//update tiles position to make the world infinite, clouds weather map and sky colors
 		terrain.updateTilesPositions();
 		cloudsModel.update();
-		skybox.update();
+		//skybox.update();
 
 		SceneFBO.bind();
 
@@ -209,7 +209,7 @@ int main()
 		// Texture visualizer
 		Shader& fboVisualizerShader = fboVisualizer.getShader();
 		fboVisualizerShader.use();
-		fboVisualizerShader.setSampler2D("fboTex", skybox.getSkyTexture(), 0);
+		fboVisualizerShader.setSampler2D("fboTex", volumetricClouds.getCloudsTexture(), 0);
 		fboVisualizer.draw();
 		
 		{
@@ -226,6 +226,7 @@ int main()
 				auto saturate = [](float v) { return std::min(std::max(v, 0.0f), 0.8f); };
 				scene.lightDir.y = saturate(scene.lightDir.y);
 				//skybox.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
+				skybox.update();
 			}
 			ImGui::InputFloat3("Camera Position", &(scene.cam->Position[0]), 7);
 			ImGui::ColorEdit3("Light color", (float*)&scene.lightColor); 
