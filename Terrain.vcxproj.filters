@@ -181,9 +181,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\skyboxFrag.frag">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="shaders\skyboxVert.vert">
       <Filter>Resource Files</Filter>
     </None>
@@ -233,6 +230,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\water.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\sky.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

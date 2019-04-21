@@ -51,8 +51,8 @@ void VolumetricClouds::draw() {
 	cloudsShader.setVec3("cloudColorTop", model->cloudColorTop);
 	cloudsShader.setVec3("cloudColorBottom", model->cloudColorBottom);
 	
-	cloudsShader.setVec3("skyColorTop", model->skyColorTop);
-	cloudsShader.setVec3("skyColorBottom", model->skyColorBottom);
+	cloudsShader.setVec3("skyColorTop", model->sky->skyColorTop);
+	cloudsShader.setVec3("skyColorBottom", model->sky->skyColorBottom);
 
 	glm::mat4 vp = s->projMatrix*s->cam->GetViewMatrix();
 	cloudsShader.setMat4("invViewProj", glm::inverse(vp));

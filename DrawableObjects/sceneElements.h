@@ -8,7 +8,7 @@
 
 struct sceneElements {
 
-	glm::vec3 lightPos, lightColor, fogColor, seed;
+	glm::vec3 lightPos, lightColor, lightDir, fogColor, seed;
 	glm::mat4 projMatrix;
 	Camera * cam;
 	FrameBufferObject * sceneFBO;

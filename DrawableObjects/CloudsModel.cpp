@@ -2,55 +2,7 @@
 #include <glad/glad.h>
 #include "../Engine/texture.h"
 
-colorPreset CloudsModel::SunsetPreset() {
-	colorPreset preset;
 
-	preset.cloudColorBottom = glm::vec3(89, 96, 109) / 255.f;
-	preset.skyColorTop = glm::vec3(177, 174, 119) / 255.f;
-	preset.skyColorBottom = glm::vec3(234, 125, 125) / 255.f;
-
-	preset.lightColor = glm::vec3(255, 171, 125) / 255.f;
-	preset.fogColor = glm::vec3(85, 97, 120) / 255.f;
-	return preset;
-}
-
-colorPreset CloudsModel::DefaultPreset() {
-	colorPreset preset;
-
-	preset.cloudColorBottom = (glm::vec3(65., 70., 80.)*(1.5f / 255.f));
-
-	preset.skyColorTop = glm::vec3(0.5, 0.7, 0.8)*1.05f;
-	preset.skyColorBottom = glm::vec3(0.9, 0.9, 0.95);
-
-	preset.lightColor = glm::vec3(255, 255, 230) / 255.f;
-	preset.fogColor = glm::vec3(0.5, 0.6, 0.7);
-
-	return preset;
-}
-
-void CloudsModel::mixSkyColorPreset(float v, colorPreset p1, colorPreset p2) {
-	float a = std::min(std::max(v, 0.0f), 1.0f);
-	float b = 1.0 - a;
-
-	cloudColorBottom = p1.cloudColorBottom*a + p2.cloudColorBottom*b;
-	skyColorTop = p1.skyColorTop*a + p2.skyColorTop*b;
-	skyColorBottom = p1.skyColorBottom*a + p2.skyColorBottom*b;
-	scene->lightColor = p1.lightColor*a + p2.lightColor*b;
-	scene->fogColor = p1.fogColor*a + p2.fogColor*b;
-}
-
-colorPreset CloudsModel::SunsetPreset1() {
-	colorPreset preset;
-
-	preset.cloudColorBottom = glm::vec3(97, 98, 120) / 255.f;
-	preset.skyColorTop = glm::vec3(133, 158, 214) / 255.f;
-	preset.skyColorBottom = glm::vec3(241, 161, 161) / 255.f;
-
-	preset.lightColor = glm::vec3(255, 201, 201) / 255.f;
-	preset.fogColor = glm::vec3(128, 153, 179) / 255.f;
-
-	return preset;
-}
 
 void CloudsModel::setGui() {
 
@@ -79,18 +31,14 @@ void CloudsModel::setGui() {
 	if (ImGui::SliderFloat("Clouds frequency", &perlinFrequency, 0.0f, 4.0f))
 		generateWeatherMap();
 
-
-	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Clouds conlors");
+	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Clouds colors");
 	glm::vec3 * cloudBottomColor = &cloudColorBottom;
 	ImGui::ColorEdit3("Cloud color", (float*)cloudBottomColor); // Edit 3 floats representing a color
 
-	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Sky colors controls");
-	ImGui::ColorEdit3("Sky top color", (float*)&skyColorTop); // Edit 3 floats representing a color
-	ImGui::ColorEdit3("Sky bottom color", (float*)&skyColorBottom); // Edit 3 floats representing a color
 	ImGui::End();
 }
 
-CloudsModel::CloudsModel(sceneElements * scene) : scene(scene)
+CloudsModel::CloudsModel(sceneElements * scene, Skybox * sky) : scene(scene), sky(sky)
 {
 	initVariables();
 	initShaders();
@@ -163,7 +111,6 @@ void CloudsModel::generateModelTextures()
 	}
 }
 
-
 CloudsModel::~CloudsModel()
 {
 	delete volumetricCloudsShader;
@@ -216,9 +163,6 @@ void CloudsModel::initVariables()
 
 	cloudColorTop = (glm::vec3(169., 149., 149.)*(1.5f / 255.f));
 	cloudColorBottom = (glm::vec3(65., 70., 80.)*(1.5f / 255.f));
-
-	skyColorTop = glm::vec3(0.5, 0.7, 0.8)*1.05f;
-	skyColorBottom = glm::vec3(0.9, 0.9, 0.95);
 
 	weatherTex = 0;
 	perlinTex = 0;

@@ -56,15 +56,14 @@ int main()
 
 	window.camera = &camera;
 
-	//glm::vec3 fogColor(0.6 + 0.1, 0.71 + 0.1, 0.85 + 0.1);
 	glm::vec3 fogColor(0.5,0.6,0.7);
-	//fogColor *= 0.7;
 	glm::vec3 lightColor(255, 255, 230);
 	lightColor /= 255.0;
 
 	FrameBufferObject SceneFBO(Window::SCR_WIDTH, Window::SCR_HEIGHT);
 	glm::vec3 lightPosition, seed;
 	glm::mat4 proj = glm::perspective(glm::radians(camera.Zoom), (float)Window::SCR_WIDTH / (float)Window::SCR_HEIGHT, 5.f, 10000000.0f);
+	glm::vec3 lightDir = glm::vec3(-.5, 0.5, 1.0);
 
 	//Every scene object need these informations to be rendered
 	sceneElements scene;
@@ -75,10 +74,9 @@ int main()
 	scene.projMatrix = proj;
 	scene.cam = &camera;
 	scene.sceneFBO = &SceneFBO;
-
+	scene.lightDir = lightDir;
 
 	drawableObject::scene = &scene;
-
 
 	int gridLength = 120;
 	Terrain terrain(gridLength);
@@ -89,7 +87,7 @@ int main()
 
 	Skybox skybox; //unused
 
-	CloudsModel cloudsModel(&scene);
+	CloudsModel cloudsModel(&scene, &skybox);
 	
 	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT, &cloudsModel);
 	VolumetricClouds reflectionVolumetricClouds(1280, 720, &cloudsModel); //a different object is needed because it has a state-dependent draw method
@@ -97,25 +95,17 @@ int main()
 	ScreenQuad PostProcessing("shaders/post_processing.frag");
 	ScreenQuad fboVisualizer("shaders/visualizeFbo.frag");
 
-	bool useSeed = true;
-	glm::vec3 lightDir = glm::vec3(-.5, 0.5, 1.0);
-
-	colorPreset presetHighSun = cloudsModel.DefaultPreset();
-	colorPreset presetSunset = cloudsModel.SunsetPreset();
-
-	auto sigmoid = [](float v) { return 1/(1.0 + exp(8.0-v*40.0)); };
-	cloudsModel.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
-
 	while (window.continueLoop())
 	{
-		lightDir = glm::normalize(lightDir);
-		scene.lightPos = lightDir*1e9f + camera.Position;
+		scene.lightDir = glm::normalize(scene.lightDir);
+		scene.lightPos = scene.lightDir*1e9f + camera.Position;
 		// input
 		window.processInput(1 / ImGui::GetIO().Framerate);
 
-		//update tiles position to make the world infinite
+		//update tiles position to make the world infinite, clouds weather map and sky colors
 		terrain.updateTilesPositions();
 		cloudsModel.update();
+		skybox.update();
 
 		SceneFBO.bind();
 
@@ -185,7 +175,7 @@ int main()
 		terrain.up = -1.0;
 		terrain.draw();
 
-		// draw terrain
+		// draw terrain and water
 		scene.sceneFBO->bind();
 		terrain.draw();
 		water.draw();
@@ -193,8 +183,8 @@ int main()
 		//disable test for quad rendering
 		ScreenQuad::disableTests();
 
-		// scene post processing - blending between main scene texture and clouds texture
 		volumetricClouds.draw();
+		skybox.draw();
 
 		// blend volumetric clouds rendering with terrain and apply some post process
 		unbindCurrentFrameBuffer(); // on-screen drawing
@@ -219,8 +209,8 @@ int main()
 		// Texture visualizer
 		Shader& fboVisualizerShader = fboVisualizer.getShader();
 		fboVisualizerShader.use();
-		fboVisualizerShader.setSampler2D("fboTex", 0, 0);
-		//fboVisualizer.draw();
+		fboVisualizerShader.setSampler2D("fboTex", skybox.getSkyTexture(), 0);
+		fboVisualizer.draw();
 		
 		{
 			static int counter = 0;
@@ -229,18 +219,17 @@ int main()
 			cloudsModel.setGui();
 			terrain.setGui();
 			water.setGui();
+			skybox.setGui();
 
 			ImGui::TextColored(ImVec4(1, 1, 0, 1), "Other controls");
-			if (ImGui::DragFloat3("Light Position", &lightDir[0], 0.01, -1.0, 1.0)) {
+			if (ImGui::DragFloat3("Light Position", &scene.lightDir[0], 0.01, -1.0, 1.0)) {
 				auto saturate = [](float v) { return std::min(std::max(v, 0.0f), 0.8f); };
-				
-				lightDir.y = saturate(lightDir.y);
-				cloudsModel.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
-
+				scene.lightDir.y = saturate(scene.lightDir.y);
+				//skybox.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
 			}
-			ImGui::InputFloat3("Camera Position", &camera.Position[0], 7);
-			ImGui::ColorEdit3("Light color", (float*)&lightColor); 
-			ImGui::ColorEdit3("Fog color", (float*)&fogColor);
+			ImGui::InputFloat3("Camera Position", &(scene.cam->Position[0]), 7);
+			ImGui::ColorEdit3("Light color", (float*)&scene.lightColor); 
+			ImGui::ColorEdit3("Fog color", (float*)&scene.fogColor);
 			ImGui::SliderFloat("Camera speed", &camera.MovementSpeed, 0.0, SPEED*3.0);
 			
 			
@@ -263,20 +252,16 @@ int main()
 			}*/
 			//ImGui::SameLine();
 			if (ImGui::Button("Sunset Preset 1")) {
-				presetSunset = cloudsModel.SunsetPreset();
-				cloudsModel.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
+				skybox.SunsetPreset();
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("Sunset Preset 2")) {
-				presetSunset = cloudsModel.SunsetPreset1();
-				cloudsModel.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
+				skybox.SunsetPreset1();
 			}
 
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::End();
 		}
-
-		//camera.Position += glm::vec3(200, 0, 0);
 
 		//gui
 		ImGui::Render();

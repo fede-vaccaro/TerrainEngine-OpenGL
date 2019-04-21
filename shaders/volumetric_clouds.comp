@@ -503,7 +503,7 @@ void main()
 	vec4 bg = colorCubeMap(cubeMapEndPos, worldDir);
 	vec3 red = vec3(1.0);
 
-	bg = mix( mix(red.rgbr, vec4(1.0), SUN_DIR.y), bg, pow( max(cubeMapEndPos.y+0.1, .0), 0.2));
+	//bg = mix( mix(red.rgbr, vec4(1.0), SUN_DIR.y), bg, pow( max(cubeMapEndPos.y+0.1, .0), 0.2));
 	//vec4 bg = vec4( TonemapACES(preetham(worldDir)), 1.0);
 	int case_ = 0;
 	//compute raymarching starting and ending point
@@ -561,29 +561,18 @@ void main()
 	v.rgb += s*v.a;
 
 	// blend clouds and background
-	/*
-	if(case_ == 0)
-		v = vec4(1.0, 0.0, 0.0,v.a); // for debugging TR
-	else if(case_ == 1)
-		v = vec4(0.0, 1.0, 0.0, v.a);
-	else if(case_ == 2)
-		v = vec4(0.0, 0.0, 1.0, v.a);
-	*/
+
 	bg.rgb = bg.rgb*(1.0 - v.a) + v.rgb;
 	bg.a = 1.0;
 
 
-	//fragColor = bg;
 	fragColor_v = bg;
-	//alphaness = vec4(cloudAlphaness, 0.0, 0.0, 1.0); // alphaness buffer
 	alphaness_v = vec4(cloudAlphaness, 0.0, 0.0, 1.0); // alphaness buffer
 
-	//bloom_v = bg; // bloom is occlusion buffer for post proc crepuscolar rays
 	if(cloudAlphaness > 0.1){ //apply fog to bloom buffer
 		float fogAmount = computeFogAmount(startPos, 0.00003);
 
 		vec3 cloud = mix(vec3(0.0), bloom_v.rgb, clamp(fogAmount,0.,1.));
-		//bloom.rgb = bloom.rgb*(1.0 - cloudAlphaness) + cloud.rgb;
 		bloom_v.rgb = bloom_v.rgb*(1.0 - cloudAlphaness) + cloud.rgb;
 
 	}

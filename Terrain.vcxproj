@@ -207,7 +207,7 @@
     <None Include="shaders\volumetric_clouds.comp" />
     <None Include="shaders\screen.frag" />
     <None Include="shaders\screen.vert" />
-    <None Include="shaders\skyboxFrag.frag" />
+    <None Include="shaders\sky.frag" />
     <None Include="shaders\skyboxVert.vert" />
     <None Include="shaders\terrain.tcs" />
     <None Include="shaders\terrain.tes" />
