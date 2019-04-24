@@ -26,6 +26,7 @@ void VolumetricClouds::draw() {
 	sceneElements* s = drawableObject::scene;
 
 	cloudsShader.use();
+
 	cloudsShader.setVec2("iResolution", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
 	cloudsShader.setFloat("iTime", glfwGetTime());
 	cloudsShader.setMat4("inv_proj", glm::inverse(s->projMatrix));
@@ -51,8 +52,8 @@ void VolumetricClouds::draw() {
 	cloudsShader.setVec3("cloudColorTop", model->cloudColorTop);
 	cloudsShader.setVec3("cloudColorBottom", model->cloudColorBottom);
 	
-	cloudsShader.setVec3("skyColorTop", model->skyColorTop);
-	cloudsShader.setVec3("skyColorBottom", model->skyColorBottom);
+	cloudsShader.setVec3("skyColorTop", model->sky->skyColorTop);
+	cloudsShader.setVec3("skyColorBottom", model->sky->skyColorBottom);
 
 	glm::mat4 vp = s->projMatrix*s->cam->GetViewMatrix();
 	cloudsShader.setMat4("invViewProj", glm::inverse(vp));
@@ -62,6 +63,9 @@ void VolumetricClouds::draw() {
 	cloudsShader.setSampler3D("worley32", model->worley32, 1);
 	cloudsShader.setSampler2D("weatherTex", model->weatherTex, 2);
 	cloudsShader.setSampler2D("depthMap", s->sceneFBO->depthTex, 3);
+
+	cloudsShader.setSampler2D("sky", model->sky->getSkyTexture(), 4);
+
 
 	//actual draw
 	//volumetricCloudsShader->draw();
@@ -79,8 +83,8 @@ void VolumetricClouds::draw() {
 
 		cloudsPPShader.use();
 
-		cloudsPPShader.setSampler2D("clouds", cloudsFBO->getColorAttachmentTex(0), 0);
-		cloudsPPShader.setSampler2D("emissions", cloudsFBO->getColorAttachmentTex(1), 1);
+		cloudsPPShader.setSampler2D("clouds", cloudsFBO->getColorAttachmentTex(VolumetricClouds::fragColor), 0);
+		cloudsPPShader.setSampler2D("emissions", cloudsFBO->getColorAttachmentTex(VolumetricClouds::bloom), 1);
 		cloudsPPShader.setSampler2D("depthMap", s->sceneFBO->depthTex, 2);
 
 		cloudsPPShader.setVec2("cloudRenderResolution", glm::vec2(SCR_WIDTH, SCR_HEIGHT));
