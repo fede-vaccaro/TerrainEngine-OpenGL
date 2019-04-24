@@ -153,7 +153,7 @@ int main()
 		ScreenQuad::disableTests();
 
 		reflectionVolumetricClouds.draw();
-		water.bindReflectionFBO(); //rebind refl buffer; reflVolumetricClouds unbound it
+		water.bindReflectionFBO(); //rebind refl buffer; reflVolumetricClouds will unbound it
 
 		
 		Shader& post = PostProcessing.getShader();
@@ -231,7 +231,7 @@ int main()
 			ImGui::InputFloat3("Camera Position", &(scene.cam->Position[0]), 7);
 			ImGui::ColorEdit3("Light color", (float*)&scene.lightColor); 
 			ImGui::ColorEdit3("Fog color", (float*)&scene.fogColor);
-			ImGui::SliderFloat("Camera speed", &camera.MovementSpeed, 0.0, SPEED*3.0);
+			ImGui::SliderFloat("Camera speed", &scene.cam->MovementSpeed, 0.0, SPEED*3.0);
 			
 			
 
@@ -277,5 +277,4 @@ int main()
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 	// close glfw
-	window.terminate();
 }
