@@ -13,6 +13,7 @@ Skybox::Skybox()
 	skyboxFBO = new FrameBufferObject(Window::SCR_WIDTH, Window::SCR_HEIGHT);
 
 	SunsetPreset1();
+	DefaultPreset();
 }
 
 void Skybox::setGui() {
@@ -65,6 +66,8 @@ colorPreset Skybox::DefaultPreset() {
 	preset.lightColor = glm::vec3(255, 255, 230) / 255.f;
 	preset.fogColor = glm::vec3(0.5, 0.6, 0.7);
 
+	highSunPreset = preset;
+
 	return preset;
 }
 
@@ -101,7 +104,7 @@ void Skybox::draw() {
 
 void Skybox::update() {
 	auto sigmoid = [](float v) { return 1 / (1.0 + exp(8.0 - v * 40.0)); };
-	mixSkyColorPreset(sigmoid(scene->lightDir.y), DefaultPreset(), presetSunset);
+	mixSkyColorPreset(sigmoid(scene->lightDir.y), highSunPreset, presetSunset);
 }
 
 Skybox::~Skybox()

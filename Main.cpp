@@ -39,13 +39,16 @@
 int main()
 {
 
-	// camera
+	// camera and window setup
 	glm::vec3 startPosition(0.0f, 800.0f, 0.0f);
 	Camera camera(startPosition);
 
 	int success;
 	Window window(success, 1600, 900);
 	if (!success) return -1;
+
+	//Window class needs camera address to perform input handling
+	window.camera = &camera;
 
 	// GUI
 	ImGui::CreateContext();
@@ -54,7 +57,6 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window.getWindow(), true);
 	ImGui_ImplOpenGL3_Init("#version 130");
 
-	window.camera = &camera;
 
 	glm::vec3 fogColor(0.5,0.6,0.7);
 	glm::vec3 lightColor(255, 255, 230);
@@ -85,12 +87,12 @@ int main()
 	Water water(glm::vec2(0.0, 0.0), gridLength, waterHeight);
 	terrain.waterPtr = &water;
 
-	Skybox skybox; //unused
+	Skybox skybox;
 
 	CloudsModel cloudsModel(&scene, &skybox);
 	
 	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT, &cloudsModel);
-	VolumetricClouds reflectionVolumetricClouds(1280, 720, &cloudsModel); //a different object is needed because it has a state-dependent draw method
+	VolumetricClouds reflectionVolumetricClouds(1280, 720, &cloudsModel); // (expected) lower resolution framebuffers, so the rendering will be faster
 	
 	ScreenQuad PostProcessing("shaders/post_processing.frag");
 	ScreenQuad fboVisualizer("shaders/visualizeFbo.frag");
@@ -100,7 +102,8 @@ int main()
 		scene.lightDir = glm::normalize(scene.lightDir);
 		scene.lightPos = scene.lightDir*1e9f + camera.Position;
 		// input
-		window.processInput(1 / ImGui::GetIO().Framerate);
+		float frametime = 1 / ImGui::GetIO().Framerate;
+		window.processInput(frametime);
 
 		//update tiles position to make the world infinite, clouds weather map and sky colors
 		terrain.updateTilesPositions();
@@ -213,8 +216,6 @@ int main()
 		//fboVisualizer.draw();
 		
 		{
-			static int counter = 0;
-
 			ImGui::Begin("Scene controls: ");
 			cloudsModel.setGui();
 			terrain.setGui();

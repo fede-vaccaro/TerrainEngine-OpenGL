@@ -18,10 +18,8 @@ public:
 	~Skybox();
 
 	virtual void draw();
-
 	virtual void setGui();
-
-	void update();
+	virtual void update();
 
 	colorPreset DefaultPreset();
 	colorPreset SunsetPreset();
@@ -39,6 +37,6 @@ private:
 	ScreenQuad * skyboxShader;
 	FrameBufferObject * skyboxFBO;
 
-	colorPreset presetSunset;
+	colorPreset presetSunset, highSunPreset;
 };
 

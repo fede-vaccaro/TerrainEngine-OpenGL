@@ -23,3 +23,6 @@ resources/untitled.mtl
 resources/untitled.obj
 Main_.cpp
 .vs/
+imgui.ini
+shaders/3dperlin_shadertoy.txt
+shaders/worley3d.comp

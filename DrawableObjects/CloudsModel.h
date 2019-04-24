@@ -18,8 +18,7 @@ public:
 	CloudsModel(sceneElements * scene, Skybox * sky);
 	~CloudsModel();
 	
-	void update();
-
+	virtual void update();
 	virtual void setGui();
 
 private:
