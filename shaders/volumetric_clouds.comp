@@ -15,6 +15,7 @@ layout(rgba32f, binding = 1) uniform image2D bloom;
 layout(rgba32f, binding = 2) uniform image2D alphaness;
 layout(rgba32f, binding = 3) uniform image2D cloudDistance;
 
+uniform sampler2D sky;
 
 uniform float FOV;
 uniform vec2 iResolution;
@@ -200,20 +201,6 @@ vec3 getSun(const vec3 d, float powExp){
 	vec3 col = 0.8*vec3(1.0,.6,0.1)*pow( sun, powExp );
 	return col;
 }
-
-vec4 colorCubeMap(vec3 endPos, const vec3 d)
-{
-    // background sky     
-	//vec3 col = vec3(0.6,0.71,0.85) - endPos.y*0.2*vec3(1.0,0.5,1.0) + 0.15*0.5;
-	vec3 col = mix(skyColorBottom, skyColorTop, clamp(1 - exp(8.5-17.*clamp(normalize(d).y*0.5 + 0.5,0.0,1.0)),0.0,1.0));
-	
-	col += getSun(d, 350.0);
-
-	return vec4(col, 1.0);
-}
-
-
-
 
 float Random2D(in vec3 st)
 {
@@ -500,10 +487,10 @@ void main()
 	//intersectCubeMap(vec3(0.0, 0.0, 0.0), worldDir, stub, cubeMapEndPos);
 	bool hit = raySphereintersectionSkyMap(worldDir, 0.5, cubeMapEndPos);
 
-	vec4 bg = colorCubeMap(cubeMapEndPos, worldDir);
+	vec4 bg = texture(sky, fragCoord/iResolution);
 	vec3 red = vec3(1.0);
 
-	//bg = mix( mix(red.rgbr, vec4(1.0), SUN_DIR.y), bg, pow( max(cubeMapEndPos.y+0.1, .0), 0.2));
+	bg = mix( mix(red.rgbr, vec4(1.0), SUN_DIR.y), bg, pow( max(cubeMapEndPos.y+0.1, .0), 0.2));
 	//vec4 bg = vec4( TonemapACES(preetham(worldDir)), 1.0);
 	int case_ = 0;
 	//compute raymarching starting and ending point

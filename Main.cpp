@@ -197,7 +197,7 @@ int main()
 		post.setSampler2D("screenTexture", SceneFBO.tex, 0);
 		post.setSampler2D("cloudTEX", volumetricClouds.getCloudsTexture(), 1);
 		post.setSampler2D("depthTex", SceneFBO.depthTex, 2);
-		post.setSampler2D("cloudDistance", volumetricClouds.getCloudsTexture(3), 3);
+		post.setSampler2D("cloudDistance", volumetricClouds.getCloudsTexture(VolumetricClouds::cloudDistance), 3);
 
 		post.setBool("wireframe", scene.wireframe);
 
@@ -210,7 +210,7 @@ int main()
 		Shader& fboVisualizerShader = fboVisualizer.getShader();
 		fboVisualizerShader.use();
 		fboVisualizerShader.setSampler2D("fboTex", volumetricClouds.getCloudsTexture(), 0);
-		fboVisualizer.draw();
+		//fboVisualizer.draw();
 		
 		{
 			static int counter = 0;
@@ -225,7 +225,6 @@ int main()
 			if (ImGui::DragFloat3("Light Position", &scene.lightDir[0], 0.01, -1.0, 1.0)) {
 				auto saturate = [](float v) { return std::min(std::max(v, 0.0f), 0.8f); };
 				scene.lightDir.y = saturate(scene.lightDir.y);
-				//skybox.mixSkyColorPreset(sigmoid(lightDir.y), presetHighSun, presetSunset);
 				skybox.update();
 			}
 			ImGui::InputFloat3("Camera Position", &(scene.cam->Position[0]), 7);

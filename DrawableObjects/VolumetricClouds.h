@@ -18,6 +18,8 @@ public:
 	virtual void draw();
 	~VolumetricClouds();
 
+	enum cloudsTextureNames {fragColor, bloom, alphaness, cloudDistance};
+
 	void generateWeatherMap();
 
 	unsigned int getCloudsTexture() { 
