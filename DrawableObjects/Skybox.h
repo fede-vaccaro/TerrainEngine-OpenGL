@@ -9,8 +9,9 @@ struct colorPreset {
 	glm::vec3 cloudColorBottom, skyColorTop, skyColorBottom, lightColor, fogColor;
 };
 
-class Skybox : public drawableObject
-{
+//This class handles the sky and its color. It draw the sky in the screen space, as only-fragment shader. 
+//It doesn't use the usual skybox because it's like a nice placeholder, if one day it will extended to perform atmospheric light scattering. 
+class Skybox : public drawableObject {
 public:
 	friend class VolumetricClouds;
 	Skybox();

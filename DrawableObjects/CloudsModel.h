@@ -9,7 +9,7 @@
 #define INT_CEIL(n,d) (int)ceil((float)n/d)
 
 
-
+//CloudsModel is responsible to collect the attributes and shaders that will be needed to render the volumetric clouds. Also, it creates the noises which models the clouds.
 class CloudsModel
 {
 public:

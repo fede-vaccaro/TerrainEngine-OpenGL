@@ -10,7 +10,7 @@
 #include "drawableObject.h"
 #include "CloudsModel.h"
 
-
+//VolumetricClouds handles the FrameBufferObjects (and textures) where the clouds will be rendered, and it's responsible to set up the uniforms and calling the draw command.
 class VolumetricClouds : public drawableObject
 {
 public:
