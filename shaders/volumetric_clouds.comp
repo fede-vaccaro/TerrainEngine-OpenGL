@@ -372,7 +372,7 @@ uniform float bayerFilter[16u] = float[]
 uniform bool enablePowder = false;
 
 uniform float densityFactor = 0.02;
-vec4 marchToCloud(vec3 startPos, vec3 endPos, vec3 bg, out vec4 cloudPos){
+vec4 raymarchToCloud(vec3 startPos, vec3 endPos, vec3 bg, out vec4 cloudPos){
 	vec3 path = endPos - startPos;
 	float len = length(path);
 
@@ -529,7 +529,7 @@ void main()
 		return; //early exit
 	}
 
-	v = marchToCloud(startPos,endPos, bg.rgb, cloudDistance_v);
+	v = raymarchToCloud(startPos,endPos, bg.rgb, cloudDistance_v);
 	cloudDistance_v = vec4(distance(cameraPosition, cloudDistance_v.xyz), 0.0,0.0,0.0);
 	//cloudDistance_v = v;
 
