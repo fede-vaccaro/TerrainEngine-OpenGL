@@ -6,7 +6,7 @@
 
 #include "Engine/Window.h"
 #include "Engine/shader.h"
-#include "Engine/ScreenQuad.h"
+#include "Engine/ScreenSpaceShader.h"
 #include "Engine/texture.h"
 
 #include "DrawableObjects/VolumetricClouds.h"
@@ -93,13 +93,14 @@ int main()
 		.subscribe(&cloudsModel)
 		.subscribe(&water);
 
-	ScreenQuad PostProcessing("shaders/post_processing.frag");
-	ScreenQuad fboVisualizer("shaders/visualizeFbo.frag");
+	ScreenSpaceShader PostProcessing("shaders/post_processing.frag");
+	ScreenSpaceShader fboVisualizer("shaders/visualizeFbo.frag");
 
 	while (window.continueLoop())
 	{
 		scene.lightDir = glm::normalize(scene.lightDir);
-		scene.lightPos = scene.lightDir*1e9f + camera.Position;
+		scene.lightPos = scene.lightDir*1e6f + camera.Position;
+
 		// input
 		float frametime = 1 / ImGui::GetIO().Framerate;
 		window.processInput(frametime);
@@ -118,7 +119,6 @@ int main()
 
 		glClearColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
 
 		// toggle/untoggle wireframe mode
@@ -147,7 +147,7 @@ int main()
 		terrain.draw();
 		FrameBufferObject const& reflFBO = water.getReflectionFBO();
 		
-		ScreenQuad::disableTests();
+		ScreenSpaceShader::disableTests();
 
 		reflectionVolumetricClouds.draw();
 		water.bindReflectionFBO(); //rebind refl buffer; reflVolumetricClouds unbound it
@@ -161,7 +161,7 @@ int main()
 		post.setSampler2D("cloudTEX", reflectionVolumetricClouds.getCloudsRawTexture(), 1);
 		PostProcessing.draw();
 
-		ScreenQuad::enableTests();
+		ScreenSpaceShader::enableTests();
 		
 		scene.cam->invertPitch();
 		scene.cam->Position.y += 2 * abs(scene.cam->Position.y - water.getHeight());
@@ -181,7 +181,7 @@ int main()
 		water.draw();
 
 		//disable test for quad rendering
-		ScreenQuad::disableTests();
+		ScreenSpaceShader::disableTests();
 
 		volumetricClouds.draw();
 		skybox.draw();

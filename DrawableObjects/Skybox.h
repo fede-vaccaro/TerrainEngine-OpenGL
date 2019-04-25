@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "../Engine/ScreenQuad.h"
+#include "../Engine/ScreenSpaceShader.h"
 #include "drawableObject.h"
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -34,7 +34,7 @@ public:
 private:
 	glm::vec3 skyColorTop, skyColorBottom;
 
-	ScreenQuad * skyboxShader;
+	ScreenSpaceShader * skyboxShader;
 	FrameBufferObject * skyboxFBO;
 
 	colorPreset presetSunset, highSunPreset;

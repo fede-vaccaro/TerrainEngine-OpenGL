@@ -72,9 +72,6 @@
     <ClInclude Include="Engine\glError.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\ScreenQuad.h">
-      <Filter>Header Files\Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\texture.h">
       <Filter>Header Files\Engine</Filter>
     </ClInclude>
@@ -107,6 +104,9 @@
     </ClInclude>
     <ClInclude Include="DrawableObjects\GUI.h">
       <Filter>Header Files\DrawableObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\ScreenSpaceShader.h">
+      <Filter>Header Files\Engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -141,9 +141,6 @@
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\glError.cpp">
-      <Filter>Source Files\Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\ScreenQuad.cpp">
       <Filter>Source Files\Engine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\texture.cpp">
@@ -184,6 +181,9 @@
     </ClCompile>
     <ClCompile Include="DrawableObjects\GUI.cpp">
       <Filter>Source Files\DrawableObjects</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\ScreenSpaceShader.cpp">
+      <Filter>Source Files\Engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -158,7 +158,7 @@
     <ClInclude Include="Engine\BaseShader.h" />
     <ClInclude Include="Engine\buffers.h" />
     <ClInclude Include="Engine\glError.h" />
-    <ClInclude Include="Engine\ScreenQuad.h" />
+    <ClInclude Include="Engine\ScreenSpaceShader.h" />
     <ClInclude Include="Engine\Shader.h" />
     <ClInclude Include="Engine\texture.h" />
     <ClInclude Include="Engine\utils.h" />
@@ -187,7 +187,7 @@
     <ClCompile Include="Engine\BaseShader.cpp" />
     <ClCompile Include="Engine\buffers.cpp" />
     <ClCompile Include="Engine\glError.cpp" />
-    <ClCompile Include="Engine\ScreenQuad.cpp" />
+    <ClCompile Include="Engine\ScreenSpaceShader.cpp" />
     <ClCompile Include="Engine\Shader.cpp" />
     <ClCompile Include="Engine\texture.cpp" />
     <ClCompile Include="Engine\utils.cpp" />

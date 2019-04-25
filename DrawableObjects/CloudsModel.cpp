@@ -48,7 +48,7 @@ CloudsModel::CloudsModel(sceneElements * scene, Skybox * sky) : scene(scene), sk
 void CloudsModel::initShaders()
 {
 	volumetricCloudsShader = new Shader("volumetricCloudsShader", "shaders/volumetric_clouds.comp");
-	postProcessingShader = new ScreenQuad("shaders/clouds_post.frag");
+	postProcessingShader = new ScreenSpaceShader("shaders/clouds_post.frag");
 	//compute shaders
 	weatherShader = new Shader("weatherMap");
 	weatherShader->attachShader("shaders/weather.comp");

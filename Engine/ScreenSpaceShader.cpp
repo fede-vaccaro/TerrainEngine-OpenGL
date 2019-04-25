@@ -1,10 +1,10 @@
-#include "ScreenQuad.h"
+#include "ScreenSpaceShader.h"
 
-unsigned int ScreenQuad::quadVAO = 0;
-unsigned int ScreenQuad::quadVBO = 0;
-bool ScreenQuad::initialized = false;
+unsigned int ScreenSpaceShader::quadVAO = 0;
+unsigned int ScreenSpaceShader::quadVBO = 0;
+bool ScreenSpaceShader::initialized = false;
 
-ScreenQuad::ScreenQuad(const char * fragmentPath)
+ScreenSpaceShader::ScreenSpaceShader(const char * fragmentPath)
 {
 	initializeQuad();
 	//shad = new Shader("shaders/screen.vert", fragmentPath);
@@ -15,20 +15,20 @@ ScreenQuad::ScreenQuad(const char * fragmentPath)
 	shad->linkPrograms();
 }
 
-void ScreenQuad::drawQuad() {
+void ScreenSpaceShader::drawQuad() {
 	glBindVertexArray(quadVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void ScreenQuad::draw() {
-	ScreenQuad::drawQuad();
+void ScreenSpaceShader::draw() {
+	ScreenSpaceShader::drawQuad();
 }
 
-ScreenQuad::~ScreenQuad()
+ScreenSpaceShader::~ScreenSpaceShader()
 {
 }
 
-void ScreenQuad::initializeQuad() {
+void ScreenSpaceShader::initializeQuad() {
 	if (!initialized) {
 		float vertices[] = {
 			-1.0f, -1.0f, 0.0, 0.0,
@@ -48,7 +48,7 @@ void ScreenQuad::initializeQuad() {
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 		glEnableVertexAttribArray(1);
-		ScreenQuad::initialized = true;
+		ScreenSpaceShader::initialized = true;
 	}
 
 }

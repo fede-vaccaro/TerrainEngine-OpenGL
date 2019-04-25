@@ -1,5 +1,5 @@
 #pragma once
-#include "../Engine/ScreenQuad.h"
+#include "../Engine/ScreenSpaceShader.h"
 #include "../Engine/buffers.h"
 #include "../Engine/texture.h"
 

@@ -9,7 +9,7 @@ Skybox::Skybox()
 	skyColorTop = glm::vec3(0.5, 0.7, 0.8)*1.05f;
 	skyColorBottom = glm::vec3(0.9, 0.9, 0.95);
 
-	skyboxShader = new ScreenQuad("shaders/sky.frag");
+	skyboxShader = new ScreenSpaceShader("shaders/sky.frag");
 	skyboxFBO = new FrameBufferObject(Window::SCR_WIDTH, Window::SCR_HEIGHT);
 
 	SunsetPreset1();
