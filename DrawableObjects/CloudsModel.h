@@ -10,7 +10,7 @@
 
 
 //CloudsModel is responsible to collect the attributes and shaders that will be needed to render the volumetric clouds. Also, it creates the noises which models the clouds.
-class CloudsModel
+class CloudsModel : public drawableObject
 {
 public:
 	friend class VolumetricClouds;
@@ -18,6 +18,7 @@ public:
 	CloudsModel(sceneElements * scene, Skybox * sky);
 	~CloudsModel();
 	
+	virtual void draw() {};
 	virtual void update();
 	virtual void setGui();
 

@@ -169,6 +169,7 @@ void Terrain::draw(){
 
 void Terrain::setGui()
 {
+	ImGui::Begin("Terrain controls: ");
 	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Terrain Controls");
 	//ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
 	//ImGui::Checkbox("Clouds PostProc + God Rays", this->getPostProcPointer());
@@ -186,6 +187,7 @@ void Terrain::setGui()
 	//ImGui::TextColored(ImVec4(1, 1, 0, 1), "Sky controls");
 	ImGui::ColorEdit3("Rock color", (float*)&rockColor[0]); // Edit 3 floats representing a color
 	//ImGui::ColorEdit3("Sky bottom color", (float*)this->getSkyBottomColorPtr()); // Edit 3 floats representing a color
+	ImGui::End();
 }
 
 void Terrain::drawVertices(int nInstances) {

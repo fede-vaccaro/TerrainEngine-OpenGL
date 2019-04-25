@@ -53,13 +53,13 @@ Window::Window(int& success, unsigned int scrW, unsigned int scrH, std::string n
 	Window::lastY = SCR_HEIGHT / 2.0f;
 	*/
 
-	success = inMain() && success;
+	success = gladLoader() && success;
 	if (success) {
 		std::cout << "GLFW window correctly initialized!" << std::endl;
 	}
 }
 
-int Window::inMain() {
+int Window::gladLoader() {
 
 	// tell GLFW to capture our mouse
 	glfwSetInputMode(this->w, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -105,7 +105,7 @@ void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height
 {
 	glViewport(0, 0, width, height);
 }
-
+ 
 void Window::processInput(float frameTime) {
 	if (glfwGetKey(this->w, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(this->w, true);
@@ -144,7 +144,6 @@ void Window::processInput(float frameTime) {
 		if (keyBools[4] == true) { keyBools[4] = false; } // Non aggiungere niente qui
 	}
 }
-
 
 Window::~Window()
 {

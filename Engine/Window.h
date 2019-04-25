@@ -45,7 +45,7 @@ public:
 
 private:
 	int oldState, newState;
-	int inMain(); // set mouse input and load opengl functions 
+	int gladLoader(); // set mouse input and load opengl functions 
 
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 	static void mouse_callback(GLFWwindow* window, double xpos, double ypos);

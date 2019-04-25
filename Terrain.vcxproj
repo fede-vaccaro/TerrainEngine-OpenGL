@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="DrawableObjects\CloudsModel.h" />
     <ClInclude Include="DrawableObjects\drawableObject.h" />
+    <ClInclude Include="DrawableObjects\GUI.h" />
     <ClInclude Include="DrawableObjects\sceneElements.h" />
     <ClInclude Include="DrawableObjects\Skybox.h" />
     <ClInclude Include="DrawableObjects\Terrain.h" />
@@ -178,6 +179,7 @@
     <ClCompile Include="Compile\stb_image_write.cpp" />
     <ClCompile Include="DrawableObjects\CloudsModel.cpp" />
     <ClCompile Include="DrawableObjects\drawableObject.cpp" />
+    <ClCompile Include="DrawableObjects\GUI.cpp" />
     <ClCompile Include="DrawableObjects\Skybox.cpp" />
     <ClCompile Include="DrawableObjects\Terrain.cpp" />
     <ClCompile Include="DrawableObjects\VolumetricClouds.cpp" />

@@ -45,18 +45,9 @@ void Water::drawVertices() {
 
 void Water::setGui()
 {
-	ImGui::TextColored(ImVec4(1, 1, 0, 1), "Water Controls");
-	//ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-	//ImGui::Checkbox("Clouds PostProc + God Rays", this->getPostProcPointer());
-
+	ImGui::Begin("Water controls");
 	ImGui::SliderFloat("Water height", &height, 0.0f, 1000.f);
-
-	//glm::vec3 * cloudBottomColor = this->getCloudColorBottomPtr();
-	//ImGui::ColorEdit3("Cloud color", (float*)cloudBottomColor); // Edit 3 floats representing a color
-
-	//ImGui::TextColored(ImVec4(1, 1, 0, 1), "Sky controls");
-	//ImGui::ColorEdit3("Sky top color", (float*)this->getSkyTopColorPtr()); // Edit 3 floats representing a color
-	//ImGui::ColorEdit3("Sky bottom color", (float*)this->getSkyBottomColorPtr()); // Edit 3 floats representing a color
+	ImGui::End();
 }
 
 void Water::draw() {

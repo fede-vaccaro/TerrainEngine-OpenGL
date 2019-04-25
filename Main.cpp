@@ -22,19 +22,20 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/random.hpp>
+
 #include "Engine/glError.h"
+
 #include "DrawableObjects/sceneElements.h"
 #include "DrawableObjects/drawableObject.h"
+#include "DrawableObjects/GUI.h"
 
 #include <iostream>
 #include <vector>
 #include <functional>
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
-
-#include "Engine/utils.h"
+#include "../imgui/imgui.h"
+#include "../imgui/imgui_impl_glfw.h"
+#include "../imgui/imgui_impl_opengl3.h"
 
 int main()
 {
@@ -50,13 +51,7 @@ int main()
 	//Window class needs camera address to perform input handling
 	window.camera = &camera;
 
-	// GUI
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-
-	ImGui_ImplGlfw_InitForOpenGL(window.getWindow(), true);
-	ImGui_ImplOpenGL3_Init("#version 130");
-
+	GUI gui(window);
 
 	glm::vec3 fogColor(0.5,0.6,0.7);
 	glm::vec3 lightColor(255, 255, 230);
@@ -88,12 +83,16 @@ int main()
 	terrain.waterPtr = &water;
 
 	Skybox skybox;
-
 	CloudsModel cloudsModel(&scene, &skybox);
 	
 	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT, &cloudsModel);
 	VolumetricClouds reflectionVolumetricClouds(1280, 720, &cloudsModel); // (expected) lower resolution framebuffers, so the rendering will be faster
 	
+	gui.subscribe(&terrain)
+		.subscribe(&skybox)
+		.subscribe(&cloudsModel)
+		.subscribe(&water);
+
 	ScreenQuad PostProcessing("shaders/post_processing.frag");
 	ScreenQuad fboVisualizer("shaders/visualizeFbo.frag");
 
@@ -108,7 +107,8 @@ int main()
 		//update tiles position to make the world infinite, clouds weather map and sky colors
 		terrain.updateTilesPositions();
 		cloudsModel.update();
-		//skybox.update();
+		gui.update();
+		skybox.update();
 
 		SceneFBO.bind();
 
@@ -119,9 +119,7 @@ int main()
 		glClearColor(fogColor[0], fogColor[1], fogColor[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+
 
 		// toggle/untoggle wireframe mode
 		if (scene.wireframe) {
@@ -138,9 +136,8 @@ int main()
 		
 		//draw to water reflection buffer object
 		water.bindReflectionFBO();
-		glClearColor(0.0, 0.4*0.8, 0.7*0.8, 1.0);
 		glEnable(GL_DEPTH_TEST);
-		//glEnable(GL_CULL_FACE);
+		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		scene.cam->invertPitch();
@@ -153,7 +150,7 @@ int main()
 		ScreenQuad::disableTests();
 
 		reflectionVolumetricClouds.draw();
-		water.bindReflectionFBO(); //rebind refl buffer; reflVolumetricClouds will unbound it
+		water.bindReflectionFBO(); //rebind refl buffer; reflVolumetricClouds unbound it
 
 		
 		Shader& post = PostProcessing.getShader();
@@ -213,68 +210,11 @@ int main()
 		Shader& fboVisualizerShader = fboVisualizer.getShader();
 		fboVisualizerShader.use();
 		fboVisualizerShader.setSampler2D("fboTex", volumetricClouds.getCloudsTexture(), 0);
-		//fboVisualizer.draw();
-		
-		{
-			ImGui::Begin("Scene controls: ");
-			cloudsModel.setGui();
-			terrain.setGui();
-			water.setGui();
-			skybox.setGui();
+		//fboVisualizer.draw(); //for debugging purposes
 
-			ImGui::TextColored(ImVec4(1, 1, 0, 1), "Other controls");
-			if (ImGui::DragFloat3("Light Position", &scene.lightDir[0], 0.01, -1.0, 1.0)) {
-				auto saturate = [](float v) { return std::min(std::max(v, 0.0f), 0.8f); };
-				scene.lightDir.y = saturate(scene.lightDir.y);
-				skybox.update();
-			}
-			ImGui::InputFloat3("Camera Position", &(scene.cam->Position[0]), 7);
-			ImGui::ColorEdit3("Light color", (float*)&scene.lightColor); 
-			ImGui::ColorEdit3("Fog color", (float*)&scene.fogColor);
-			ImGui::SliderFloat("Camera speed", &scene.cam->MovementSpeed, 0.0, SPEED*3.0);
-			
-			
-
-			
-			ImGui::Checkbox("Wireframe mode", &scene.wireframe);
-
-			if (ImGui::Button("Generate seed"))
-				scene.seed = genRandomVec3();
-			//ImGui::SameLine();
-			//ImGui::Text("Generate a new seed");
-			ImGui::SameLine();
-			if (ImGui::Button("Use default seed"))
-				scene.seed = glm::vec3(0.0, 0.0, 0.0);
-
-			/*ImGui::SameLine();
-			if (ImGui::Button("Default Preset")) {
-				volumetricClouds.DefaultPreset();
-				lightDir.y = 0.5;
-			}*/
-			//ImGui::SameLine();
-			if (ImGui::Button("Sunset Preset 1")) {
-				skybox.SunsetPreset();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Sunset Preset 2")) {
-				skybox.SunsetPreset1();
-			}
-
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			ImGui::End();
-		}
-
-		//gui
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		gui.draw();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		window.swapBuffersAndPollEvents();
 	}
-
-	//
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
-	// close glfw
 }
