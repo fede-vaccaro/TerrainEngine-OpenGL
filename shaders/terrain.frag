@@ -344,7 +344,8 @@ void main()
 	//float fogFactor = clamp((u_FogDist.y - distFromPos) / (u_FogDist.y - u_FogDist.x), 0.0, 1.0);
 	//float fogFactor = clamp(exp(-1.5*distFromPos/(u_FogDist.y - u_FogDist.x) + 0.5), 0.0, 1.0);
 	bool normals_fog = true;
-	float fogFactor = applyFog(vec3(0.0), distance(gEyeWorldPos, WorldPos), gEyeWorldPos, normalize(WorldPos - gEyeWorldPos));
+	float dist = distance(gEyeWorldPos, WorldPos);
+	float fogFactor = applyFog(vec3(0.0), dist, gEyeWorldPos, normalize(WorldPos - gEyeWorldPos));
 	float eps = 0.1;
 	if(fogFactor >= 0.0 && fogFactor > 1. - eps){
 		//normals_fog = false;
@@ -386,10 +387,10 @@ void main()
     vec4 color = heightColor*vec4((ambient + specular*0 + diffuse)*vec3(1.0f) , 1.0f);
 	if(drawFog){
 		FragColor = mix(color, vec4(mix(fogColor*1.1,fogColor*0.85,clamp(WorldPos.y/(1500.*16.)*gDispFactor,0.0,1.0)), 1.0f), fogFactor);
-		FragColor.a = WorldPos.y/waterHeight;
+		FragColor.a = dist;
 	}else{
 		FragColor = color;
-		FragColor.a = WorldPos.y/waterHeight;
+		FragColor.a = dist;
 	}
 
 	//FragColor.rgb = n*0.5 + 0.5;

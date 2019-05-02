@@ -6,6 +6,8 @@ in vec2 TexCoords;
 uniform sampler2D screenTexture;
 uniform sampler2D cloudTEX;
 uniform sampler2D depthTex;
+uniform sampler2D skyTex;
+uniform sampler2D cloudDistance;
 uniform bool wireframe;
 
 uniform vec2 resolution;
@@ -29,8 +31,21 @@ void main()
 	//FragColor = vec4(0.5,0.1,0.8,1.0);
 	vec4 cloud = texture(cloudTEX, TexCoords);
 	vec4 bg = texture(screenTexture, TexCoords);
+	
+	float cloudDistance = texture(cloudDistance, TexCoords).r;
+	
 	float mixVal = (texture(depthTex, TexCoords).r < 1.0 ? 0.0 : 1.0);
 	vec4 col = mix(bg, cloud, (!wireframe ? mixVal : 0.0));
+
+
+	if(cloudDistance < bg.a && cloudDistance > 0.0){
+	
+	col = vec4(1.0,0.0,0.0,1.0);
+
+	}
+
+
+
 
 	const float gamma = 2.2;
     const float exposure = 3.0;

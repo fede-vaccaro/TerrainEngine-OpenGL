@@ -33,9 +33,11 @@
 #include <vector>
 #include <functional>
 
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_impl_glfw.h"
-#include "../imgui/imgui_impl_opengl3.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
+#include "Engine/utils.h"
 
 int main()
 {
@@ -45,7 +47,7 @@ int main()
 	Camera camera(startPosition);
 
 	int success;
-	Window window(success, 1600, 900);
+	Window window(success, 2560*0.9, 1440*0.9);
 	if (!success) return -1;
 
 	//Window class needs camera address to perform input handling
@@ -67,7 +69,7 @@ int main()
 	scene.lightPos = lightPosition;
 	scene.lightColor = lightColor;
 	scene.fogColor = fogColor;
-	scene.seed = seed;
+	scene.seed = seed = genRandomVec3();
 	scene.projMatrix = proj;
 	scene.cam = &camera;
 	scene.sceneFBO = &SceneFBO;
@@ -198,6 +200,7 @@ int main()
 		post.setSampler2D("cloudTEX", volumetricClouds.getCloudsTexture(), 1);
 		post.setSampler2D("depthTex", SceneFBO.depthTex, 2);
 		post.setSampler2D("cloudDistance", volumetricClouds.getCloudsTexture(VolumetricClouds::cloudDistance), 3);
+		post.setSampler2D("skyTex", skybox.getSkyTexture(), 4);
 
 		post.setBool("wireframe", scene.wireframe);
 

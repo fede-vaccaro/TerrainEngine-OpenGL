@@ -469,6 +469,7 @@ float computeFogAmount(in vec3 startPos, in float factor){
 void main()
 {
 	vec4 fragColor_v, bloom_v, alphaness_v, cloudDistance_v;
+	cloudDistance_v = vec4(-1.0);
 	ivec2 fragCoord = ivec2(gl_GlobalInvocationID.xy);
 
 	//if(texture(depthMap, TexCoords).r < 1.0)
