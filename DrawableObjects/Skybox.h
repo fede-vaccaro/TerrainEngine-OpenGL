@@ -38,5 +38,7 @@ private:
 	FrameBufferObject * skyboxFBO;
 
 	colorPreset presetSunset, highSunPreset;
+
+	bool finishedPreset = false;
 };
 
