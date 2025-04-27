@@ -1,7 +1,9 @@
 #pragma once
 #include <string>
 #include <glad/glad.h>
+#include "shaderUtils.h"
 
+/*
 struct shaderType {
 	//shaderType(shaderType& shaderT) : type(shaderT.type), name(shaderT.name) {}
 	shaderType() : type(-1), name("") {}
@@ -9,10 +11,13 @@ struct shaderType {
 	unsigned int type;
 	std::string name;
 };
+*/
 
+/*
 bool checkCompileErrors(unsigned int shader, std::string type, std::string shaderName);
 std::string getShaderName(const char* shaderPath);
 shaderType getShaderType(const char* path);
+*/
 
 class BaseShader
 {

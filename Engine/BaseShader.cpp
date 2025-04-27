@@ -18,7 +18,7 @@ BaseShader::BaseShader(const char * shaderPath)
 
 }
 
-
+/*
 bool checkCompileErrors(unsigned int shader, std::string type, std::string shaderName)
 {
 	int success;
@@ -47,6 +47,7 @@ bool checkCompileErrors(unsigned int shader, std::string type, std::string shade
 	//}
 	return success;
 }
+*/
 
 std::string BaseShader::loadShaderFromFile(const char* shaderPath) {
 	std::string shaderCode;
@@ -72,6 +73,7 @@ std::string BaseShader::loadShaderFromFile(const char* shaderPath) {
 
 }
 
+/*
 std::string getShaderName(const char* path) {
 	std::string pathstr = std::string(path);
 	const size_t last_slash_idx = pathstr.find_last_of("/");
@@ -101,7 +103,7 @@ shaderType getShaderType(const char* path) {
 	if (type == "comp")
 		return shaderType(GL_COMPUTE_SHADER, "COMPUTE") ;
 }
-
+*/
 
 BaseShader::~BaseShader()
 {

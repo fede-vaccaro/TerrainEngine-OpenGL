@@ -10,11 +10,11 @@ public:
 	ScreenSpaceShader(const char * fragmentPath);
 	~ScreenSpaceShader();
 
-	Shader * const getShaderPtr() {
+	const Shader * getShaderPtr() {
 		return shad;
 	}
 
-	Shader & const getShader() {
+	Shader & getShader() {
 		return *shad;
 	}
 

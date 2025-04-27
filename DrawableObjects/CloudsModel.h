@@ -1,6 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
-#include "../Engine/Shader.h"
+#include "../Engine/shader.h"
 #include "sceneElements.h"
 #include "../Engine/ScreenSpaceShader.h"
 #include "../imgui/imgui.h"

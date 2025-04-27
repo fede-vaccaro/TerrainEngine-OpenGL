@@ -1,4 +1,4 @@
-#include "GLError.h"
+#include "glError.h"
 #include <glad/glad.h>
 #include <iostream>
 

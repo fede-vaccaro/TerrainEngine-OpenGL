@@ -1,6 +1,6 @@
 #version 330 core
 out vec4 FragColor;
-in vec3 TexCoords;
+in vec2 TexCoords;
 
 uniform vec3 skyColorBottom;
 uniform vec3 skyColorTop;
