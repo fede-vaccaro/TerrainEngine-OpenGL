@@ -2,9 +2,12 @@
 *A little OpenGL application which renders an (almost) procedural scene, featuring a terrain with distance adaptive LOD, water surface simulation and volumetric clouds.*
 
 **dependancies needed:**
-* GLFW (compiled library in the files)
+* GLFW (compiled library in the files) - or install it with `sudo apt install libglfw3 libglfw3-dev libglew-dev libgl1-mesa-dev` (tested on WLS2)
 * imgui (also in the files, which is the lovely framework from which the GUI is made!)
 * *An OpenGL 4 ready graphics card!*
+
+**Other dependencies:** (already included)
+* [Outcome_V2](https://github.com/ned14/outcome)
 
 *Include/* and *Libraries/* directory has been already uploaded.
 
