@@ -4,14 +4,18 @@
 #include "../imgui/imgui.h"
 #include "../Engine/utils.h"
 
-Water::Water(glm::vec2 position, float scale, float height): scale(scale), height(height){
+namespace terrain {
 
-	//shad = new Shader("shaders/waterVertexShader.vert", "shaders/waterFragmentShader.frag");
-	shad = new Shader("WaterShader");
-	shad->attachShader("shaders/water.vert")
-		->attachShader("shaders/water.frag")
-		->linkPrograms();
+Water::Water(glm::vec2 position, float scale, float height): scale(scale), height(height)
+{
+	//shad = new ShadingProgram("shaders/waterVertexShader.vert", "shaders/waterFragmentShader.frag");
+	auto shaderBuilder = gl::ProgramBuilder();
 
+	shad = shaderBuilder
+	.newProgram("WaterShader")
+	.attachShader(gl::Shader::loadFrom("shaders/water.vert").value())
+	.attachShader(gl::Shader::loadFrom("shaders/water.frag").value())
+	.linkPrograms().value();
 
 	glm::mat4 identity;
 	glm::mat4 scaleMatrix = glm::scale(identity, glm::vec3(scale, scale, scale));
@@ -37,7 +41,7 @@ const int res = 2;
 void Water::drawVertices() {
 	glBindVertexArray(planeVAO);
 	//shader.use();
-	shad->use();
+	shad.use();
 	glDrawElements(GL_TRIANGLES, (res - 1)*(res - 1) * 2 * 3, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
@@ -52,7 +56,7 @@ void Water::setGui()
 
 void Water::draw() {
 	// draw water plane
-	shad->use();
+	shad.use();
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -61,40 +65,40 @@ void Water::draw() {
 	//this->setPosition(glm::vec2(se->cam.Position[0], se->cam.Position[2]), scale, height);
 	this->setHeight(height);
 
-	shad->setMat4("modelMatrix", modelMatrix);
-	shad->setMat4("gVP", se->projMatrix*se->cam->GetViewMatrix());
+	shad.setMat4("modelMatrix", modelMatrix);
+	shad.setMat4("gVP", se->projMatrix*se->cam->GetViewMatrix());
 
-	shad->setVec3("u_LightColor", se->lightColor);
-	shad->setVec3("u_LightPosition", se->lightPos);
+	shad.setVec3("u_LightColor", se->lightColor);
+	shad.setVec3("u_LightPosition", se->lightPos);
 
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, reflectionFBO->tex);
-	shad->setInt("reflectionTex", 0);
+	shad.setInt("reflectionTex", 0);
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, refractionFBO->tex);
-	shad->setInt("refractionTex", 1);
+	shad.setInt("refractionTex", 1);
 
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, dudvMap);
-	shad->setInt("waterDUDV", 2);
+	shad.setInt("waterDUDV", 2);
 
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, normalMap);
-	shad->setInt("normalMap", 3);
+	shad.setInt("normalMap", 3);
 
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, refractionFBO->depthTex);
-	shad->setInt("depthMap", 4);
+	shad.setInt("depthMap", 4);
 
 	float waveSpeed = 0.25;
 	float time = glfwGetTime();
 
 	float moveFactor = waveSpeed * time;
-	shad->setFloat("moveFactor", moveFactor);
+	shad.setFloat("moveFactor", moveFactor);
 
-	shad->setVec3("cameraPosition", se->cam->Position);
+	shad.setVec3("cameraPosition", se->cam->Position);
 
 	//waterPlane->Draw(*shad);
 	this->drawVertices();
@@ -105,8 +109,4 @@ void Water::unbindFBO() {
 	unbindCurrentFrameBuffer(Window::SCR_WIDTH, Window::SCR_WIDTH);
 }
 
-
-
-Water::~Water()
-{
-}
+} // namespace terrain

@@ -1,8 +1,8 @@
 #include "texture.h"
 
-unsigned int TextureFromFile(const char *path, const string &directory, bool gamma)
+unsigned int TextureFromFile(const char *path, const std::string &directory, bool gamma)
 {
-	string filename = string(path);
+	auto filename = std::string(path);
 	filename = directory + '/' + filename;
 
 	unsigned int textureID;
@@ -42,7 +42,7 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
 	return textureID;
 }
 
-unsigned int loadCubemap(vector<std::string> faces) {
+unsigned int loadCubemap(std::vector<std::string> faces) {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);

@@ -4,12 +4,15 @@
 #include "../Engine/Window.h"
 #include "../imgui/imgui.h"
 
+namespace terrain
+{
+
 Skybox::Skybox()
 {
 	skyColorTop = glm::vec3(0.5, 0.7, 0.8)*1.05f;
 	skyColorBottom = glm::vec3(0.9, 0.9, 0.95);
 
-	skyboxShader = new ScreenSpaceShader("shaders/sky.frag");
+	skyboxShader = new terrain::ScreenSpaceShader("shaders/sky.frag");
 	skyboxFBO = new FrameBufferObject(Window::SCR_WIDTH, Window::SCR_HEIGHT);
 
 	SunsetPreset1();
@@ -87,7 +90,7 @@ void Skybox::draw() {
 	sceneElements * s = drawableObject::scene;
 	skyboxFBO->bind();
 
-	Shader& shader = skyboxShader->getShader();
+	terrain::gl::ShadingProgram& shader = skyboxShader->getShader();
 	shader.use();
 
 	shader.setVec2("resolution", glm::vec2(Window::SCR_WIDTH, Window::SCR_HEIGHT));
@@ -112,3 +115,5 @@ Skybox::~Skybox()
 	delete skyboxFBO;
 	delete skyboxShader;
 }
+
+} // namespace terrain

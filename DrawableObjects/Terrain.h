@@ -1,13 +1,17 @@
 #pragma once
+
 #include <glm/glm.hpp>
-//#include <model.h>
 #include "../Engine/texture.h"
-//#include "TessShader.h"
 #include "Water.h"
 #include <camera.h>
 #include "../Engine/glError.h"
 #include "drawableObject.h"
 #include "Water.h"
+
+#include <ShadingProgram.h>
+
+namespace terrain
+{
 
 enum tPosition {
 	C, N, S, E, W, SE, SW, NE, NW, totTiles
@@ -19,7 +23,8 @@ public:
 
 	Terrain(int gl);
 	
-	virtual ~Terrain();
+	virtual ~Terrain() = default;
+
 	virtual void draw();
 	virtual void setGui();
 
@@ -84,7 +89,7 @@ private:
 	static bool drawFog;
 	unsigned int * textures, posBuffer;
 
-	Shader * shad;
+	gl::ShadingProgram _shad;
 	glm::mat4 modelMatrix;
 
 	std::vector<glm::vec2> positionVec;
@@ -111,3 +116,4 @@ private:
 	void reset();
 };
 
+} // namespace terrain

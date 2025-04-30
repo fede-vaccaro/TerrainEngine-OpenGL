@@ -1,10 +1,10 @@
 #pragma once
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <camera.h>
+
 #include <iostream>
 
+#include <camera.h>
 
 
 class Window

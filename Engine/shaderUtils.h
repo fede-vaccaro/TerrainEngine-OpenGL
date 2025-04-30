@@ -1,15 +1,31 @@
 #ifndef SHADERUTILS_H
 #define SHADERUTILS_H
+
+#include <filesystem>
+#include <ostream>
 #include <string>
 
-struct shaderType {
-	shaderType() : type(-1), name("") {}
-	shaderType(unsigned int type, std::string name) : type(type), name(name) {}
-	unsigned int type;
-	std::string name;
-};
+namespace terrain::gl
+{
+	enum class shaderType: GLuint
+	{
+		INVALID = GLuint{0},
+		VERTEX = GL_VERTEX_SHADER,
+		FRAGMENT = GL_FRAGMENT_SHADER,
+		TESS_EVALUATION = GL_TESS_EVALUATION_SHADER,
+		TESS_CONTROL = GL_TESS_CONTROL_SHADER,
+		GEOMETRY = GL_GEOMETRY_SHADER,
+		COMPUTE = GL_COMPUTE_SHADER
+	};
 
-bool checkCompileErrors(unsigned int shader, std::string type, std::string shaderName);
-std::string getShaderName(const char* shaderPath);
-shaderType getShaderType(const char* path);
+	std::ostream& operator<<(std::ostream& os, const shaderType& type);
+	std::string to_string(const shaderType& type);
+		
+	std::string checkShaderCompileErrors(GLuint shader_id, shaderType type, const std::string& shaderName);
+	std::string checkProgramCompileErrors(GLuint program_id, const std::string& programName);
+
+	shaderType shaderTypeFromPath(const std::filesystem::path& path);
+	
+}
+
 #endif

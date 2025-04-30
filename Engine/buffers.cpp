@@ -6,7 +6,7 @@ void bindFrameBuffer(int frameBuffer, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-void unbindCurrentFrameBuffer(int scrWidth, int scrHeight) {//call to switch to default frame buffer
+void unbindCurrentFrameBuffer(int scrWidth, int scrHeight) { //call to switch to default frame buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, scrWidth, scrHeight);
 }

@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include "../Engine/texture.h"
 
-
+namespace terrain {
 
 void CloudsModel::setGui() {
 
@@ -47,22 +47,33 @@ CloudsModel::CloudsModel(sceneElements * scene, Skybox * sky) : scene(scene), sk
 
 void CloudsModel::initShaders()
 {
-	volumetricCloudsShader = new Shader("volumetricCloudsShader", "shaders/volumetric_clouds.comp");
+	auto shaderBuilder = gl::ProgramBuilder();
+
+	_volumetricCloudsShader = shaderBuilder
+	.newProgram("volumetricCloudsShader")
+	.attachShader(gl::Shader::loadFrom("shaders/volumetric_clouds.comp").value())
+	.linkPrograms(true).value();
+
 	postProcessingShader = new ScreenSpaceShader("shaders/clouds_post.frag");
+
 	//compute shaders
-	weatherShader = new Shader("weatherMap");
-	weatherShader->attachShader("shaders/weather.comp");
-	weatherShader->linkPrograms();
+	_weatherShader = shaderBuilder.newProgram("weatherMap")
+	.attachShader(gl::Shader::loadFrom("shaders/weather.comp").value())
+	.linkPrograms(true).value();
 }
 
 void CloudsModel::generateModelTextures()
 {
+	auto programBuilder = gl::ProgramBuilder{};
+
 	/////////////////// TEXTURE GENERATION //////////////////
 	if (!perlinTex) {
 		//compute shaders
-		Shader comp("perlinWorley");
-		comp.attachShader("shaders/perlinworley.comp");
-		comp.linkPrograms();
+		gl::ShadingProgram comp = programBuilder
+		.newProgram("perlinWorley")
+		.attachShader(gl::Shader::loadFrom("shaders/perlinworley.comp").value())
+		.linkPrograms(true).value();
+
 
 		//make texture
 		this->perlinTex = generateTexture3D(128, 128, 128);
@@ -82,9 +93,10 @@ void CloudsModel::generateModelTextures()
 
 	if (!worley32) {
 		//compute shaders
-		Shader worley_git("worleyComp");
-		worley_git.attachShader("shaders/worley.comp");
-		worley_git.linkPrograms();
+		gl::ShadingProgram worley_git = programBuilder
+		.newProgram("worleyComp")
+		.attachShader(gl::Shader::loadFrom("shaders/worley.comp").value())
+		.linkPrograms(true).value();
 
 		//make texture
 		this->worley32 = generateTexture3D(32, 32, 32);
@@ -118,9 +130,7 @@ void CloudsModel::generateModelTextures()
 
 CloudsModel::~CloudsModel()
 {
-	delete volumetricCloudsShader;
 	delete postProcessingShader;
-	delete weatherShader;
 }
 
 void CloudsModel::update()
@@ -134,9 +144,11 @@ void CloudsModel::update()
 
 void CloudsModel::generateWeatherMap() {
 	bindTexture2D(weatherTex, 0);
-	weatherShader->use();
-	weatherShader->setVec3("seed", scene->seed);
-	weatherShader->setFloat("perlinFrequency", perlinFrequency);
+
+	_weatherShader.use();
+	_weatherShader.setVec3("seed", scene->seed);
+	_weatherShader.setFloat("perlinFrequency", perlinFrequency);
+	
 	std::cout << "computing weather!" << std::endl;
 	glDispatchCompute(INT_CEIL(1024, 8), INT_CEIL(1024, 8), 1);
 	std::cout << "weather computed!!" << std::endl;
@@ -173,3 +185,5 @@ void CloudsModel::initVariables()
 	perlinTex = 0;
 	worley32 = 0;
 }
+
+} // namespace terrain

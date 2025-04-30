@@ -1,16 +1,14 @@
 #pragma once
-#include <stb_image.h>
-#include <string>
-#include <iostream>
-#include <vector>
-
-
 #include <glad/glad.h>
 
-using namespace std;
+#include <iostream>
+#include <vector>
+#include <string>
 
-unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
-unsigned int loadCubemap(vector<std::string> faces);
+#include <stb_image.h>
+
+unsigned int TextureFromFile(const char *path, const std::string &directory, bool gamma = false);
+unsigned int loadCubemap(std::vector<std::string> faces);
 unsigned int generateTexture2D(int w, int h);
 unsigned int generateTexture3D(int w, int h, int d);
 void bindTexture2D(unsigned int tex, int unit = 0);

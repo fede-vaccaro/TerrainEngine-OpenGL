@@ -3,18 +3,18 @@
 
 #include <glad/glad.h> // holds all OpenGL type declarations
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include "shader.h"
-
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <vector>
-using namespace std;
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "ShadingProgram.h"
+namespace terrain
+{
 struct Vertex {
 	// position
 	glm::vec3 Position;
@@ -30,21 +30,21 @@ struct Vertex {
 
 struct Texture {
 	unsigned int id;
-	string type;
-	string path;
+	std::string type;
+	std::string path;
 };
 
 class Mesh {
 public:
 	/*  Mesh Data  */
-	vector<Vertex> vertices;
-	vector<unsigned int> indices;
-	vector<Texture> textures;
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
+	std::vector<Texture> textures;
 	unsigned int VAO;
 
 	/*  Functions  */
 	// constructor
-	Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
+	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 	{
 		this->vertices = vertices;
 		this->indices = indices;
@@ -55,7 +55,7 @@ public:
 	}
 
 	// render the mesh
-	void Draw(Shader shader, unsigned int drawMode = GL_TRIANGLES)
+	void Draw(gl::ShadingProgram& shader, unsigned int drawMode = GL_TRIANGLES)
 	{
 		// bind appropriate textures
 		unsigned int diffuseNr = 1;
@@ -66,8 +66,8 @@ public:
 		{
 			glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
 											  // retrieve texture number (the N in diffuse_textureN)
-			string number;
-			string name = textures[i].type;
+			std::string number;
+			std::string name = textures[i].type;
 			if (name == "texture_diffuse")
 				number = std::to_string(diffuseNr++);
 			else if (name == "texture_specular")
@@ -78,21 +78,24 @@ public:
 				number = std::to_string(heightNr++); // transfer unsigned int to stream
 
 													 // now set the sampler to the correct texture unit
-			glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+			// glUniform1i(glGetUniformLocation(shader.programId, (name + number).c_str()), i);
 			// and finally bind the texture
-			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+			// glBindTexture(GL_TEXTURE_2D, textures[i].id);
+
+			shader.setSampler2D(name + number, textures[i].id, i);
 		}
 
 		// draw mesh
+		shader.use();
+
 		glBindVertexArray(VAO);
-		//shader.use();
 		glDrawElements(drawMode, indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
 		// always good practice to set everything back to defaults once configured.
 		glActiveTexture(GL_TEXTURE0);
 	}
-	void DrawIstances(Shader shader, unsigned int drawMode = GL_TRIANGLES, unsigned int nIstances = 1)
+	void DrawIstances(gl::ShadingProgram& shader, unsigned int drawMode = GL_TRIANGLES, unsigned int nIstances = 1)
 	{
 		// bind appropriate textures
 		unsigned int diffuseNr = 1;
@@ -103,8 +106,8 @@ public:
 		{
 			glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
 											  // retrieve texture number (the N in diffuse_textureN)
-			string number;
-			string name = textures[i].type;
+			std::string number;
+			std::string name = textures[i].type;
 			if (name == "texture_diffuse")
 				number = std::to_string(diffuseNr++);
 			else if (name == "texture_specular")
@@ -115,14 +118,16 @@ public:
 				number = std::to_string(heightNr++); // transfer unsigned int to stream
 
 													 // now set the sampler to the correct texture unit
-			glUniform1i(glGetUniformLocation(shader.ID, (name + number).c_str()), i);
+			// glUniform1i(glGetUniformLocation(shader.programId, (name + number).c_str()), i);
 			// and finally bind the texture
-			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+			// glBindTexture(GL_TEXTURE_2D, textures[i].id);
+			shader.setSampler2D(name + number, textures[i].id, i);
+
 		}
 
 		// draw mesh
+		shader.use();
 		glBindVertexArray(VAO);
-		//shader.use();
 		glDrawElementsInstanced(drawMode, indices.size(), GL_UNSIGNED_INT, 0, nIstances);
 		glBindVertexArray(0);
 
@@ -174,4 +179,6 @@ private:
 		glBindVertexArray(0);
 	}
 };
+
+}
 #endif

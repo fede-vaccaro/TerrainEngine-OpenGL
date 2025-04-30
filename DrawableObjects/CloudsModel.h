@@ -1,12 +1,16 @@
 #pragma once
 #include <glm/glm.hpp>
-#include "../Engine/shader.h"
+
 #include "sceneElements.h"
-#include "../Engine/ScreenSpaceShader.h"
-#include "../imgui/imgui.h"
 #include "Skybox.h"
 
+#include "../Engine/Shader.h"
+#include "../Engine/ScreenSpaceShader.h"
+#include "../imgui/imgui.h"
+
 #define INT_CEIL(n,d) (int)ceil((float)n/d)
+
+namespace terrain{
 
 //CloudsModel is responsible to collect the attributes and shaders that will be needed to render the volumetric clouds. Also, it creates the noises which models the clouds.
 class CloudsModel : public drawableObject
@@ -24,7 +28,8 @@ public:
 	virtual void setGui();
 
 private:
-	Shader * volumetricCloudsShader, *weatherShader;
+	gl::ShadingProgram _volumetricCloudsShader;
+	gl::ShadingProgram _weatherShader;
 	ScreenSpaceShader * postProcessingShader;
 
 	float coverage, cloudSpeed, crispiness, curliness, density, absorption;
@@ -47,6 +52,6 @@ private:
 	void initVariables();
 	void initShaders();
 
-
 };
 
+} // namespace terrain

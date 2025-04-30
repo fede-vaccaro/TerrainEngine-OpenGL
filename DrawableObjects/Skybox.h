@@ -5,6 +5,8 @@
 #include "drawableObject.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+namespace terrain {
+
 struct colorPreset {
 	glm::vec3 cloudColorBottom, skyColorTop, skyColorBottom, lightColor, fogColor;
 };
@@ -34,9 +36,10 @@ public:
 private:
 	glm::vec3 skyColorTop, skyColorBottom;
 
-	ScreenSpaceShader * skyboxShader;
+	terrain::ScreenSpaceShader * skyboxShader;
 	FrameBufferObject * skyboxFBO;
 
 	colorPreset presetSunset, highSunPreset;
 };
 
+} // namespace terrain

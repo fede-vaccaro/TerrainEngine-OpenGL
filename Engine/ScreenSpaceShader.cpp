@@ -1,18 +1,25 @@
 #include "ScreenSpaceShader.h"
 
+namespace terrain
+{
+
 unsigned int ScreenSpaceShader::quadVAO = 0;
 unsigned int ScreenSpaceShader::quadVBO = 0;
 bool ScreenSpaceShader::initialized = false;
 
-ScreenSpaceShader::ScreenSpaceShader(const char * fragmentPath)
+ScreenSpaceShader::ScreenSpaceShader(const std::string& fragmentPath)
 {
 	initializeQuad();
-	//shad = new Shader("shaders/screen.vert", fragmentPath);
-	shad = new Shader("ScreenQuad_" + getShaderName(fragmentPath));
 
-	shad->attachShader(BaseShader("shaders/screen.vert"));
-	shad->attachShader(BaseShader(fragmentPath));
-	shad->linkPrograms();
+	auto shaderBuilder = gl::ProgramBuilder();
+
+	gl::Shader fragmentShader = gl::Shader::loadFrom(fragmentPath).value();
+
+	shad = shaderBuilder
+	.newProgram("ScreenQuad_" + fragmentShader.getName())
+	.attachShader(gl::Shader::loadFrom("shaders/screen.vert").value())
+	.attachShader(std::move(fragmentShader))
+	.linkPrograms().value();
 }
 
 void ScreenSpaceShader::drawQuad() {
@@ -22,10 +29,6 @@ void ScreenSpaceShader::drawQuad() {
 
 void ScreenSpaceShader::draw() {
 	ScreenSpaceShader::drawQuad();
-}
-
-ScreenSpaceShader::~ScreenSpaceShader()
-{
 }
 
 void ScreenSpaceShader::initializeQuad() {
@@ -52,3 +55,5 @@ void ScreenSpaceShader::initializeQuad() {
 	}
 
 }
+
+} // namespace terrain

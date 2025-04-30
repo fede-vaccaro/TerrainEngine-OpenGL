@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Engine/Window.h"
-#include "Engine/shader.h"
+#include "Engine/Shader.h"
 #include "Engine/ScreenSpaceShader.h"
 #include "Engine/texture.h"
 
@@ -76,25 +76,25 @@ int main()
 	drawableObject::scene = &scene;
 
 	int gridLength = 120;
-	Terrain terrain(gridLength);
+	terrain::Terrain terrain(gridLength);
 
 	float waterHeight = 120.;
-	Water water(glm::vec2(0.0, 0.0), gridLength, waterHeight);
+	terrain::Water water(glm::vec2(0.0, 0.0), gridLength, waterHeight);
 	terrain.waterPtr = &water;
 
-	Skybox skybox;
-	CloudsModel cloudsModel(&scene, &skybox);
+	terrain::Skybox skybox;
+	terrain::CloudsModel cloudsModel(&scene, &skybox);
 	
-	VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT, &cloudsModel);
-	VolumetricClouds reflectionVolumetricClouds(1280, 720, &cloudsModel); // (expected) lower resolution framebuffers, so the rendering will be faster
+	terrain::VolumetricClouds volumetricClouds(Window::SCR_WIDTH, Window::SCR_HEIGHT, &cloudsModel);
+	terrain::VolumetricClouds reflectionVolumetricClouds(1280, 720, &cloudsModel); // (expected) lower resolution framebuffers, so the rendering will be faster
 	
 	gui.subscribe(&terrain)
 		.subscribe(&skybox)
 		.subscribe(&cloudsModel)
 		.subscribe(&water);
 
-	ScreenSpaceShader PostProcessing("shaders/post_processing.frag");
-	ScreenSpaceShader fboVisualizer("shaders/visualizeFbo.frag");
+	terrain::ScreenSpaceShader PostProcessing("shaders/post_processing.frag");
+	terrain::ScreenSpaceShader fboVisualizer("shaders/visualizeFbo.frag");
 
 	while (window.continueLoop())
 	{
@@ -147,13 +147,13 @@ int main()
 		terrain.draw();
 		FrameBufferObject const& reflFBO = water.getReflectionFBO();
 		
-		ScreenSpaceShader::disableTests();
+		terrain::ScreenSpaceShader::disableTests();
 
 		reflectionVolumetricClouds.draw();
 		water.bindReflectionFBO(); //rebind refl buffer; reflVolumetricClouds unbound it
 
 		
-		Shader& post = PostProcessing.getShader();
+		terrain::gl::ShadingProgram& post = PostProcessing.getShader();
 		post.use();
 		post.setVec2("resolution", glm::vec2(1280, 720));
 		post.setSampler2D("screenTexture", reflFBO.tex, 0);
@@ -161,7 +161,7 @@ int main()
 		post.setSampler2D("cloudTEX", reflectionVolumetricClouds.getCloudsRawTexture(), 1);
 		PostProcessing.draw();
 
-		ScreenSpaceShader::enableTests();
+		terrain::ScreenSpaceShader::enableTests();
 		
 		scene.cam->invertPitch();
 		scene.cam->Position.y += 2 * abs(scene.cam->Position.y - water.getHeight());
@@ -181,14 +181,14 @@ int main()
 		water.draw();
 
 		//disable test for quad rendering
-		ScreenSpaceShader::disableTests();
+		terrain::ScreenSpaceShader::disableTests();
 
 		volumetricClouds.draw();
 		skybox.draw();
 
 		// blend volumetric clouds rendering with terrain and apply some post process
 		unbindCurrentFrameBuffer(); // on-screen drawing
-		//Shader& post = PostProcessing.getShader();
+		//ShadingProgram& post = PostProcessing.getShader();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		post.use();
@@ -197,7 +197,7 @@ int main()
 		post.setSampler2D("screenTexture", SceneFBO.tex, 0);
 		post.setSampler2D("cloudTEX", volumetricClouds.getCloudsTexture(), 1);
 		post.setSampler2D("depthTex", SceneFBO.depthTex, 2);
-		post.setSampler2D("cloudDistance", volumetricClouds.getCloudsTexture(VolumetricClouds::cloudDistance), 3);
+		post.setSampler2D("cloudDistance", volumetricClouds.getCloudsTexture(terrain::VolumetricClouds::cloudDistance), 3);
 
 		post.setBool("wireframe", scene.wireframe);
 
@@ -207,7 +207,7 @@ int main()
 
 
 		// Texture visualizer
-		Shader& fboVisualizerShader = fboVisualizer.getShader();
+		terrain::gl::ShadingProgram& fboVisualizerShader = fboVisualizer.getShader();
 		fboVisualizerShader.use();
 		fboVisualizerShader.setSampler2D("fboTex", volumetricClouds.getCloudsTexture(), 0);
 		//fboVisualizer.draw(); //for debugging purposes

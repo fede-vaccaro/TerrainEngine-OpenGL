@@ -1,62 +1,103 @@
-#include "shaderUtils.h"
 #include <glad/glad.h>
 #include <iostream>
 
-bool checkCompileErrors(unsigned int shader, std::string type, std::string shaderName)
+#include "shaderUtils.h"
+
+namespace terrain::gl
 {
-	int success;
-	char infoLog[1024];
-	if (type != "PROGRAM")
-	{
-		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-		if (!success)
-		{
-			glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-			std::cout << "ERROR: SHADER" << shaderName << "COMPILATION ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
-		}
-	}
-	else
-	{
-		glGetProgramiv(shader, GL_LINK_STATUS, &success);
-		if (!success)
-		{
-			glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-			std::cout << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
-		}
+
+constexpr uint64_t kMaxLogSize = 1024 * 1024;
+
+std::string checkShaderCompileErrors(GLuint shaderId, shaderType type, const std::string& shaderName)
+{
+	GLint success{-1};
+	GLchar infoLog[kMaxLogSize];
+	GLsizei logSize{0};
+
+	glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
+
+	if (!success)
+	{	
+		glGetShaderInfoLog(shaderId, kMaxLogSize, &logSize, infoLog);
+		std::cout << "AN ERROR OCCURRED WITH THE SHADER " << shaderName << " OF TYPE " << type << ": " << std::string(infoLog, infoLog + logSize) << std::endl;
 	}
 
-	//if (success) {
-	//	std::cout << type + " SHADER SUCCESSFULLY COMPILED AND/OR LINKED!" << std::endl;
-	//}
-	return success;
+	return std::string(infoLog, infoLog + logSize);
 }
 
-std::string getShaderName(const char* path) {
-	std::string pathstr = std::string(path);
-	const size_t last_slash_idx = pathstr.find_last_of("/");
-	if (std::string::npos != last_slash_idx)
-	{
-		pathstr.erase(0, last_slash_idx + 1);
+std::string checkProgramCompileErrors(GLuint programId, const std::string& programName)
+{
+	GLint success{-1};
+	GLchar infoLog[kMaxLogSize];
+	GLsizei logSize{0};
+
+	glGetProgramiv(programId, GL_LINK_STATUS, &success);
+	if (!success){
+		glGetProgramInfoLog(programId, kMaxLogSize, &logSize, infoLog);
+		std::cout << "ERROR WITH LINKING PROGRAM " << programName << ": " << std::string(infoLog, infoLog + logSize) << std::endl;
 	}
-	return pathstr;
+
+	return std::string(infoLog, infoLog + logSize);
 }
-shaderType getShaderType(const char* path) {
-	std::string type = getShaderName(path);
-	const size_t last_slash_idx = type.find_last_of(".");
-	if (std::string::npos != last_slash_idx)
+
+
+
+std::ostream& operator<<(std::ostream& os, const shaderType& type)
+{
+	switch (type)
 	{
-		type.erase(0, last_slash_idx + 1);
+		case shaderType::INVALID:
+			os << "INVALID";
+			break;
+		case shaderType::VERTEX:
+			os << "VERTEX";
+			break;
+		case shaderType::FRAGMENT:
+			os << "FRAGMENT";
+			break;
+		case shaderType::GEOMETRY:
+			os << "GEOMETRY";
+			break;
+		case shaderType::TESS_CONTROL:
+			os << "TESS_CONTROL";
+			break;
+		case shaderType::TESS_EVALUATION:
+			os << "TESS_EVALUATION";
+			break;
+		case shaderType::COMPUTE:
+			os << "COMPUTE";
+			break;
+		default:
+			os << "INVALID SHADER ENUM";
 	}
-	if (type == "vert")
-		return shaderType(GL_VERTEX_SHADER, "VERTEX");
-	if (type == "frag")
-		return shaderType(GL_FRAGMENT_SHADER, "FRAGMENT");
-	if (type == "tes")
-		return shaderType(GL_TESS_EVALUATION_SHADER, "TESS_EVALUATION");
-	if (type == "tcs")
-		return shaderType(GL_TESS_CONTROL_SHADER, "TESS_CONTROL");
-	if (type == "geom")
-		return shaderType(GL_GEOMETRY_SHADER, "GEOMETRY");
-	if (type == "comp")
-		return shaderType(GL_COMPUTE_SHADER, "COMPUTE");
+
+	return os;
 }
+
+std::string to_string(const shaderType& type)
+{
+	std::stringstream ss;
+	ss << type;
+	return ss.str();
+}
+
+shaderType shaderTypeFromPath(const std::filesystem::path& path) {
+	auto extension = path.extension();
+
+	if (extension == ".vert")
+		return shaderType::VERTEX;
+	if (extension == ".frag")
+		return shaderType::FRAGMENT;
+	if (extension == ".tes")
+		return shaderType::TESS_EVALUATION;
+	if (extension == ".tcs")
+		return shaderType::TESS_CONTROL;
+	if (extension == ".geom")
+		return shaderType::GEOMETRY;
+	if (extension == ".comp")
+		return shaderType::COMPUTE;
+
+	return shaderType::INVALID;
+}
+
+} // namespace terrain::gl

@@ -2,7 +2,8 @@
 
 #define TIMETO(CODE, TASK) 	t1 = glfwGetTime(); CODE; t2 = glfwGetTime(); std::cout << "Time to " + std::string(TASK) + " :" << (t2 - t1)*1e3 << "ms" << std::endl;
 
-
+namespace terrain
+{
 
 VolumetricClouds::VolumetricClouds(int SW, int SH, CloudsModel * model): SCR_WIDTH(SW), SCR_HEIGHT(SH), model(model) {
 
@@ -21,8 +22,8 @@ void VolumetricClouds::draw() {
 		bindTexture2D(cloudsFBO->getColorAttachmentTex(i), i);
 	}
 
-	//Shader & cloudsShader = volumetricCloudsShader->getShader();
-	Shader & cloudsShader = *model->volumetricCloudsShader;
+	//ShadingProgram & cloudsShader = volumetricCloudsShader->getShader();
+	gl::ShadingProgram& cloudsShader = model->_volumetricCloudsShader;
 	sceneElements* s = drawableObject::scene;
 
 	cloudsShader.use();
@@ -79,7 +80,7 @@ void VolumetricClouds::draw() {
 	if (model->postProcess) {
 		// cloud post processing filtering
 		cloudsPostProcessingFBO->bind();
-		Shader& cloudsPPShader = model->postProcessingShader->getShader();
+		gl::ShadingProgram& cloudsPPShader = model->postProcessingShader->getShader();
 
 		cloudsPPShader.use();
 
@@ -116,8 +117,4 @@ void VolumetricClouds::draw() {
 	}
 }
 
-
-
-VolumetricClouds::~VolumetricClouds()
-{
-}
+} // namespace terrain

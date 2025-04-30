@@ -2,17 +2,21 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_access.hpp>
 //#include <model.h>
-#include "../Engine/shader.h"
+#include "../Engine/ShadingProgram.h"
 #include "../Engine/buffers.h"
 #include <GLFW/glfw3.h>
 #include "../Engine/Window.h"
 #include "drawableObject.h"
 
+namespace terrain 
+{
+
 class Water : public drawableObject
 {
 public:
 	Water(glm::vec2 position, float scale, float height);
-	virtual ~Water();
+	virtual ~Water() = default;
+
 	virtual void draw();
 	virtual void setGui();
 	void bindRefractionFBO();
@@ -62,7 +66,8 @@ private:
 
 	unsigned int dudvMap, normalMap;
 	glm::mat4 modelMatrix;
-	Shader * shad;
+	gl::ShadingProgram shad;
 	//Model * waterPlane;
 };
 
+} // namespace terrain

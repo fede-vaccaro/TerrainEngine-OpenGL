@@ -10,13 +10,16 @@
 #include "drawableObject.h"
 #include "CloudsModel.h"
 
+namespace terrain
+{
+
 //VolumetricClouds handles the FrameBufferObjects (and textures) where the clouds will be rendered, and it's responsible to set up the uniforms and calling the draw command.
 class VolumetricClouds : public drawableObject
 {
 public:
-	VolumetricClouds(int SW, int SH, CloudsModel * model);
+	VolumetricClouds(int SW, int SH, terrain::CloudsModel * model);
 	virtual void draw();
-	~VolumetricClouds();
+	~VolumetricClouds() = default;
 
 	enum cloudsTextureNames {fragColor, bloom, alphaness, cloudDistance};
 
@@ -42,6 +45,7 @@ private:
 	TextureSet * cloudsFBO;
 	FrameBufferObject *cloudsPostProcessingFBO;
 
-	CloudsModel * model;
+	terrain::CloudsModel * model;
 };
 
+} // namespace terrain
