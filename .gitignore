@@ -26,3 +26,6 @@ Main_.cpp
 imgui.ini
 shaders/3dperlin_shadertoy.txt
 shaders/worley3d.comp
+build/ 
+settings.json
+TerrainEngine
