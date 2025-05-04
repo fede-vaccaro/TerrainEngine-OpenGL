@@ -6,6 +6,10 @@
 * imgui (also in the files, which is the lovely framework from which the GUI is made!)
 * *An OpenGL 4 ready graphics card!*
 
+**Now you can build it and run it on Linux!**
+
+* `cmake -B build && cmake --build build && mv build/bin/TerrainEngine .` (many thanks to @feishengfei !)
+
 **Other dependencies:** (already included)
 * [Outcome_V2](https://github.com/ned14/outcome)
 
