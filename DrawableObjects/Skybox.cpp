@@ -17,6 +17,8 @@ Skybox::Skybox()
 
 	SunsetPreset1();
 	DefaultPreset();
+	update();
+	finishedPreset = true;
 }
 
 void Skybox::setGui() {
@@ -79,10 +81,13 @@ void Skybox::mixSkyColorPreset(float v, colorPreset p1, colorPreset p2) {
 	float b = 1.0 - a;
 
 	//cloudColorBottom = p1.cloudColorBottom*a + p2.cloudColorBottom*b;
-	skyColorTop = p1.skyColorTop*a + p2.skyColorTop*b;
-	skyColorBottom = p1.skyColorBottom*a + p2.skyColorBottom*b;
-	scene->lightColor = p1.lightColor*a + p2.lightColor*b;
-	scene->fogColor = p1.fogColor*a + p2.fogColor*b;
+	if (!finishedPreset)
+	{
+		skyColorTop = p1.skyColorTop*a + p2.skyColorTop*b;
+		skyColorBottom = p1.skyColorBottom*a + p2.skyColorBottom*b;
+		scene->lightColor = p1.lightColor * a + p2.lightColor * b;
+		scene->fogColor = p1.fogColor * a + p2.fogColor * b;
+	}
 }
 
 
