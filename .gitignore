@@ -29,3 +29,8 @@ shaders/worley3d.comp
 build/ 
 settings.json
 TerrainEngine
+
+# dependencies
+Include/outcome.hpp
+Include/tiny_obj_loader.h
+Include/tiny_obj_loader.cc
